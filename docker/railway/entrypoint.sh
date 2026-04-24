@@ -2,6 +2,8 @@
 set -eu
 
 export PORT="${PORT:-8080}"
+export CACHE_STORE="${CACHE_STORE:-file}"
+export SESSION_DRIVER="${SESSION_DRIVER:-file}"
 
 envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/http.d/default.conf
 

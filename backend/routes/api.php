@@ -17,7 +17,11 @@ use Illuminate\Routing\Middleware\ThrottleRequests;
 
 Route::get('/hello', function () {
     return response()->json(['message' => 'Hello from Laravel']);
-})->withoutMiddleware([ThrottleRequests::class]);
+})->withoutMiddleware([
+    ThrottleRequests::class,
+    'throttle:api',
+    \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+]);
 
 Route::get('/health', function () {
     // Keep health output minimal and protect it in production.
@@ -39,7 +43,11 @@ Route::get('/health', function () {
     } catch (\Throwable $e) {
         return response()->json(['status' => 'error'], 503);
     }
-})->withoutMiddleware([ThrottleRequests::class]);
+})->withoutMiddleware([
+    ThrottleRequests::class,
+    'throttle:api',
+    \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+]);
 
 // Legal information (public)
 Route::get('/legal/meta', [LegalController::class, 'meta']);
