@@ -10,20 +10,17 @@ use Illuminate\Support\Facades\Hash;
 class SetupController extends Controller
 {
     /**
-     * Create a superadmin user during initial setup.
-     * This endpoint is only available if fewer than 2 superadmins exist.
-     * No token needed - protected by rate limiting and existence check.
+     * Create a superadmin user during initial setup (database must be completely empty).
+     * This endpoint self-disables after the first user is created.
+     * Security: Only works if no users exist at all in the database.
      */
     public function createSuperAdmin(Request $request)
     {
-        // Only allow if fewer than 2 superadmins exist
-        $superadminCount = User::whereHas('role', function ($q) {
-            $q->where('name', 'superadmin');
-        })->count();
-
-        if ($superadminCount >= 2) {
+        // Only allow if database is completely empty (no users)
+        $userCount = User::count();
+        if ($userCount > 0) {
             return response()->json(
-                ['message' => 'Both superadmins already exist. This endpoint is no longer available.'],
+                ['message' => 'Database already has users. This endpoint is no longer available.'],
                 403
             );
         }
