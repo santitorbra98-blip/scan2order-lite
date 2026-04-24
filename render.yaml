@@ -1,0 +1,113 @@
+services:
+  - type: web
+    name: scan2order-lite
+    env: docker
+    dockerfilePath: ./Dockerfile.railway
+    plan: free
+    healthCheckPath: /api/hello
+    autoDeploy: true
+    envVars:
+      - key: APP_NAME
+        value: Scan2Order
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: scan2order-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: scan2order-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: scan2order-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: scan2order-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: scan2order-db
+          property: password
+      - key: CACHE_STORE
+        value: file
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: SESSION_DRIVER
+        value: file
+      - key: SESSION_LIFETIME
+        value: "120"
+      - key: SANCTUM_EXPIRATION
+        value: "240"
+      - key: SANCTUM_STATEFUL_DOMAINS
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: HEALTH_CHECK_TOKEN
+        generateValue: true
+      - key: RUN_MIGRATIONS
+        value: "true"
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Scan2Order
+      - key: LEGAL_COMPANY_NAME
+        sync: false
+      - key: LEGAL_OWNER_TYPE
+        sync: false
+      - key: LEGAL_TAX_ID
+        sync: false
+      - key: LEGAL_ADDRESS
+        sync: false
+      - key: LEGAL_POSTAL_CODE
+        sync: false
+      - key: LEGAL_CITY
+        sync: false
+      - key: LEGAL_PROVINCE
+        sync: false
+      - key: LEGAL_COUNTRY
+        sync: false
+      - key: LEGAL_CONTACT_EMAIL
+        sync: false
+      - key: LEGAL_SUPPORT_EMAIL
+        sync: false
+      - key: LEGAL_PRIVACY_EMAIL
+        sync: false
+      - key: LEGAL_SUPPORT_PHONE
+        sync: false
+      - key: LEGAL_REGISTRY_DATA
+        sync: false
+      - key: LEGAL_JURISDICTION_CITY
+        sync: false
+
+  - type: pserv
+    name: scan2order-db
+    plan: free
+    databaseName: scan2order_lite
+    user: scan2order

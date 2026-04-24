@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'brand_name' => env('LEGAL_BRAND_NAME', env('APP_NAME', 'Scan2Order')),
+    'company_name' => env('LEGAL_COMPANY_NAME', 'PENDIENTE_DE_CONFIGURAR'),
+    'owner_type' => env('LEGAL_OWNER_TYPE', 'pendiente'),
+    'tax_id' => env('LEGAL_TAX_ID', 'PENDIENTE'),
+    'address' => env('LEGAL_ADDRESS', 'PENDIENTE_DE_CONFIGURAR'),
+    'postal_code' => env('LEGAL_POSTAL_CODE', '00000'),
+    'city' => env('LEGAL_CITY', 'PENDIENTE'),
+    'province' => env('LEGAL_PROVINCE', 'PENDIENTE'),
+    'country' => env('LEGAL_COUNTRY', 'España'),
+    'fiscal_region' => env('LEGAL_FISCAL_REGION', 'Canarias'),
+    'is_canary_islands' => (bool) env('LEGAL_IS_CANARY_ISLANDS', true),
+    'indirect_tax_name' => env('LEGAL_INDIRECT_TAX_NAME', 'IGIC'),
+    'contact_email' => env('LEGAL_CONTACT_EMAIL', env('MAIL_FROM_ADDRESS', 'legal@tu-dominio.com')),
+    'support_email' => env('LEGAL_SUPPORT_EMAIL', env('MAIL_FROM_ADDRESS', 'soporte@tu-dominio.com')),
+    'privacy_email' => env('LEGAL_PRIVACY_EMAIL', env('MAIL_FROM_ADDRESS', 'privacidad@tu-dominio.com')),
+    'support_phone' => env('LEGAL_SUPPORT_PHONE', '+34 000 000 000'),
+    'registry_data' => env('LEGAL_REGISTRY_DATA', 'PENDIENTE_DE_CONFIGURAR'),
+    'activity_description' => env('LEGAL_ACTIVITY_DESCRIPTION', 'Software de digitalización de menús para restauración.'),
+    'version' => env('LEGAL_VERSION', '2026-04'),
+    'last_updated' => env('LEGAL_LAST_UPDATED', '2026-04-11'),
+    'jurisdiction_city' => env('LEGAL_JURISDICTION_CITY', 'Madrid'),
+    'uses_optional_cookies' => (bool) env('LEGAL_USES_OPTIONAL_COOKIES', false),
+];

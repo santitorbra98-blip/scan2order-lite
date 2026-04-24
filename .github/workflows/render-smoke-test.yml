@@ -1,0 +1,35 @@
+name: Render Smoke Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Render base URL (optional override)'
+        required: false
+        type: string
+  schedule:
+    - cron: '30 7 * * *'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run smoke test
+        env:
+          SMOKE_BASE_URL: ${{ inputs.base_url || secrets.RENDER_SMOKE_URL }}
+          SMOKE_HEALTH_TOKEN: ${{ secrets.RENDER_SMOKE_HEALTH_TOKEN }}
+          SMOKE_LOGIN: ${{ secrets.RENDER_SMOKE_LOGIN }}
+          SMOKE_PASSWORD: ${{ secrets.RENDER_SMOKE_PASSWORD }}
+        run: npm run smoke:render

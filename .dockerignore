@@ -1,0 +1,12 @@
+.git
+.gitignore
+backend/.env
+backend/.env.*
+!backend/.env.example
+node_modules
+frontend/node_modules
+backend/vendor
+backend/storage/logs
+test-results
+e2e/report
+e2e/trace

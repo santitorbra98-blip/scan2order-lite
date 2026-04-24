@@ -1,0 +1,43 @@
+FROM node:20-alpine AS frontend-build
+
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
+
+FROM php:8.4-fpm-alpine
+
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    gettext \
+    postgresql-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    libzip-dev \
+    icu-dev \
+    oniguruma-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_pgsql gd zip intl mbstring bcmath opcache
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+COPY backend/ ./
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+COPY --from=frontend-build /app/frontend/dist /var/www/frontend
+COPY docker/railway/default.conf.template /etc/nginx/templates/default.conf.template
+COPY docker/railway/supervisord.conf /etc/supervisord.conf
+COPY docker/railway/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN chmod +x /usr/local/bin/entrypoint.sh \
+    && mkdir -p /var/lib/nginx/tmp /run/nginx /var/log/supervisor
+
+ENV PORT=8080
+
+EXPOSE 8080
+
+CMD ["/usr/local/bin/entrypoint.sh"]

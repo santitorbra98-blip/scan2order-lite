@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Scan2Order - Carta Digital para Restaurantes</title>
+  </head>
+  <body>
+    <!-- Auto-reload guard: if the browser has a stale index.html cached and the
+         hashed JS asset returns 404 (deleted on new deploy), reload the page
+         bypassing cache so the browser fetches the updated index.html. -->
+    <script>
+      window.addEventListener('error', function (e) {
+        if (
+          e.target && e.target.tagName === 'SCRIPT' &&
+          typeof e.target.src === 'string' &&
+          e.target.src.includes('/assets/')
+        ) {
+          // Force hard reload — bypasses disk cache
+          window.location.reload(true)
+        }
+      }, true)
+    </script>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
