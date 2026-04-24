@@ -7,6 +7,12 @@ envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/htt
 
 cd /var/www/html
 
+# Laravel returns HTTP 500 for every request if APP_KEY is missing.
+if [ -z "${APP_KEY:-}" ]; then
+  export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
+  echo "APP_KEY was not set; generated ephemeral runtime key."
+fi
+
 mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache || true
 
