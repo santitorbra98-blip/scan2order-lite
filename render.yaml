@@ -109,5 +109,5 @@ services:
   - type: pserv
     name: scan2order-db
     plan: free
-    databaseName: scan2order_lite
-    user: scan2order
+    database: scan2order_lite
+    ipAllowList: []
