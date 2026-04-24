@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SetupController;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 
 /*
@@ -48,6 +49,11 @@ Route::get('/health', function () {
     'throttle:api',
     \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
 ]);
+
+// Setup endpoints (only available during initial setup - auto-disabled once 2 superadmins exist)
+Route::post('/setup/create-superadmin', [SetupController::class, 'createSuperAdmin'])
+    ->middleware('throttle:auth-login')
+    ->withoutMiddleware(['throttle:api', \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class]);
 
 // Legal information (public)
 Route::get('/legal/meta', [LegalController::class, 'meta']);
