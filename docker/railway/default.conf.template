@@ -4,6 +4,12 @@ server {
 
     client_max_body_size 10M;
 
+    # Render liveness probe must not depend on Laravel boot state.
+    location = /api/hello {
+        default_type application/json;
+        return 200 '{"message":"Hello from Nginx"}';
+    }
+
     location /api {
         root /var/www/html/public;
         try_files $uri $uri/ /index.php?$query_string;
