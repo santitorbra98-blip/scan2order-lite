@@ -27,7 +27,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY backend/ ./
-RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader --no-scripts
 COPY --from=frontend-build /app/frontend/dist /var/www/frontend
 COPY docker/railway/default.conf.template /etc/nginx/templates/default.conf.template
 COPY docker/railway/supervisord.conf /etc/supervisord.conf
