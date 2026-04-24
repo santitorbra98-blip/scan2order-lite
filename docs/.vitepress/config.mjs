@@ -13,15 +13,18 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Inicio', link: '/' },
+      { text: 'Paso a Paso', link: '/paso-a-paso-completo' },
       { text: 'Guia Rapida', link: '/guia-rapida' },
       { text: 'Produccion', link: '/produccion-checklist' },
       { text: 'Render', link: '/deploy-render' },
-      { text: 'Smoke Tests', link: '/smoke-tests' }
+      { text: 'Smoke Tests', link: '/smoke-tests' },
+      { text: 'Guia Profesor', link: '/guia-profesor' }
     ],
     sidebar: [
       {
         text: 'Proyecto',
         items: [
+          { text: 'Paso a paso completo', link: '/paso-a-paso-completo' },
           { text: 'Guia Rapida', link: '/guia-rapida' },
           { text: 'Arquitectura', link: '/arquitectura' },
           { text: 'API Auth', link: '/api-auth' }
@@ -33,6 +36,12 @@ export default defineConfig({
           { text: 'Checklist de Produccion', link: '/produccion-checklist' },
           { text: 'Despliegue en Render', link: '/deploy-render' },
           { text: 'Smoke Tests Post Deploy', link: '/smoke-tests' }
+        ]
+      },
+      {
+        text: 'Evaluacion',
+        items: [
+          { text: 'Guia para profesor', link: '/guia-profesor' }
         ]
       }
     ],

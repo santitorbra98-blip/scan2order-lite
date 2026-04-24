@@ -1,57 +1,75 @@
-# Smoke Tests Post Deploy (Render)
+# Smoke tests explicados facil
 
-Este proyecto incluye un test automatizado para validar en produccion:
+## Que es un smoke test
 
-- `GET /api/hello`
-- `GET /api/health?token=...`
-- `POST /api/login`
+Un smoke test es una prueba rapida para responder: la app esta viva y funciona lo mas critico.
 
-## Secrets requeridos en GitHub
+En este proyecto comprueba solo 3 cosas:
 
-Configura en `Settings -> Secrets and variables -> Actions`:
+1. El backend responde: GET /api/hello.
+2. La app y la base de datos estan sanas: GET /api/health.
+3. El login funciona: POST /api/login.
 
-- `RENDER_SMOKE_URL` (ejemplo: `https://scan2order-lite.onrender.com`)
-- `RENDER_SMOKE_HEALTH_TOKEN`
-- `RENDER_SMOKE_LOGIN`
-- `RENDER_SMOKE_PASSWORD`
+Si una de esas 3 falla, el workflow falla.
 
-## Workflow
+## Donde esta implementado
 
-Archivo: `.github/workflows/render-smoke-test.yml`
+- Script: [scripts/smoke-render.mjs](../scripts/smoke-render.mjs)
+- Workflow: [\.github/workflows/render-smoke-test.yml](../.github/workflows/render-smoke-test.yml)
 
-- Se ejecuta manualmente (`workflow_dispatch`).
-- Puede ejecutarse por `schedule` diario.
-- Falla el pipeline si cualquier comprobacion devuelve estado inesperado.
+## Que son los secrets (sin tecnicismos)
 
-## Usuario smoke recomendado
+Los secrets son valores privados en GitHub (contrasenas, tokens, urls internas).
+No se guardan en texto plano en el repositorio.
 
-Crea un usuario dedicado para pruebas de disponibilidad (rol minimo necesario).
+Para este smoke test necesitas 4:
 
-Ejemplo (desde consola de Laravel):
+1. RENDER_SMOKE_URL
+2. RENDER_SMOKE_HEALTH_TOKEN
+3. RENDER_SMOKE_LOGIN
+4. RENDER_SMOKE_PASSWORD
 
-```php
-use App\\Models\\User;
-use App\\Models\\Role;
+## Como crear los secrets paso a paso
 
-$role = Role::where('name', 'admin')->first();
+1. Abre tu repo en GitHub.
+2. Entra a Settings.
+3. En el menu lateral: Secrets and variables > Actions.
+4. Pulsa New repository secret.
+5. Crea uno por uno:
 
-User::updateOrCreate(
-  ['email' => 'smoke@scan2order-lite.onrender.com'],
-  [
-    'name' => 'Smoke User',
-    'password' => 'Cambiar123456789!',
-    'role_id' => $role?->id,
-    'status' => 'active',
-  ]
-);
-```
+- Name: RENDER_SMOKE_URL
+- Secret: https://scan2order-lite.onrender.com
 
-## Ejecucion local del smoke test
+- Name: RENDER_SMOKE_HEALTH_TOKEN
+- Secret: el token real que pusiste en HEALTH_CHECK_TOKEN en Render
+
+- Name: RENDER_SMOKE_LOGIN
+- Secret: email del usuario de prueba (ejemplo smoke@scan2order-lite.onrender.com)
+
+- Name: RENDER_SMOKE_PASSWORD
+- Secret: contrasena de ese usuario de prueba
+
+## Como ejecutar la prueba en GitHub
+
+1. Ve a Actions.
+2. Entra en Render Smoke Test.
+3. Pulsa Run workflow.
+4. Espera resultado:
+
+- OK /api/hello
+- OK /api/health
+- OK /api/login
+
+## Recomendacion practica
+
+Usa un usuario dedicado solo para smoke test. No uses tu usuario personal de admin.
+
+## Ejecucion local manual
 
 ```bash
 SMOKE_BASE_URL=https://scan2order-lite.onrender.com \
-SMOKE_HEALTH_TOKEN=... \
+SMOKE_HEALTH_TOKEN=TU_TOKEN \
 SMOKE_LOGIN=smoke@scan2order-lite.onrender.com \
-SMOKE_PASSWORD='Cambiar123456789!' \
+SMOKE_PASSWORD=TuPasswordSeguro \
 npm run smoke:render
 ```

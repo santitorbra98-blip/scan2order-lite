@@ -1,24 +1,23 @@
 # Scan2Order Lite
 
-Scan2Order Lite es una plataforma para digitalizacion y gestion de cartas de restaurantes.
+Aplicacion web para crear y gestionar cartas digitales de restaurantes.
 
-## Stack tecnologico
+## Resumen rapido
 
 - Backend: Laravel 12 + Sanctum + PostgreSQL
 - Frontend: Vue 3 + Vite + Pinia
 - Infra local: Docker Compose
-- Deploy recomendado: Render (plan gratuito)
-- Documentacion: VitePress + GitHub Pages
+- Despliegue recomendado: Render (plan gratuito)
+- Documentacion: VitePress publicada en GitHub Pages
 
-## Estado del proyecto
+## Estado actual
 
-- Arranque local validado con Docker.
-- Health checks funcionales (`/api/hello`, `/api/health`).
-- Blueprint de Render listo (`render.yaml`).
-- Smoke test post-deploy automatizado listo (GitHub Actions).
-- Sitio de documentacion profesional listo para GitHub Pages.
+- Arranque local validado.
+- Endpoints de salud operativos: /api/hello y /api/health.
+- Despliegue en Render preparado con [render.yaml](render.yaml).
+- Smoke test de produccion automatizado por GitHub Actions.
 
-## Inicio rapido
+## Inicio rapido local
 
 ```bash
 cp .env.example .env
@@ -29,52 +28,16 @@ curl -k https://localhost:8443/api/hello
 
 ## Documentacion completa
 
-Toda la documentacion esta en `docs/` y se publica automaticamente en GitHub Pages.
+La documentacion de evaluacion y operacion esta en [docs](docs):
 
-- Inicio: `docs/index.md`
-- Guia rapida: `docs/guia-rapida.md`
-- Arquitectura: `docs/arquitectura.md`
-- Checklist de produccion: `docs/produccion-checklist.md`
-- Deploy Render: `docs/deploy-render.md`
-- Smoke tests: `docs/smoke-tests.md`
-
-## Despliegue del proyecto (Render)
-
-1. Haz push del repositorio a GitHub.
-2. En Render: `New -> Blueprint`.
-3. Selecciona el repo y aplica `render.yaml`.
-4. Completa variables `sync: false`.
-5. Primer deploy con `RUN_MIGRATIONS=true`.
-6. Tras migrar, cambia a `RUN_MIGRATIONS=false`.
-
-Guia detallada: `DEPLOY_RENDER.md` y `docs/deploy-render.md`.
-
-## Publicar documentacion en GitHub Pages
-
-El workflow `.github/workflows/docs-deploy.yml` publica automaticamente la docs al hacer push en `main/master`.
-
-Pasos en GitHub:
-
-1. `Settings -> Pages`.
-2. Source: `GitHub Actions`.
-3. Push a `main`.
-4. Esperar workflow `Deploy Documentation`.
-
-## Smoke test post-deploy
-
-Workflow: `.github/workflows/render-smoke-test.yml`
-
-Secrets requeridos:
-
-- `RENDER_SMOKE_URL`
-- `RENDER_SMOKE_HEALTH_TOKEN`
-- `RENDER_SMOKE_LOGIN`
-- `RENDER_SMOKE_PASSWORD`
-
-Ejecucion manual:
-
-1. `Actions -> Render Smoke Test`.
-2. `Run workflow`.
+- [Paso a paso completo](docs/paso-a-paso-completo.md)
+- [Inicio](docs/index.md)
+- [Guia Rapida](docs/guia-rapida.md)
+- [Arquitectura](docs/arquitectura.md)
+- [Checklist de Produccion](docs/produccion-checklist.md)
+- [Despliegue Render](docs/deploy-render.md)
+- [Smoke Tests explicados](docs/smoke-tests.md)
+- [Guia para defensa del proyecto](docs/guia-profesor.md)
 
 ## Scripts utiles
 
@@ -86,6 +49,7 @@ npm run smoke:render
 npm test
 ```
 
-## Nota sobre GitHub (subida del proyecto)
+## CI/CD configurado
 
-No puedo autenticarme en tu cuenta desde este entorno para hacer `git push` por ti, pero el repositorio ya queda preparado para subirlo y desplegarlo sin cambios adicionales.
+- Publicacion de documentacion en Pages: [.github/workflows/docs-deploy.yml](.github/workflows/docs-deploy.yml)
+- Smoke test de produccion: [.github/workflows/render-smoke-test.yml](.github/workflows/render-smoke-test.yml)
