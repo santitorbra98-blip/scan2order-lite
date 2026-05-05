@@ -223,7 +223,8 @@ class AuthController extends Controller
 
         $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
         if (!$user) {
-            return response()->json(['message' => 'No se encontró la cuenta asociada a ese email'], 422);
+            // Return the same generic message as forgotPassword to prevent user enumeration.
+            return response()->json(['message' => 'Código inválido o expirado'], 422);
         }
 
         $valid = DB::transaction(function () use ($user, $normalizedCode) {

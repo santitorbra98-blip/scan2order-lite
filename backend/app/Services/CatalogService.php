@@ -16,7 +16,11 @@ class CatalogService
     {
         Storage::disk('public')->makeDirectory('products');
 
-        $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+        // Use the MIME-detected extension (not the client-supplied one) to prevent
+        // a polyglot file (e.g. GIF+PHP code named evil.php) from being stored with
+        // a .php extension and later executed by PHP-FPM.
+        $ext = $image->guessExtension() ?: 'bin';
+        $imageName = time() . '_' . uniqid() . '.' . $ext;
         $storedPath = Storage::disk('public')->putFileAs('products', $image, $imageName);
 
         if ($storedPath === false) {

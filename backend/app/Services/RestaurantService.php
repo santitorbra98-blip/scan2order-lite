@@ -14,7 +14,11 @@ class RestaurantService
     public function storeRestaurantImage($image): string
     {
         Storage::disk('public')->makeDirectory('restaurants');
-        $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+        // Use the MIME-detected extension (not the client-supplied one) to prevent
+        // a polyglot file (e.g. GIF+PHP code named evil.php) from being stored with
+        // a .php extension and later executed by PHP-FPM.
+        $ext = $image->guessExtension() ?: 'bin';
+        $imageName = time() . '_' . uniqid() . '.' . $ext;
         $result = Storage::disk('public')->putFileAs('restaurants', $image, $imageName);
         if ($result === false) {
             throw new \RuntimeException('No se pudo guardar la imagen del restaurante.');

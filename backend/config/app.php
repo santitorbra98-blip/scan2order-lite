@@ -13,6 +13,11 @@ return [
     'asset_url' => env('ASSET_URL'),
     'timezone' => 'Europe/Madrid',
     'locale' => env('APP_LOCALE', 'es'),
+
+    // One-time setup token — required to call POST /api/setup/create-superadmin.
+    // Generate with: openssl rand -hex 32
+    // Leave empty (or unset) to fully disable the HTTP setup endpoint.
+    'setup_token' => env('SETUP_TOKEN'),
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
     'faker_locale' => env('APP_FAKER_LOCALE', 'es_ES'),
     'cipher' => 'AES-256-CBC',

@@ -11,7 +11,9 @@ return [
 
     'guard' => ['web'],
 
-    'expiration' => env('SANCTUM_EXPIRATION', null),
+    // Tokens expire after 7 days by default. Override via SANCTUM_EXPIRATION env var (minutes).
+    // Shorter-lived tokens reduce the window of exposure for stolen tokens.
+    'expiration' => env('SANCTUM_EXPIRATION', 10080),
 
     'token_prefix' => env('SANCTUM_TOKEN_PREFIX', ''),
 

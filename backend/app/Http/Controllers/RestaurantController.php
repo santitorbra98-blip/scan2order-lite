@@ -84,12 +84,12 @@ class RestaurantController extends Controller
         $this->normalizeScheduleInput($request);
 
         $request->validate([
-            'name' => 'required|string',
-            'address' => 'nullable|string',
-            'phone' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
-            'active' => 'boolean',
-            'schedule' => 'nullable|array',
+            'name'     => 'required|string|max:255',
+            'address'  => 'nullable|string|max:500',
+            'phone'    => 'nullable|string|max:30',
+            'image'    => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'active'   => 'boolean',
+            'schedule' => 'nullable|array|max:14',
         ]);
 
         $data = array_filter($request->only(['name', 'address', 'phone', 'active', 'schedule']), fn ($v) => $v !== null);
@@ -147,13 +147,13 @@ class RestaurantController extends Controller
         $this->normalizeScheduleInput($request);
 
         $request->validate([
-            'name' => 'sometimes|required|string',
-            'address' => 'nullable|string',
-            'phone' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'name'         => 'sometimes|required|string|max:255',
+            'address'      => 'nullable|string|max:500',
+            'phone'        => 'nullable|string|max:30',
+            'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'remove_image' => 'boolean',
-            'active' => 'boolean',
-            'schedule' => 'nullable|array',
+            'active'       => 'boolean',
+            'schedule'     => 'nullable|array|max:14',
         ]);
 
         $data = $request->only(['name', 'address', 'phone', 'active', 'schedule']);

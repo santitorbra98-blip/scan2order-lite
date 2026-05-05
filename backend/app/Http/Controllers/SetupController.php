@@ -10,17 +10,31 @@ use Illuminate\Support\Facades\Hash;
 class SetupController extends Controller
 {
     /**
-     * Create a superadmin user during initial setup (database must be completely empty).
-     * This endpoint self-disables after the first user is created.
-     * Security: Only works if no users exist at all in the database.
+     * Create a superadmin user during initial setup.
+     *
+     * Security layers:
+     *  1. Requires the X-Setup-Token header to match the SETUP_TOKEN env variable.
+     *     Without this, the endpoint is fully disabled (returns 404).
+     *  2. Auto-disables once 2 superadmins already exist in the database.
+     *
+     * Intended for automated deployments (CI/CD). For interactive use prefer:
+     *   php artisan superadmin:create
      */
     public function createSuperAdmin(Request $request)
     {
-        // Only allow if database is completely empty (no users)
-        $userCount = User::count();
-        if ($userCount > 0) {
+        // 1. Token gate — if SETUP_TOKEN is not configured or does not match, act as if the
+        //    route does not exist (404) to avoid leaking that the endpoint is present.
+        $setupToken = config('app.setup_token');
+        if (empty($setupToken) || !hash_equals($setupToken, (string) $request->header('X-Setup-Token', ''))) {
+            abort(404);
+        }
+
+        // 2. Only allow while fewer than 2 superadmins exist.
+        //    After the second superadmin is created the endpoint auto-disables.
+        $superadminCount = User::whereHas('role', fn ($q) => $q->where('name', 'superadmin'))->count();
+        if ($superadminCount >= 2) {
             return response()->json(
-                ['message' => 'Database already has users. This endpoint is no longer available.'],
+                ['message' => 'Setup already completed. This endpoint is no longer available.'],
                 403
             );
         }

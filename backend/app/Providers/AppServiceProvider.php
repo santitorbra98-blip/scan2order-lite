@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
 
             foreach ($map as $key => [$file, $configKey]) {
                 $value = Setting::get($key);
-                if ($value !== null) {
+                if ($value !== null && $value !== '') {
                     config(["$file.$configKey" => $value]);
                 }
             }
