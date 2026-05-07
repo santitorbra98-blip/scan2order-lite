@@ -118,118 +118,32 @@
     </div>
 
     <!-- Catalog Modal -->
-    <div v-if="showCatalogModal" class="modal-overlay" @click.self="closeCatalogModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>{{ editingCatalog ? 'Editar catálogo' : 'Nuevo catálogo' }}</h2>
-          <button @click="closeCatalogModal" class="btn-close">×</button>
-        </div>
-        <form @submit.prevent="saveCatalog" class="modal-body">
-          <div class="form-group">
-            <label>Nombre:</label>
-            <input v-model="catalogForm.name" type="text" required placeholder="Desayuno, Almuerzo..." />
-          </div>
-          <div class="form-group">
-            <label>Descripción:</label>
-            <textarea v-model="catalogForm.description" placeholder="Descripción opcional"></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="button" @click="closeCatalogModal" class="btn-cancel">Cancelar</button>
-            <button type="submit" class="btn-save">{{ editingCatalog ? 'Actualizar' : 'Crear' }}</button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <CatalogModal
+      v-model="showCatalogModal"
+      :editing="editingCatalog"
+      @close="closeCatalogModal"
+      @save="saveCatalog"
+    />
 
     <!-- Section Modal -->
-    <div v-if="showSectionModal" class="modal-overlay" @click.self="closeSectionModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>{{ editingSection ? 'Editar sección' : 'Nueva sección' }}</h2>
-          <button @click="closeSectionModal" class="btn-close">×</button>
-        </div>
-        <form @submit.prevent="saveSection" class="modal-body">
-          <div class="form-group">
-            <label>Nombre:</label>
-            <input v-model="sectionForm.name" type="text" required placeholder="Bebidas, Postres..." />
-          </div>
-          <div class="form-group">
-            <label>Descripción:</label>
-            <textarea v-model="sectionForm.description" placeholder="Descripción opcional"></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="button" @click="closeSectionModal" class="btn-cancel">Cancelar</button>
-            <button type="submit" class="btn-save">{{ editingSection ? 'Actualizar' : 'Crear' }}</button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <SectionModal
+      v-model="showSectionModal"
+      :editing="editingSection"
+      @close="closeSectionModal"
+      @save="saveSection"
+    />
 
     <!-- Product Modal -->
-    <div v-if="showProductModal" class="modal-overlay" @click.self="closeProductModal">
-      <div class="modal modal-wide">
-        <div class="modal-header">
-          <h2>{{ editingProduct ? 'Editar producto' : 'Nuevo producto' }}</h2>
-          <button @click="closeProductModal" class="btn-close">×</button>
-        </div>
-        <form @submit.prevent="saveProduct" class="modal-body">
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Nombre:</label>
-              <input v-model="productForm.name" type="text" required placeholder="Nombre del producto" />
-            </div>
-            <div class="form-group">
-              <label>Precio:</label>
-              <input v-model.number="productForm.price" type="number" step="0.01" required placeholder="0.00" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Descripción:</label>
-            <textarea v-model="productForm.description" placeholder="Descripción del producto"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Imagen (opcional):</label>
-            <input ref="productImageInput" type="file" @change="onProductImageChange" accept="image/jpeg,image/png,image/gif,image/webp" class="file-input" />
-            <small>Formatos: JPG, PNG, GIF, WEBP. Máximo 5MB.</small>
-            <div v-if="productImagePreview" class="image-preview">
-              <img :src="productImagePreview" alt="Vista previa" />
-              <button type="button" @click="removeProductImage" class="btn-remove-image">✕ Eliminar</button>
-            </div>
-          </div>
-          <div class="form-group checkbox-group">
-            <label><input v-model="productForm.isNew" type="checkbox" /> Destacar como "NEW"</label>
-          </div>
-
-          <details class="allergens-dropdown">
-            <summary>Alérgenos ({{ productForm.allergens.length }} seleccionados)</summary>
-            <div class="allergens-grid">
-              <label v-for="a in ALLERGEN_OPTIONS" :key="a.code" class="allergen-option">
-                <input v-model="productForm.allergens" type="checkbox" :value="a.code" />
-                <span>{{ a.symbol }}</span> <span>{{ a.label }}</span>
-              </label>
-            </div>
-          </details>
-
-          <details class="allergens-dropdown">
-            <summary>Tipo de alimento ({{ productForm.dietTags.length }} seleccionados)</summary>
-            <div class="allergens-grid">
-              <label v-for="d in DIET_OPTIONS" :key="d.code" class="allergen-option">
-                <input v-model="productForm.dietTags" type="checkbox" :value="d.code" />
-                <span>{{ d.symbol }}</span> <span>{{ d.label }}</span>
-              </label>
-            </div>
-          </details>
-
-          <div v-if="productFormError" class="error">{{ productFormError }}</div>
-          <div class="form-actions">
-            <button type="button" @click="closeProductModal" class="btn-cancel">Cancelar</button>
-            <button type="submit" class="btn-save" :disabled="isSavingProduct">
-              {{ isSavingProduct ? 'Guardando...' : (editingProduct ? 'Actualizar' : 'Crear') }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <ProductModal
+      v-model="showProductModal"
+      :editing="editingProduct"
+      :allergen-options="ALLERGEN_OPTIONS"
+      :diet-options="DIET_OPTIONS"
+      :saving="isSavingProduct"
+      :error="productFormError"
+      @close="closeProductModal"
+      @save="saveProduct"
+    />
 
     <!-- QR Modal -->
     <QrPrintModal v-if="showQrModal" :restaurant-id="selectedRestaurantId" :restaurant-name="selectedRestaurantName" @close="showQrModal = false" />
@@ -239,27 +153,16 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { api, getToken } from '../../services/api'
-import { useImageField } from '../../composables/useImageField'
+import { catalogService } from '../../services/catalogService'
+import { useToast } from '../../composables/useToast'
 import { ALLERGEN_OPTIONS, getAllergenMeta } from '../../constants/allergens'
 import { DIET_TYPE_OPTIONS as DIET_OPTIONS } from '../../constants/dietTypes'
 import QrPrintModal from '../../components/QrPrintModal.vue'
+import CatalogModal from '../../components/CatalogModal.vue'
+import SectionModal from '../../components/SectionModal.vue'
+import ProductModal from '../../components/ProductModal.vue'
 
-const {
-  inputRef: productImageInput,
-  file: productImageFile,
-  preview: productImagePreview,
-  reset: resetProductImage,
-  handleChange: processProductImageChange,
-  removeSelection: removeProductImage,
-} = useImageField()
-
-const toast = ref({ show: false, type: 'success', message: '' })
-let toastTimer = null
-function showToast(msg, type = 'success') {
-  if (toastTimer) clearTimeout(toastTimer)
-  toast.value = { show: true, type, message: msg }
-  toastTimer = setTimeout(() => { toast.value.show = false }, 2500)
-}
+const { toast, showToast } = useToast()
 
 // State
 const restaurantsStats = ref([])
@@ -275,13 +178,11 @@ const showQrModal = ref(false)
 // Catalog modal
 const showCatalogModal = ref(false)
 const editingCatalog = ref(null)
-const catalogForm = ref({ name: '', description: '' })
 
 // Section modal
 const showSectionModal = ref(false)
 const editingSection = ref(null)
 const sectionCatalog = ref(null)
-const sectionForm = ref({ name: '', description: '' })
 
 // Product modal
 const showProductModal = ref(false)
@@ -290,7 +191,6 @@ const productCatalog = ref(null)
 const productSection = ref(null)
 const isSavingProduct = ref(false)
 const productFormError = ref(null)
-const productForm = ref({ name: '', description: '', price: 0, isNew: false, allergens: [], dietTags: [] })
 
 const filteredCatalogs = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
@@ -308,7 +208,7 @@ const filteredCatalogs = computed(() => {
 async function fetchRestaurantsStats() {
   isLoadingStats.value = true
   try {
-    const data = await api.get('/restaurants/stats')
+    const data = await catalogService.getRestaurantsStats()
     restaurantsStats.value = Array.isArray(data) ? data : []
   } catch { restaurantsStats.value = [] }
   finally { isLoadingStats.value = false }
@@ -329,7 +229,7 @@ function backToList() {
 async function fetchCatalogs() {
   isLoading.value = true
   try {
-    const data = await api.get(`/restaurants/${selectedRestaurantId.value}/catalogs`)
+    const data = await catalogService.getCatalogs(selectedRestaurantId.value)
     catalogs.value = Array.isArray(data) ? data : []
   } catch (err) { showToast(err.message || 'Error al cargar catálogos', 'error') }
   finally { isLoading.value = false }
@@ -338,19 +238,18 @@ async function fetchCatalogs() {
 // Catalog CRUD
 function openCatalogForm(catalog = null) {
   editingCatalog.value = catalog
-  catalogForm.value = catalog ? { name: catalog.name, description: catalog.description || '' } : { name: '', description: '' }
   showCatalogModal.value = true
 }
 function editCatalog(catalog) { openCatalogForm(catalog) }
 function closeCatalogModal() { showCatalogModal.value = false; editingCatalog.value = null }
 
-async function saveCatalog() {
+async function saveCatalog(formData) {
   try {
     if (editingCatalog.value) {
-      await api.put(`/restaurants/${selectedRestaurantId.value}/catalogs/${editingCatalog.value.id}`, catalogForm.value)
+      await catalogService.updateCatalog(selectedRestaurantId.value, editingCatalog.value.id, formData)
       showToast('Catálogo actualizado')
     } else {
-      await api.post(`/restaurants/${selectedRestaurantId.value}/catalogs`, catalogForm.value)
+      await catalogService.createCatalog(selectedRestaurantId.value, formData)
       showToast('Catálogo creado')
     }
     closeCatalogModal()
@@ -361,7 +260,7 @@ async function saveCatalog() {
 async function deleteCatalog(catalog) {
   if (!confirm(`¿Eliminar catálogo "${catalog.name}"?`)) return
   try {
-    await api.delete(`/restaurants/${selectedRestaurantId.value}/catalogs/${catalog.id}`)
+    await catalogService.deleteCatalog(selectedRestaurantId.value, catalog.id)
     showToast('Catálogo eliminado')
     await fetchCatalogs()
   } catch (err) { showToast(err.message || 'Error', 'error') }
@@ -371,20 +270,19 @@ async function deleteCatalog(catalog) {
 function openSectionForm(catalog, section = null) {
   sectionCatalog.value = catalog
   editingSection.value = section
-  sectionForm.value = section ? { name: section.name, description: section.description || '' } : { name: '', description: '' }
   showSectionModal.value = true
 }
 function editSection(catalog, section) { openSectionForm(catalog, section) }
 function closeSectionModal() { showSectionModal.value = false; editingSection.value = null }
 
-async function saveSection() {
+async function saveSection(formData) {
   const cId = sectionCatalog.value.id
   try {
     if (editingSection.value) {
-      await api.put(`/restaurants/${selectedRestaurantId.value}/catalogs/${cId}/sections/${editingSection.value.id}`, sectionForm.value)
+      await catalogService.updateSection(selectedRestaurantId.value, cId, editingSection.value.id, formData)
       showToast('Sección actualizada')
     } else {
-      await api.post(`/restaurants/${selectedRestaurantId.value}/catalogs/${cId}/sections`, sectionForm.value)
+      await catalogService.createSection(selectedRestaurantId.value, cId, formData)
       showToast('Sección creada')
     }
     closeSectionModal()
@@ -395,7 +293,7 @@ async function saveSection() {
 async function deleteSection(catalog, section) {
   if (!confirm(`¿Eliminar sección "${section.name}"?`)) return
   try {
-    await api.delete(`/restaurants/${selectedRestaurantId.value}/catalogs/${catalog.id}/sections/${section.id}`)
+    await catalogService.deleteSection(selectedRestaurantId.value, catalog.id, section.id)
     showToast('Sección eliminada')
     await fetchCatalogs()
   } catch (err) { showToast(err.message || 'Error', 'error') }
@@ -407,47 +305,33 @@ function openProductForm(catalog, section, product = null) {
   productSection.value = section
   editingProduct.value = product
   productFormError.value = null
-  resetProductImage()
-  if (product) {
-    productForm.value = {
-      name: product.name, description: product.description || '', price: product.price,
-      isNew: Boolean(product.is_new), allergens: [...(product.allergens || [])], dietTags: [...(product.diet_tags || [])],
-    }
-  } else {
-    productForm.value = { name: '', description: '', price: 0, isNew: false, allergens: [], dietTags: [] }
-  }
   showProductModal.value = true
 }
 function editProduct(catalog, section, product) { openProductForm(catalog, section, product) }
-function closeProductModal() { showProductModal.value = false; editingProduct.value = null; resetProductImage() }
+function closeProductModal() { showProductModal.value = false; editingProduct.value = null }
 
-async function onProductImageChange(event) {
-  const result = await processProductImageChange(event)
-  if (!result.ok && result.error) showToast(result.error, 'error')
-}
-
-async function saveProduct() {
+async function saveProduct({ form, imageFile }) {
   isSavingProduct.value = true
   productFormError.value = null
   const cId = productCatalog.value.id
   const sId = productSection.value.id
   try {
     const fd = new FormData()
-    fd.append('name', productForm.value.name)
-    fd.append('description', productForm.value.description || '')
-    fd.append('price', String(productForm.value.price))
-    fd.append('is_new', productForm.value.isNew ? '1' : '0')
+    fd.append('name', form.name)
+    fd.append('description', form.description || '')
+    fd.append('price', String(form.price))
+    fd.append('is_new', form.isNew ? '1' : '0')
     fd.append('active', '1')
-    productForm.value.allergens.forEach(a => fd.append('allergens[]', a))
-    productForm.value.dietTags.forEach(d => fd.append('diet_tags[]', d))
-    if (productImageFile.value) fd.append('image', productImageFile.value)
+    form.allergens.forEach(a => fd.append('allergens[]', a))
+    form.dietTags.forEach(d => fd.append('diet_tags[]', d))
+    if (imageFile) fd.append('image', imageFile)
 
     if (editingProduct.value) {
       fd.append('_method', 'PUT')
-      await api.upload(`/restaurants/${selectedRestaurantId.value}/catalogs/${cId}/sections/${sId}/products/${editingProduct.value.id}`, fd)
+      await catalogService.updateProduct(selectedRestaurantId.value, cId, sId, editingProduct.value.id, fd)
       showToast('Producto actualizado')
     } else {
-      await api.upload(`/restaurants/${selectedRestaurantId.value}/catalogs/${cId}/sections/${sId}/products`, fd)
+      await catalogService.createProduct(selectedRestaurantId.value, cId, sId, fd)
       showToast('Producto creado')
     }
     closeProductModal()
@@ -460,7 +344,7 @@ async function saveProduct() {
 async function deleteProduct(catalog, section, product) {
   if (!confirm(`¿Eliminar "${product.name}"?`)) return
   try {
-    await api.delete(`/restaurants/${selectedRestaurantId.value}/catalogs/${catalog.id}/sections/${section.id}/products/${product.id}`)
+    await catalogService.deleteProduct(selectedRestaurantId.value, catalog.id, section.id, product.id)
     showToast('Producto eliminado')
     await fetchCatalogs()
   } catch (err) { showToast(err.message || 'Error', 'error') }

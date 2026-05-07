@@ -14,6 +14,7 @@ const AdminProducts = () => import('../views/admin/Products.vue')
 const AdminUsers = () => import('../views/admin/Users.vue')
 const AdminOnboarding = () => import('../views/admin/Onboarding.vue')
 const AdminSettings = () => import('../views/admin/Settings.vue')
+const AdminProfile  = () => import('../views/admin/Profile.vue')
 
 const LegalNotice = () => import('../views/legal/LegalNotice.vue')
 const PrivacyPolicy = () => import('../views/legal/PrivacyPolicy.vue')
@@ -37,6 +38,7 @@ const routes = [
   { path: '/admin/products', name: 'AdminProducts', component: AdminProducts, meta: { requiresAuth: true, roles: ['admin', 'superadmin'] } },
   { path: '/admin/users', name: 'AdminUsers', component: AdminUsers, meta: { requiresAuth: true, roles: ['superadmin'] } },
   { path: '/admin/settings', name: 'AdminSettings', component: AdminSettings, meta: { requiresAuth: true, roles: ['superadmin'] } },
+  { path: '/admin/profile',  name: 'AdminProfile',  component: AdminProfile,  meta: { requiresAuth: true, roles: ['admin', 'superadmin'] } },
 
   // 404
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound, meta: { public: true } }

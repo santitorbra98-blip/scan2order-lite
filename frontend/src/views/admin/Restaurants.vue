@@ -16,49 +16,70 @@
         <p>Crea el primero para comenzar.</p>
       </div>
 
-      <div v-else class="restaurants-grid">
-        <div v-for="restaurant in restaurants" :key="restaurant.id" class="restaurant-card">
-          <div class="restaurant-photo-wrap">
-            <img v-if="restaurant.image" :src="getImageUrl(restaurant)" :alt="restaurant.name" class="restaurant-photo" />
-            <div v-else class="restaurant-photo restaurant-photo-placeholder">🏪</div>
+      <template v-else>
+        <!-- Superadmin view: own restaurants -->
+        <template v-if="isSuperAdmin">
+          <div class="section-header">
+            <h2 class="section-title">🏠 Mis restaurantes</h2>
+            <span class="section-count">{{ ownRestaurants.length }}</span>
           </div>
-          <div class="restaurant-main">
-            <h3 class="restaurant-name">{{ restaurant.name }}</h3>
-            <p class="restaurant-address">{{ restaurant.address || 'Sin dirección' }}</p>
-            <p class="restaurant-phone">{{ restaurant.phone || 'Sin teléfono' }}</p>
-            <p class="restaurant-created">📅 {{ formatDate(restaurant.created_at) }}</p>
-
-            <div class="card-schedule">
-              <div class="card-schedule-header">
-                <span>⏰</span>
-                <strong>Horario</strong>
-                <button type="button" class="card-schedule-edit" @click="openEditModal(restaurant, true)">Editar</button>
-              </div>
-              <div v-if="restaurant.schedule && Object.keys(restaurant.schedule).length" class="card-schedule-grid">
-                <div v-for="day in DAYS" :key="day.key" class="card-schedule-day" :class="restaurant.schedule[day.key]?.enabled ? 'day-open' : 'day-closed'">
-                  <span class="day-abbr">{{ day.label.slice(0, 2) }}</span>
-                  <span class="day-hours">
-                    {{ restaurant.schedule[day.key]?.enabled ? `${restaurant.schedule[day.key].open}–${restaurant.schedule[day.key].close}` : 'Cerrado' }}
-                  </span>
-                </div>
-              </div>
-              <p v-else class="card-schedule-empty">Sin horario definido</p>
+          <div v-if="ownRestaurants.length === 0" class="section-empty">Sin restaurantes propios.</div>
+          <div v-else class="restaurants-grid">
+            <div v-for="restaurant in ownRestaurants" :key="restaurant.id" class="restaurant-card">
+              <RestaurantCardContent
+                :restaurant="restaurant"
+                :get-image-url="getImageUrl"
+                :format-date="formatDate"
+                :days="DAYS"
+                @edit="openEditModal(restaurant)"
+                @edit-schedule="openEditModal(restaurant, true)"
+                @qr="qrRestaurant = restaurant"
+                @delete="openDeleteModal(restaurant)"
+              />
             </div>
           </div>
 
-          <div class="restaurant-meta">
-            <span class="status-badge" :class="restaurant.active ? 'status-active' : 'status-inactive'">
-              {{ restaurant.active ? 'Activo' : 'Inactivo' }}
-            </span>
+          <div class="section-header" style="margin-top: 2.5rem;">
+            <h2 class="section-title">👥 Restaurantes de admins</h2>
+            <span class="section-count">{{ adminRestaurants.length }}</span>
           </div>
+          <div v-if="adminRestaurants.length === 0" class="section-empty">Ningún admin ha creado restaurantes aún.</div>
+          <div v-else class="restaurants-grid">
+            <div v-for="restaurant in adminRestaurants" :key="restaurant.id" class="restaurant-card">
+              <div class="owner-badge">
+                <span class="owner-label">👤 {{ restaurant.creator?.name }}</span>
+                <span class="owner-email">{{ restaurant.creator?.email }}</span>
+              </div>
+              <RestaurantCardContent
+                :restaurant="restaurant"
+                :get-image-url="getImageUrl"
+                :format-date="formatDate"
+                :days="DAYS"
+                @edit="openEditModal(restaurant)"
+                @edit-schedule="openEditModal(restaurant, true)"
+                @qr="qrRestaurant = restaurant"
+                @delete="openDeleteModal(restaurant)"
+              />
+            </div>
+          </div>
+        </template>
 
-          <div class="restaurant-actions">
-            <button class="btn-action btn-qr" @click="qrRestaurant = restaurant">📱 QR Carta</button>
-            <button class="btn-action" @click="openEditModal(restaurant)">✏️ Editar</button>
-            <button class="btn-action btn-danger" @click="openDeleteModal(restaurant)">🗑️ Borrar</button>
+        <!-- Regular admin view -->
+        <div v-else class="restaurants-grid">
+          <div v-for="restaurant in restaurants" :key="restaurant.id" class="restaurant-card">
+            <RestaurantCardContent
+              :restaurant="restaurant"
+              :get-image-url="getImageUrl"
+              :format-date="formatDate"
+              :days="DAYS"
+              @edit="openEditModal(restaurant)"
+              @edit-schedule="openEditModal(restaurant, true)"
+              @qr="qrRestaurant = restaurant"
+              @delete="openDeleteModal(restaurant)"
+            />
           </div>
         </div>
-      </div>
+      </template>
 
       <!-- Pagination -->
       <div v-if="pagination && pagination.last_page > 1" class="pagination">
@@ -69,95 +90,26 @@
     </div>
 
     <!-- Create/Edit Modal -->
-    <div v-if="showFormModal" class="modal-overlay" @click.self="closeFormModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>{{ isEditing ? 'Editar restaurante' : 'Crear restaurante' }}</h2>
-          <button @click="closeFormModal" class="btn-close">×</button>
-        </div>
-        <form @submit.prevent="saveRestaurant" class="modal-body">
-          <section class="form-section">
-            <h3>Información del restaurante</h3>
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="name">Nombre:</label>
-                <input id="name" v-model="form.name" type="text" required placeholder="Nombre del restaurante" />
-              </div>
-              <div class="form-group">
-                <label for="phone">Teléfono:</label>
-                <input id="phone" v-model="form.phone" type="text" placeholder="Teléfono" />
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="address">Dirección:</label>
-              <input id="address" v-model="form.address" type="text" placeholder="Dirección" />
-            </div>
-            <div class="form-group">
-              <label for="restaurant-image">Foto del restaurante:</label>
-              <input id="restaurant-image" ref="restaurantImageInput" type="file" accept="image/jpeg,image/png,image/gif,image/webp" class="file-input" @change="onImageChange" />
-              <small>Formatos: JPG, PNG, GIF, WEBP. Máximo 5MB.</small>
-              <div v-if="imagePreview" class="image-preview">
-                <img :src="imagePreview" alt="Vista previa" />
-                <button type="button" class="btn-remove-image" @click="removeImage">Eliminar foto</button>
-              </div>
-            </div>
-            <div class="form-group checkbox-group">
-              <label><input v-model="form.active" type="checkbox" /> Restaurante activo</label>
-            </div>
-          </section>
-
-          <section class="form-section" ref="scheduleSection">
-            <h3>Horario de apertura</h3>
-            <div class="schedule-grid">
-              <div v-for="day in DAYS" :key="day.key" class="schedule-row">
-                <label class="schedule-day-toggle">
-                  <input type="checkbox" v-model="form.schedule[day.key].enabled" />
-                  <span>{{ day.label }}</span>
-                </label>
-                <template v-if="form.schedule[day.key].enabled">
-                  <input class="time-input" type="time" v-model="form.schedule[day.key].open" />
-                  <span>—</span>
-                  <input class="time-input" type="time" v-model="form.schedule[day.key].close" />
-                </template>
-                <span v-else class="schedule-closed">Cerrado</span>
-              </div>
-            </div>
-          </section>
-
-          <div v-if="formError" class="error">{{ formError }}</div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-cancel" @click="closeFormModal" :disabled="isSaving">Cancelar</button>
-            <button type="submit" class="btn-save" :disabled="isSaving">
-              {{ isSaving ? 'Guardando...' : (isEditing ? 'Actualizar' : 'Crear') }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <RestaurantFormModal
+      v-model="showFormModal"
+      :is-editing="isEditing"
+      :initial="formInitial"
+      :days="DAYS"
+      :default-schedule="defaultSchedule"
+      :saving="isSaving"
+      :error="formError"
+      @close="closeFormModal"
+      @save="saveRestaurant"
+    />
 
     <!-- Delete Modal -->
-    <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
-      <div class="modal modal-delete">
-        <div class="modal-header">
-          <h2>Confirmar eliminación</h2>
-          <button @click="closeDeleteModal" class="btn-close">×</button>
-        </div>
-        <div class="modal-body">
-          <p>¿Seguro que quieres eliminar <strong>{{ restaurantToDelete?.name }}</strong>?</p>
-          <label class="delete-confirm-check">
-            <input v-model="deleteConfirmed" type="checkbox" />
-            Sí, deseo eliminar este restaurante
-          </label>
-          <div class="form-actions">
-            <button type="button" @click="closeDeleteModal" class="btn-cancel" :disabled="isDeleting">Cancelar</button>
-            <button type="button" @click="confirmDelete" class="btn-delete-confirm" :disabled="isDeleting || !deleteConfirmed">
-              {{ isDeleting ? 'Eliminando...' : 'Eliminar' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <RestaurantDeleteModal
+      v-model="showDeleteModal"
+      :restaurant-name="restaurantToDelete?.name"
+      :deleting="isDeleting"
+      @close="closeDeleteModal"
+      @confirm="confirmDelete"
+    />
 
     <!-- QR Modal -->
     <QrPrintModal v-if="qrRestaurant" :restaurant-id="qrRestaurant.id" :restaurant-name="qrRestaurant.name" @close="qrRestaurant = null" />
@@ -165,10 +117,14 @@
 </template>
 
 <script setup>
-import { nextTick, onMounted, ref } from 'vue'
-import { useImageField } from '../../composables/useImageField'
-import { api } from '../../services/api'
+import { computed, onMounted, ref } from 'vue'
+import { useAuthStore } from '../../stores/auth'
+import { useToast } from '../../composables/useToast'
+import { restaurantService } from '../../services/restaurantService'
 import QrPrintModal from '../../components/QrPrintModal.vue'
+import RestaurantCardContent from '../../components/RestaurantCardContent.vue'
+import RestaurantFormModal from '../../components/RestaurantFormModal.vue'
+import RestaurantDeleteModal from '../../components/RestaurantDeleteModal.vue'
 
 const DAYS = [
   { key: 'monday', label: 'Lunes' },
@@ -192,18 +148,20 @@ function defaultSchedule() {
   }
 }
 
-const {
-  inputRef: restaurantImageInput,
-  file: imageFile,
-  preview: imagePreview,
-  reset: resetImageField,
-  setPreview: setImagePreview,
-  handleChange: processImageChange,
-  removeSelection: removeImage,
-} = useImageField()
+const authStore = useAuthStore()
+const isSuperAdmin = computed(() => authStore.hasRole('superadmin'))
 
 const restaurants = ref([])
 const pagination = ref(null)
+
+// Superadmin: split into own vs admin-owned
+const ownRestaurants = computed(() =>
+  restaurants.value.filter(r => r.creator?.role === 'superadmin' || !r.creator)
+)
+const adminRestaurants = computed(() =>
+  restaurants.value.filter(r => r.creator?.role === 'admin')
+)
+
 const isLoading = ref(false)
 const error = ref(null)
 const qrRestaurant = ref(null)
@@ -214,23 +172,10 @@ const isEditing = ref(false)
 const isSaving = ref(false)
 const isDeleting = ref(false)
 const formError = ref(null)
+const formInitial = ref(null)
 const restaurantToDelete = ref(null)
-const deleteConfirmed = ref(false)
-const scheduleSection = ref(null)
 
-const toast = ref({ show: false, type: 'success', message: '' })
-let toastTimer = null
-
-const form = ref({
-  id: null, name: '', address: '', phone: '', active: true,
-  schedule: defaultSchedule(),
-})
-
-function showToast(msg, type = 'success') {
-  if (toastTimer) clearTimeout(toastTimer)
-  toast.value = { show: true, type, message: msg }
-  toastTimer = setTimeout(() => { toast.value.show = false }, 2500)
-}
+const { toast, showToast } = useToast()
 
 function formatDate(d) {
   if (!d) return 'N/A'
@@ -241,16 +186,11 @@ function getImageUrl(r) {
   return r?.image ? `/storage/${r.image}` : ''
 }
 
-async function onImageChange(event) {
-  const result = await processImageChange(event)
-  if (!result.ok && result.error) showToast(result.error, 'error')
-}
-
 async function fetchRestaurants(page = 1) {
   isLoading.value = true
   error.value = null
   try {
-    const result = await api.get(`/restaurants?page=${page}`)
+    const result = await restaurantService.getAll(page)
     if (result && result.meta) {
       restaurants.value = result.data
       pagination.value = result.meta
@@ -265,62 +205,52 @@ async function fetchRestaurants(page = 1) {
   }
 }
 
-function resetForm() {
-  form.value = { id: null, name: '', address: '', phone: '', active: true, schedule: defaultSchedule() }
-  resetImageField()
-}
-
 function openCreateModal() {
   isEditing.value = false
   formError.value = null
-  resetForm()
+  formInitial.value = null
   showFormModal.value = true
 }
 
-async function openEditModal(restaurant, scrollToSchedule = false) {
+function openEditModal(restaurant) {
   isEditing.value = true
   formError.value = null
-  form.value = {
+  formInitial.value = {
     id: restaurant.id,
     name: restaurant.name || '',
     address: restaurant.address || '',
     phone: restaurant.phone || '',
     active: Boolean(restaurant.active),
     schedule: (restaurant.schedule && Object.keys(restaurant.schedule).length) ? restaurant.schedule : defaultSchedule(),
+    _imagePreview: restaurant.image ? getImageUrl(restaurant) : null,
   }
-  setImagePreview(restaurant.image ? getImageUrl(restaurant) : null)
   showFormModal.value = true
-
-  if (scrollToSchedule) {
-    await nextTick()
-    scheduleSection.value?.scrollIntoView({ behavior: 'smooth' })
-  }
 }
 
-function closeFormModal() { showFormModal.value = false; resetForm() }
+function closeFormModal() { showFormModal.value = false; formInitial.value = null }
 
-async function saveRestaurant() {
+async function saveRestaurant({ form, imageFile }) {
   isSaving.value = true
   formError.value = null
 
   try {
     const formData = new FormData()
-    formData.append('name', form.value.name)
-    formData.append('address', form.value.address || '')
-    formData.append('phone', form.value.phone || '')
-    formData.append('active', form.value.active ? '1' : '0')
-    formData.append('schedule', JSON.stringify(form.value.schedule))
+    formData.append('name', form.name)
+    formData.append('address', form.address || '')
+    formData.append('phone', form.phone || '')
+    formData.append('active', form.active ? '1' : '0')
+    formData.append('schedule', JSON.stringify(form.schedule))
 
-    if (imageFile.value) {
-      formData.append('image', imageFile.value)
+    if (imageFile) {
+      formData.append('image', imageFile)
     }
 
     if (isEditing.value) {
       formData.append('_method', 'PUT')
-      await api.upload(`/restaurants/${form.value.id}`, formData)
+      await restaurantService.update(form.id, formData)
       showToast('Restaurante actualizado')
     } else {
-      await api.upload('/restaurants', formData)
+      await restaurantService.create(formData)
       showToast('Restaurante creado')
     }
 
@@ -335,7 +265,6 @@ async function saveRestaurant() {
 
 function openDeleteModal(restaurant) {
   restaurantToDelete.value = restaurant
-  deleteConfirmed.value = false
   showDeleteModal.value = true
 }
 
@@ -345,17 +274,21 @@ function closeDeleteModal() {
 }
 
 async function confirmDelete() {
-  if (!deleteConfirmed.value || !restaurantToDelete.value) return
+  if (!restaurantToDelete.value) return
   isDeleting.value = true
+  const targetId = restaurantToDelete.value.id
   try {
-    await api.delete(`/restaurants/${restaurantToDelete.value.id}`)
+    await restaurantService.remove(targetId)
+    // Remove immediately from local list for instant feedback
+    restaurants.value = restaurants.value.filter(r => r.id !== targetId)
     showToast('Restaurante eliminado')
     closeDeleteModal()
-    await fetchRestaurants()
   } catch (err) {
-    showToast(err.message || 'Error al eliminar', 'error')
+    showToast(err.response?.data?.message || err.message || 'Error al eliminar', 'error')
   } finally {
     isDeleting.value = false
+    // Refresh in background to sync any server-side changes
+    fetchRestaurants(pagination.value?.current_page || 1)
   }
 }
 
@@ -409,40 +342,6 @@ onMounted(() => fetchRestaurants())
   box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: transform 0.2s;
 }
 .restaurant-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-
-.restaurant-photo-wrap { height: 180px; overflow: hidden; }
-.restaurant-photo { width: 100%; height: 100%; object-fit: cover; }
-.restaurant-photo-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: #f1f5f9; }
-
-.restaurant-main { padding: 1.25rem; }
-.restaurant-name { font-size: 1.2rem; color: #1e293b; margin: 0 0 0.5rem; }
-.restaurant-address, .restaurant-phone, .restaurant-created { margin: 0.2rem 0; color: #64748b; font-size: 0.9rem; }
-
-.restaurant-meta { padding: 0 1.25rem; display: flex; gap: 0.5rem; }
-.status-badge { padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; }
-.status-active { background: #dcfce7; color: #166534; }
-.status-inactive { background: #fef2f2; color: #dc2626; }
-
-.restaurant-actions { padding: 1rem 1.25rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
-.btn-action {
-  padding: 0.5rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px;
-  background: white; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;
-}
-.btn-action:hover { background: #f8fafc; border-color: #cbd5e1; }
-.btn-action.btn-qr { border-color: #667eea; color: #667eea; }
-.btn-action.btn-danger { border-color: #fca5a5; color: #dc2626; }
-.btn-action.btn-danger:hover { background: #fef2f2; }
-
-.card-schedule { margin-top: 1rem; padding: 0.75rem; background: #f8fafc; border-radius: 8px; }
-.card-schedule-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
-.card-schedule-edit { margin-left: auto; background: none; border: none; color: #667eea; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
-.card-schedule-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; }
-.card-schedule-day { text-align: center; padding: 0.3rem; border-radius: 6px; font-size: 0.75rem; }
-.day-open { background: #dcfce7; }
-.day-closed { background: #f1f5f9; color: #94a3b8; }
-.day-abbr { display: block; font-weight: 700; }
-.day-hours { display: block; font-size: 0.7rem; }
-.card-schedule-empty { margin: 0; font-size: 0.85rem; color: #94a3b8; }
 
 /* Modals */
 .modal-overlay {
@@ -498,4 +397,27 @@ onMounted(() => fetchRestaurants())
 .btn-delete-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .error { background: #fef2f2; color: #dc2626; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; }
+
+/* Section separators (superadmin view) */
+.section-header {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin-bottom: 1.25rem; padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+.section-title { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0; }
+.section-count {
+  background: #e0e7ff; color: #4338ca;
+  font-size: 0.8rem; font-weight: 700; padding: 0.2rem 0.6rem;
+  border-radius: 999px; line-height: 1.5;
+}
+.section-empty { color: #94a3b8; font-style: italic; padding: 1rem 0 1.5rem; }
+
+/* Owner badge on admin-created cards */
+.owner-badge {
+  display: flex; flex-direction: column; gap: 1px;
+  background: #f0f9ff; padding: 0.5rem 1rem;
+  border-bottom: 1px solid #bae6fd;
+}
+.owner-label { font-size: 0.85rem; font-weight: 600; color: #0369a1; }
+.owner-email { font-size: 0.75rem; color: #64748b; }
 </style>

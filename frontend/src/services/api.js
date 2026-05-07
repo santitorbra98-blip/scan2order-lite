@@ -44,6 +44,7 @@ const apiClient = {
         const options = {
           method,
           credentials: 'include',
+          cache: 'no-store',
           signal: controller.signal,
           headers: {
             'Content-Type': 'application/json',
@@ -61,7 +62,7 @@ const apiClient = {
           options.headers['X-XSRF-TOKEN'] = xsrfToken
         }
 
-        if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+        if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE')) {
           options.body = JSON.stringify(data)
         }
 
@@ -83,7 +84,18 @@ const apiClient = {
           throw httpError
         }
 
-        const json = await response.json()
+        // 204 No Content or empty body — return null directly without parsing.
+        const contentType = response.headers.get('content-type') ?? ''
+        const contentLength = response.headers.get('content-length')
+        if (
+          response.status === 204 ||
+          contentLength === '0' ||
+          !contentType.includes('application/json')
+        ) {
+          return null
+        }
+
+        const json = await response.json().catch(() => null)
         // Pass through full paginated response (has both data + meta).
         // For non-paginated resource responses, unwrap the data array directly.
         if (json !== null && typeof json === 'object' && 'data' in json && !('message' in json)) {
@@ -134,8 +146,8 @@ const apiClient = {
   patch(endpoint, data) {
     return this.request('PATCH', endpoint, data)
   },
-  delete(endpoint) {
-    return this.request('DELETE', endpoint)
+  delete(endpoint, data = null) {
+    return this.request('DELETE', endpoint, data)
   },
   async upload(endpoint, formData) {
     const controller = new AbortController()

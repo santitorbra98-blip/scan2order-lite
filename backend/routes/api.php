@@ -2,10 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SetupController;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -70,21 +72,28 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middle
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
-    Route::post('/legal/acceptances', [LegalController::class, 'acceptances']);
+
+    // Profile management
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::post('/profile/request-password-change', [ProfileController::class, 'requestPasswordChange'])->middleware('throttle:auth-forgot-password');
+    Route::post('/profile/confirm-password-change', [ProfileController::class, 'confirmPasswordChange'])->middleware('throttle:auth-reset-password');
+    Route::post('/profile/request-email-change', [ProfileController::class, 'requestEmailChange'])->middleware('throttle:auth-forgot-password');
+    Route::post('/profile/confirm-email-change', [ProfileController::class, 'confirmEmailChange'])->middleware('throttle:auth-reset-password');
+    Route::delete('/profile', [ProfileController::class, 'deleteAccount']);
 });
 
 // Public API endpoints (viewing menu)
 Route::get('/restaurants', [RestaurantController::class, 'index']);
 Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->whereNumber('restaurant');
-Route::get('/restaurants/{restaurantId}/catalogs', [ProductController::class, 'getCatalogsByRestaurant']);
+Route::get('/restaurants/{restaurantId}/catalogs', [CatalogController::class, 'getCatalogsByRestaurant']);
 
 // Protected resource routes (admin only)
 Route::middleware(['auth:sanctum'])->group(function () {
     // Restaurant management
-    Route::get('/restaurants/stats', [ProductController::class, 'getRestaurantsStats']);
+    Route::get('/restaurants/stats', [CatalogController::class, 'getRestaurantsStats']);
     Route::post('/restaurants', [RestaurantController::class, 'store']);
     Route::put('/restaurants/{restaurant}', [RestaurantController::class, 'update']);
-    Route::put('/restaurants/{restaurant}/admins', [RestaurantController::class, 'syncAdmins']);
     Route::delete('/restaurants/{restaurant}', [RestaurantController::class, 'destroy']);
 
     // User management (superadmin only)
@@ -99,15 +108,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/settings', [SettingController::class, 'update']);
 
     // Catalog management
-    Route::get('/restaurants/{restaurantId}/catalogs/export-pdf', [ProductController::class, 'exportCatalogsPdf']);
-    Route::post('/restaurants/{restaurantId}/catalogs', [ProductController::class, 'storeCatalog']);
-    Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}', [ProductController::class, 'updateCatalog']);
-    Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}', [ProductController::class, 'deleteCatalog']);
+    Route::get('/restaurants/{restaurantId}/catalogs/export-pdf', [CatalogController::class, 'exportCatalogsPdf']);
+    Route::post('/restaurants/{restaurantId}/catalogs', [CatalogController::class, 'storeCatalog']);
+    Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}', [CatalogController::class, 'updateCatalog']);
+    Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}', [CatalogController::class, 'deleteCatalog']);
 
     // Section management
-    Route::post('/restaurants/{restaurantId}/catalogs/{catalogId}/sections', [ProductController::class, 'storeSection']);
-    Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}', [ProductController::class, 'updateSection']);
-    Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}', [ProductController::class, 'deleteSection']);
+    Route::post('/restaurants/{restaurantId}/catalogs/{catalogId}/sections', [CatalogController::class, 'storeSection']);
+    Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}', [CatalogController::class, 'updateSection']);
+    Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}', [CatalogController::class, 'deleteSection']);
 
     // Product management
     Route::post('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}/products', [ProductController::class, 'storeProduct']);

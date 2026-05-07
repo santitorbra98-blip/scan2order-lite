@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
-use App\Models\Setting;
+use App\Models\Restaurant;
+use App\Policies\RestaurantPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,33 +17,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->loadMailSettingsFromDb();
+        Gate::policy(Restaurant::class, RestaurantPolicy::class);
+
         $this->validateLegalConfigInProduction();
-    }
-
-    private function loadMailSettingsFromDb(): void
-    {
-        try {
-            $map = [
-                'mail_mailer'       => ['mail', 'default'],
-                'mail_host'         => ['mail', 'mailers.smtp.host'],
-                'mail_port'         => ['mail', 'mailers.smtp.port'],
-                'mail_username'     => ['mail', 'mailers.smtp.username'],
-                'mail_password'     => ['mail', 'mailers.smtp.password'],
-                'mail_encryption'   => ['mail', 'mailers.smtp.encryption'],
-                'mail_from_address' => ['mail', 'from.address'],
-                'mail_from_name'    => ['mail', 'from.name'],
-            ];
-
-            foreach ($map as $key => [$file, $configKey]) {
-                $value = Setting::get($key);
-                if ($value !== null && $value !== '') {
-                    config(["$file.$configKey" => $value]);
-                }
-            }
-        } catch (\Throwable $e) {
-            Log::warning('Could not load mail settings from DB: ' . $e->getMessage());
-        }
     }
 
     private function validateLegalConfigInProduction(): void

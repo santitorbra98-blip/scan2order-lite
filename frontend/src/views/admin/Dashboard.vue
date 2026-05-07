@@ -6,34 +6,22 @@
     </div>
 
     <div class="dashboard-grid">
-      <div class="stat-card">
-        <div class="stat-icon">🍽️</div>
-        <div class="stat-info">
-          <p class="stat-label">Restaurantes</p>
-          <p class="stat-value">{{ stats.restaurants }}</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">📦</div>
-        <div class="stat-info">
-          <p class="stat-label">Productos</p>
-          <p class="stat-value">{{ stats.products }}</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">📋</div>
-        <div class="stat-info">
-          <p class="stat-label">Catálogos</p>
-          <p class="stat-value">{{ stats.catalogs }}</p>
-        </div>
-      </div>
-      <div v-if="isSuperadmin" class="stat-card">
-        <div class="stat-icon">👥</div>
-        <div class="stat-info">
-          <p class="stat-label">Usuarios</p>
-          <p class="stat-value">{{ stats.users }}</p>
-        </div>
-      </div>
+      <StatsCard icon="🍽️">
+        <p class="stat-label">Restaurantes</p>
+        <p class="stat-value">{{ stats.restaurants }}</p>
+      </StatsCard>
+      <StatsCard icon="📦">
+        <p class="stat-label">Productos</p>
+        <p class="stat-value">{{ stats.products }}</p>
+      </StatsCard>
+      <StatsCard icon="📋">
+        <p class="stat-label">Catálogos</p>
+        <p class="stat-value">{{ stats.catalogs }}</p>
+      </StatsCard>
+      <StatsCard v-if="isSuperadmin" icon="👥">
+        <p class="stat-label">Usuarios</p>
+        <p class="stat-value">{{ stats.users }}</p>
+      </StatsCard>
     </div>
 
     <div class="actions-section">
@@ -57,36 +45,43 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { reactive, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../../services/api'
 import { useAuthStore } from '../../stores/auth'
+import StatsCard from '../../components/StatsCard.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
 const isSuperadmin = computed(() => auth.hasRole('superadmin'))
 
-const stats = ref({ restaurants: 0, products: 0, catalogs: 0, users: 0 })
+const stats = reactive({ restaurants: 0, products: 0, catalogs: 0, users: 0 })
 
 async function fetchStats() {
   try {
-    const restaurantsResult = await api.get('/restaurants')
+    const [restaurantsRes, statsRes, usersRes] = await Promise.allSettled([
+      api.get('/restaurants'),
+      api.get('/restaurants/stats'),
+      isSuperadmin.value ? api.get('/users') : Promise.resolve(null),
+    ])
+
+    const restaurantsResult = restaurantsRes.status === 'fulfilled' ? restaurantsRes.value : null
     const list = restaurantsResult?.meta ? restaurantsResult.data : (Array.isArray(restaurantsResult) ? restaurantsResult : [])
-    stats.value.restaurants = restaurantsResult?.meta ? restaurantsResult.meta.total : list.length
+    stats.restaurants = restaurantsResult?.meta ? restaurantsResult.meta.total : list.length
 
-    const statsData = await api.get('/restaurants/stats').catch(() => [])
+    const statsData = statsRes.status === 'fulfilled' ? statsRes.value : []
     const statsList = Array.isArray(statsData) ? statsData : []
-    stats.value.products = statsList.reduce((sum, r) => sum + Number(r?.total_products || 0), 0)
-    stats.value.catalogs = statsList.reduce((sum, r) => sum + Number(r?.total_catalogs || 0), 0)
+    stats.products = statsList.reduce((sum, r) => sum + Number(r?.total_products || 0), 0)
+    stats.catalogs = statsList.reduce((sum, r) => sum + Number(r?.total_catalogs || 0), 0)
 
-    if (!isSuperadmin.value && stats.value.restaurants === 0) {
+    if (!isSuperadmin.value && stats.restaurants === 0) {
       router.replace('/admin/onboarding')
       return
     }
 
-    if (auth.hasRole('superadmin')) {
-      const usersResult = await api.get('/users').catch(() => null)
-      stats.value.users = usersResult?.meta
+    if (isSuperadmin.value) {
+      const usersResult = usersRes.status === 'fulfilled' ? usersRes.value : null
+      stats.users = usersResult?.meta
         ? usersResult.meta.total
         : (Array.isArray(usersResult) ? usersResult.length : 0)
     }
@@ -110,13 +105,7 @@ onMounted(() => fetchStats())
   gap: 1.5rem; margin-bottom: 3rem;
 }
 
-.stat-card {
-  background: white; border-radius: 12px; padding: 1.5rem;
-  display: flex; align-items: center; gap: 1.5rem;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: transform 0.2s;
-}
-.stat-card:hover { transform: translateY(-3px); }
-.stat-icon { font-size: 2.5rem; }
+/* stat-card styles moved to StatsCard.vue */
 .stat-label { color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 0.3rem; }
 .stat-value { color: #1e293b; font-size: 2rem; font-weight: 700; margin: 0; }
 

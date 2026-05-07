@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AuditLog;
+use App\Jobs\LogAuditAction;
+use App\Models\Restaurant;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -22,21 +23,16 @@ class Controller extends BaseController
         ?string $ipAddress = null,
         ?string $userAgent = null
     ): void {
-        try {
-            AuditLog::create([
-                'actor_user_id' => $actor?->id,
-                'target_user_id' => $targetUser?->id,
-                'action' => $action,
-                'resource_type' => $resourceType,
-                'resource_id' => $resourceId !== null ? (string) $resourceId : null,
-                'ip_address' => $ipAddress,
-                'user_agent' => $userAgent,
-                'metadata' => $metadata,
-                'created_at' => now(),
-            ]);
-        } catch (\Throwable $exception) {
-            // Do not block primary flow if audit storage fails.
-        }
+        LogAuditAction::dispatch(
+            $actor?->id,
+            $targetUser?->id,
+            $action,
+            $resourceType,
+            $resourceId !== null ? (string) $resourceId : null,
+            $ipAddress,
+            $userAgent,
+            $metadata,
+        );
     }
 
     protected function managedRestaurantIds(?User $user): array
@@ -55,5 +51,22 @@ class Controller extends BaseController
         }
 
         return $user->canAccessRestaurant($restaurantId);
+    }
+
+    protected function authorizeRestaurant(int|string $restaurantId): Restaurant
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user) {
+            abort(response()->json(['message' => 'No autenticado'], 401));
+        }
+
+        $restaurant = Restaurant::find($restaurantId);
+        if (!$restaurant) {
+            abort(response()->json(['message' => 'Restaurante no encontrado'], 404));
+        }
+
+        $this->authorize('manage', $restaurant);
+
+        return $restaurant;
     }
 }

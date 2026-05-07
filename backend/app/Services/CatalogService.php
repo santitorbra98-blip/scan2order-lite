@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Exceptions\BusinessException;
 use App\Models\Catalog;
 use App\Models\Product;
 use App\Models\Restaurant;
 use App\Models\Section;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -20,7 +22,7 @@ class CatalogService
         // a polyglot file (e.g. GIF+PHP code named evil.php) from being stored with
         // a .php extension and later executed by PHP-FPM.
         $ext = $image->guessExtension() ?: 'bin';
-        $imageName = time() . '_' . uniqid() . '.' . $ext;
+        $imageName = Str::uuid()->toString() . '.' . $ext;
         $storedPath = Storage::disk('public')->putFileAs('products', $image, $imageName);
 
         if ($storedPath === false) {
@@ -39,8 +41,22 @@ class CatalogService
         }
     }
 
-    public function createCatalog(Restaurant $restaurant, array $data): Catalog
+    public function createCatalog(Restaurant $restaurant, array $data, ?User $admin = null): Catalog
     {
+        if ($admin && $admin->hasRole('admin') && !$admin->hasRole('superadmin')) {
+            $limit = $admin->max_catalogs;
+            if ($limit !== null) {
+                $managedIds = $admin->managedRestaurantIds();
+                $current = Catalog::whereIn('restaurant_id', $managedIds)->count();
+                if ($current >= $limit) {
+                    throw new BusinessException(
+                        "Has alcanzado el límite de {$limit} catálogo(s) permitido(s) para tu cuenta.",
+                        403
+                    );
+                }
+            }
+        }
+
         return $restaurant->catalogs()->create($data);
     }
 
@@ -80,8 +96,22 @@ class CatalogService
         $section->delete();
     }
 
-    public function createProduct(Section $section, int $restaurantId, array $data, $imageFile = null): Product
+    public function createProduct(Section $section, int $restaurantId, array $data, $imageFile = null, ?User $admin = null): Product
     {
+        if ($admin && $admin->hasRole('admin') && !$admin->hasRole('superadmin')) {
+            $limit = $admin->max_products;
+            if ($limit !== null) {
+                $managedIds = $admin->managedRestaurantIds();
+                $current = Product::whereIn('restaurant_id', $managedIds)->count();
+                if ($current >= $limit) {
+                    throw new BusinessException(
+                        "Has alcanzado el límite de {$limit} producto(s) permitido(s) para tu cuenta.",
+                        403
+                    );
+                }
+            }
+        }
+
         $data['restaurant_id'] = $restaurantId;
 
         if ($imageFile) {

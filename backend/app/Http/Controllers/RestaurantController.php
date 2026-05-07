@@ -48,7 +48,7 @@ class RestaurantController extends Controller
 
         if ($currentUser && $currentUser->hasRole('superadmin')) {
             return RestaurantResource::collection(
-                Restaurant::with(['admins' => $adminSelector])->paginate(25)
+                Restaurant::with(['admins' => $adminSelector, 'creator'])->paginate(25)
             );
         }
 
@@ -132,14 +132,13 @@ class RestaurantController extends Controller
 
     public function update(Request $request, Restaurant $restaurant)
     {
-        $user = $request->user();
+        $user = $request->user('sanctum');
         if (!$user || !$user->hasAnyRole(['admin', 'superadmin'])) {
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
         if ($user->hasRole('admin') && !$user->hasRole('superadmin')) {
-            $isLinkedAdmin = $restaurant->admins()->where('users.id', $user->id)->exists();
-            if (!$isLinkedAdmin && $restaurant->created_by !== $user->id) {
+            if (!$this->canAccessRestaurant($user, (int) $restaurant->id)) {
                 return response()->json(['message' => 'No autorizado'], 403);
             }
         }
@@ -177,14 +176,13 @@ class RestaurantController extends Controller
 
     public function destroy(Restaurant $restaurant)
     {
-        $user = request()->user();
+        $user = request()->user('sanctum');
         if (!$user || !$user->hasAnyRole(['admin', 'superadmin'])) {
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
         if ($user->hasRole('admin') && !$user->hasRole('superadmin')) {
-            $isLinkedAdmin = $restaurant->admins()->where('users.id', $user->id)->exists();
-            if (!$isLinkedAdmin && $restaurant->created_by !== $user->id) {
+            if (!$this->canAccessRestaurant($user, (int) $restaurant->id)) {
                 return response()->json(['message' => 'No autorizado'], 403);
             }
         }

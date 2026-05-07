@@ -18,7 +18,16 @@ export default defineConfig({
       { text: 'Produccion', link: '/produccion-checklist' },
       { text: 'Render', link: '/deploy-render' },
       { text: 'Smoke Tests', link: '/smoke-tests' },
-      { text: 'Guia Profesor', link: '/guia-profesor' }
+      {
+        text: 'Rubrica',
+        items: [
+          { text: 'DEW — Entorno Cliente', link: '/dew' },
+          { text: 'DSW — Entorno Servidor', link: '/dsw' },
+          { text: 'DPL — Despliegue', link: '/dpl' },
+          { text: 'DOR — Diseño de Interfaces', link: '/dor' },
+          { text: 'Guia para profesor', link: '/guia-profesor' }
+        ]
+      }
     ],
     sidebar: [
       {
@@ -36,6 +45,15 @@ export default defineConfig({
           { text: 'Checklist de Produccion', link: '/produccion-checklist' },
           { text: 'Despliegue en Render', link: '/deploy-render' },
           { text: 'Smoke Tests Post Deploy', link: '/smoke-tests' }
+        ]
+      },
+      {
+        text: 'Rubrica del Proyecto',
+        items: [
+          { text: 'DEW — Entorno Cliente', link: '/dew' },
+          { text: 'DSW — Entorno Servidor', link: '/dsw' },
+          { text: 'DPL — Despliegue', link: '/dpl' },
+          { text: 'DOR — Diseño de Interfaces', link: '/dor' }
         ]
       },
       {

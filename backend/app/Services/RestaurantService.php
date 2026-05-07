@@ -18,7 +18,7 @@ class RestaurantService
         // a polyglot file (e.g. GIF+PHP code named evil.php) from being stored with
         // a .php extension and later executed by PHP-FPM.
         $ext = $image->guessExtension() ?: 'bin';
-        $imageName = time() . '_' . uniqid() . '.' . $ext;
+        $imageName = Str::uuid()->toString() . '.' . $ext;
         $result = Storage::disk('public')->putFileAs('restaurants', $image, $imageName);
         if ($result === false) {
             throw new \RuntimeException('No se pudo guardar la imagen del restaurante.');
@@ -35,6 +35,26 @@ class RestaurantService
 
     public function createRestaurant(array $data, User $creator, $imageFile = null): Restaurant
     {
+        // Enforce per-admin restaurant limit (NULL = unlimited, superadmin is always unlimited)
+        if ($creator->hasRole('admin') && !$creator->hasRole('superadmin')) {
+            $limit = $creator->max_restaurants;
+            if ($limit !== null) {
+                $current = Restaurant::query()
+                    ->where(function (\Illuminate\Database\Eloquent\Builder $q) use ($creator) {
+                        $q->whereHas('admins', fn ($q2) => $q2->where('users.id', $creator->id))
+                          ->orWhere('created_by', $creator->id);
+                    })
+                    ->count();
+
+                if ($current >= $limit) {
+                    throw new BusinessException(
+                        "Has alcanzado el límite de {$limit} local(es) permitido(s) para tu cuenta.",
+                        403
+                    );
+                }
+            }
+        }
+
         $data['created_by'] = $creator->id;
 
         if ($imageFile) {

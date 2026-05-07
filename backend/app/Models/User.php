@@ -28,6 +28,9 @@ class User extends Authenticatable
         'created_by',
         'status',
         'email_verified_at',
+        'max_restaurants',
+        'max_catalogs',
+        'max_products',
     ];
 
     protected $hidden = [
@@ -84,6 +87,10 @@ class User extends Authenticatable
 
     public function hasPermission($permissionName)
     {
+        // Superadmin has all permissions unconditionally
+        if ($this->hasRole('superadmin')) {
+            return true;
+        }
         return $this->permissions()->contains('name', $permissionName);
     }
 }

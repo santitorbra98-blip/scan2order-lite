@@ -17,6 +17,7 @@
             {{ auth.user?.name }} ▼
           </button>
           <div v-if="showUserMenu" class="dropdown-menu">
+            <router-link to="/admin/profile" class="dropdown-link">Mi perfil</router-link>
             <button @click="logout" class="logout-btn">Cerrar sesión</button>
           </div>
         </li>
@@ -34,7 +35,7 @@
 <script setup>
 import { useAuthStore } from './stores/auth'
 import LegalFooter from '@/components/legal/LegalFooter.vue'
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const auth = useAuthStore()
@@ -44,10 +45,6 @@ const showUserMenu = ref(false)
 
 const canAccessAdmin = computed(() => auth.hasAnyRole(['admin', 'superadmin']))
 const isSuperadmin = computed(() => auth.hasRole('superadmin'))
-
-onMounted(() => {
-  // Auth is initialized in main.js before mount — nothing to do here.
-})
 
 watch(() => router.currentRoute.value.name, () => {
   showUserMenu.value = false
@@ -196,6 +193,23 @@ body {
   overflow: hidden;
   border: 1px solid #d4dce4;
 }
+
+.dropdown-link {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: center;
+  text-decoration: none;
+  color: #334155;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.dropdown-link:hover { background: #f8fafc; }
 
 .logout-btn {
   width: 100%;

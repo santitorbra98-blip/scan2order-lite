@@ -17,10 +17,13 @@ class RestaurantResource extends JsonResource
             'image' => $this->image,
             'active' => $this->active,
             'schedule' => $this->schedule,
+            'created_by' => $this->created_by,
             'creator' => $this->whenLoaded('creator', function () {
                 return [
-                    'id' => $this->creator->id,
-                    'name' => $this->creator->name,
+                    'id'    => $this->creator->id,
+                    'name'  => $this->creator->name,
+                    'email' => $this->creator->email,
+                    'role'  => $this->creator->role?->name,
                 ];
             }),
             'admins' => $this->whenLoaded('admins', function () {

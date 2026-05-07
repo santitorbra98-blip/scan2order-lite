@@ -21,8 +21,9 @@ class Restaurant extends Model
     ];
 
     protected $casts = [
-        'active'   => 'boolean',
-        'schedule' => 'array',
+        'active'      => 'boolean',
+        'schedule'    => 'array',
+        'created_by'  => 'integer',
     ];
 
     public function creator()
