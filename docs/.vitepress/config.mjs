@@ -13,38 +13,23 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: 'Inicio', link: '/' },
-      { text: 'Paso a Paso', link: '/paso-a-paso-completo' },
-      { text: 'Guia Rapida', link: '/guia-rapida' },
-      { text: 'Produccion', link: '/produccion-checklist' },
-      { text: 'Render', link: '/deploy-render' },
-      { text: 'Smoke Tests', link: '/smoke-tests' },
+      { text: 'Arquitectura', link: '/arquitectura' },
       {
         text: 'Rubrica',
         items: [
           { text: 'DEW — Entorno Cliente', link: '/dew' },
           { text: 'DSW — Entorno Servidor', link: '/dsw' },
           { text: 'DPL — Despliegue', link: '/dpl' },
-          { text: 'DOR — Diseño de Interfaces', link: '/dor' },
-          { text: 'Guia para profesor', link: '/guia-profesor' }
+          { text: 'DOR — Diseño de Interfaces', link: '/dor' }
         ]
-      }
+      },
+      { text: 'Defensa', link: '/defensa' }
     ],
     sidebar: [
       {
-        text: 'Proyecto',
+        text: 'Arquitectura',
         items: [
-          { text: 'Paso a paso completo', link: '/paso-a-paso-completo' },
-          { text: 'Guia Rapida', link: '/guia-rapida' },
-          { text: 'Arquitectura', link: '/arquitectura' },
-          { text: 'API Auth', link: '/api-auth' }
-        ]
-      },
-      {
-        text: 'Operaciones',
-        items: [
-          { text: 'Checklist de Produccion', link: '/produccion-checklist' },
-          { text: 'Despliegue en Render', link: '/deploy-render' },
-          { text: 'Smoke Tests Post Deploy', link: '/smoke-tests' }
+          { text: 'Arquitectura del sistema', link: '/arquitectura' }
         ]
       },
       {
@@ -57,9 +42,9 @@ export default defineConfig({
         ]
       },
       {
-        text: 'Evaluacion',
+        text: 'Defensa',
         items: [
-          { text: 'Guia para profesor', link: '/guia-profesor' }
+          { text: 'Guion por asignatura', link: '/defensa' }
         ]
       }
     ],
