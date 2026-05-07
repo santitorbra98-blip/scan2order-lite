@@ -7,13 +7,6 @@ Backend Laravel 11 · Frontend Vue 3 · PostgreSQL · Docker · GitHub Actions.
 
 - [Arquitectura del sistema](./arquitectura) — servicios, flujo de peticiones, decisiones técnicas
 
-## Rúbrica del Proyecto
+## Rúbrica y Defensa
 
-- [DEW — Desarrollo Web en Entorno Cliente](./dew)
-- [DSW — Desarrollo Web en Entorno Servidor](./dsw)
-- [DPL — Despliegue de Aplicaciones Web](./dpl)
-- [DOR — Diseño de Interfaces Web](./dor)
-
-## Defensa
-
-- [Guion de defensa por asignatura](./defensa) — argumentación técnica para DSW, DEW, DPL, DOR y SSG
+- [Criterios cubiertos y argumentación por asignatura](./defensa) — DSW · DEW · DPL · DOR · SSG

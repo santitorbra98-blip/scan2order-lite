@@ -1,10 +1,243 @@
-# Defensa del Proyecto
+# Rúbrica y Defensa del Proyecto
 
-Guía de argumentación técnica por asignatura. Cada sección corresponde al tiempo asignado en la defensa.
+Criterios cubiertos y argumentación técnica por asignatura. El tiempo indicado corresponde al bloque de defensa.
 
 ---
 
 ## DSW — Desarrollo Web en Entorno Servidor · 8 min
+
+### ✅ PHP + Laravel como backend de la API REST
+
+El backend es una API REST construida con Laravel 11 sobre PHP 8.4-FPM. NGINX actúa como reverse proxy y redirige todo lo que llega a `/api/*` al proceso PHP-FPM. Las rutas están definidas en `backend/routes/api.php` y cada endpoint tiene su propio controlador, FormRequest de validación y, si aplica, su Policy de autorización.
+
+---
+
+### ✅ RBAC propio (sin librerías)
+
+Hay dos roles de sistema: `admin` y `superadmin`. Los permisos van asociados al rol, no al usuario individual. El modelo `User` expone métodos de comprobación que cualquier capa del backend puede usar:
+
+- `hasRole('superadmin')` — compara contra el nombre del rol
+- `hasPermission('manage_products')` — itera los permisos del rol; el superadmin los tiene todos
+- `canAccessRestaurant($id)` — comprueba la tabla pivote `user_restaurant`
+
+El acceso a cada restaurante se centraliza en `RestaurantPolicy`, registrada mediante `Gate::policy()`. Cualquier controlador invoca `$this->authorize('manage', $restaurant)` y la Policy decide si el acceso es válido.
+
+---
+
+### ✅ Laravel Sanctum (autenticación stateless)
+
+El login devuelve un Bearer token que el frontend guarda en `sessionStorage`. Ese token se incluye en la cabecera `Authorization` de cada petición. El middleware `auth:sanctum` lo valida contra la tabla `personal_access_tokens`. No hay cookies ni sesiones — la API es consumible desde cualquier cliente. El logout elimina el token de la base de datos de forma inmediata.
+
+---
+
+### ✅ Throttling diferenciado por endpoint
+
+Cada flujo de autenticación tiene su propio límite, definido en `RouteServiceProvider` con `RateLimiter::for(...)`:
+
+| Nombre | Límite | Clave |
+|--------|--------|-------|
+| `api` | 60 req/min | user id o IP |
+| `auth-login` | 8 req/min | email + IP (bloquea spray attacks) |
+| `auth-register-request` | 4 cada 15 min | IP |
+| `auth-forgot-password` | 3 cada 30 min | IP |
+| `auth-reset-password` | 5 cada 15 min | IP |
+
+Un atacante que agote el límite de login no afecta al límite del API general ni al de registro.
+
+---
+
+### ✅ Auditoría asíncrona
+
+Cada acción sensible (crear restaurante, cambio de contraseña, login…) se registra en la tabla `audit_logs` con: actor, acción, recurso, IP y user-agent. El registro **no ocurre en el hilo de la petición** — se despacha un `LogAuditAction` job a la cola. Si la cola es `sync` (desarrollo) se ejecuta en el mismo proceso; en producción es asíncrono puro. Si el job falla, escribe un `Log::warning` y no rompe la petición original.
+
+---
+
+### ✅ Mail dinámico y MFA por correo
+
+Toda la lógica de códigos de verificación (registro, recuperación, cambio de email/contraseña) está centralizada en `MfaCodeService`. El servicio genera un código, lo guarda hasheado en `email_mfa_codes` con TTL configurable (`security.mfa_email_code_ttl_minutes`), y envía el Mailable de Laravel. Los límites de intentos se leen de `config/security.php`, que a su vez viene del `.env`, sin tocar código para cambiarlos.
+
+---
+
+## DEW — Desarrollo Web en Entorno Cliente · 7 min
+
+### ✅ Vue 3 + SFC + Composition API
+
+Todos los componentes usan `<script setup>` (Single File Components). La Composition API permite colocar lógica, template y estilos en un mismo fichero sin mezclar responsabilidades. `ref()` crea estado reactivo, `computed()` deriva valores que se actualizan solos, y `watch()` reacciona a cambios. El componente `StatsCard.vue` usa además `<script setup lang="ts">` con genéricos de `defineProps`, cubriendo el requisito de TypeScript.
+
+---
+
+### ✅ Vue Router con lazy loading y guards
+
+Las rutas admin usan carga dinámica (`() => import(...)`) para que el código de cada vista se descargue solo cuando el usuario navega a ella. El guard `router.beforeEach` intercepta cada navegación: comprueba `meta.requiresAuth` y `meta.roles`, y redirige a `/login` o al dashboard según corresponda. Las rutas públicas (carta del cliente, login, legal) no requieren token.
+
+---
+
+### ✅ Pinia — estado global de autenticación
+
+El único store global es `useAuthStore`. Centraliza el token, el objeto usuario, los métodos `login` / `logout`, y los helpers `hasRole` / `hasAnyRole` que usan tanto el router como los componentes. El token se persiste en `sessionStorage` al login y se elimina al logout.
+
+---
+
+### ✅ Props, Emits y composición de componentes
+
+Las vistas admin están descompuestas en modales extraídos como componentes independientes (`ProductModal`, `CatalogModal`, `RestaurantFormModal`, `RestaurantDeleteModal`…). Cada modal recibe datos via `defineProps` y comunica el resultado al padre via `defineEmits`. El flujo siempre es unidireccional: datos bajan por props, eventos suben por emits.
+
+---
+
+### ✅ Composables propios
+
+| Composable | Función |
+|-----------|---------|
+| `useToast` | Notificación temporal con auto-cierre configurable |
+| `useImageField` | Carga de imagen: validación MIME, compresión automática, previsualización |
+| `useLegalMeta` | Fetch de metadatos legales con caché y fallback |
+
+Los composables evitan duplicar lógica entre vistas y encapsulan el ciclo de vida de sus efectos internamente.
+
+---
+
+### ✅ localStorage / sessionStorage
+
+El token se almacena en `sessionStorage` (se borra al cerrar el tab). `api.js` lo inyecta automáticamente en la cabecera `Authorization` de cada petición. Hay lógica de migración para sesiones antiguas que usaban `localStorage`.
+
+---
+
+## DPL — Despliegue de Aplicaciones Web · 5 min
+
+### ✅ NGINX + Docker + stack completo
+
+El stack local se levanta con `docker compose up -d --build` e incluye cinco servicios: **nginx** (reverse proxy, SSL local), **php** (Laravel FPM), **postgres** (PostgreSQL 15 con volumen persistente), **frontend** (build de Vite) y **scheduler** (ejecuta `artisan schedule:run` cada 60 s). Cada imagen usa Alpine para minimizar tamaño.
+
+---
+
+### ✅ Dockerfile.railway multistage (dos entornos)
+
+Para producción existe `Dockerfile.railway`, una imagen única que fusiona todo en dos fases:
+
+1. **Fase Node**: compila el frontend con Vite → genera `dist/`
+2. **Fase PHP**: instala PHP, NGINX y Supervisor; copia solo el `dist/` compilado (no Node.js)
+
+El resultado es una imagen de ~120 MB autocontenida con frontend, backend, NGINX y scheduler. `render.yaml` la despliega en Render con `autoDeploy: true` y `APP_DEBUG=false`.
+
+Los dos entornos diferenciados son: **local** (Docker Compose, debug activo, cola síncrona) y **producción** (imagen única, debug desactivado, cola de base de datos, SSL automático).
+
+---
+
+### ✅ CI/CD con GitHub Actions
+
+**Workflow 1 — Docs a GitHub Pages** (`.github/workflows/docs-deploy.yml`): cada push a `main` que modifique `docs/` compila VitePress y publica automáticamente en GitHub Pages. Sin intervención manual.
+
+**Workflow 2 — Smoke test diario** (`.github/workflows/render-smoke-test.yml`): cada día a las 07:30 UTC (o al lanzarlo manualmente) prueba tres endpoints críticos de la URL de producción: `/api/hello`, `/api/health` y `POST /api/auth/login`. Si alguno falla, el workflow queda en rojo y GitHub notifica por email.
+
+---
+
+### ✅ Control de versiones
+
+Repositorio en GitHub con rama `main`. Todos los ficheros de infraestructura (Dockerfiles, workflows, render.yaml, config) están versionados junto al código. El despliegue en Render se dispara automáticamente en cada push.
+
+---
+
+### ✅ Documentación desplegada (VitePress + GitHub Pages)
+
+La documentación se genera con VitePress (`npm run docs:build`) y se publica en `https://santitorbra98-blip.github.io/scan2order-lite/`. La configuración en `docs/.vitepress/config.mjs` ajusta el `base` automáticamente según el nombre del repositorio, sin configuración manual de GitHub Pages.
+
+---
+
+## DOR — Diseño de Interfaces Web · 3 min
+
+### ✅ Dos interfaces visuales diferenciadas
+
+**Carta del cliente** (`/restaurant/:id`): interfaz minimalista orientada al móvil, sin autenticación, sin sidebar. El comensal escanea el QR y ve únicamente los catálogos, secciones, productos con foto, precio y alérgenos.
+
+**Panel de administración** (`/admin/*`): sidebar fijo con indicador de ruta activa, cabecera con nombre y rol del usuario, modales de creación/edición, paginación y confirmaciones explícitas para acciones destructivas. Accesible solo con token válido.
+
+---
+
+### ✅ Paleta de colores justificada
+
+| Rol | Hex | Justificación |
+|-----|-----|--------------|
+| Primario `#667eea` | Violeta azulado | Tecnología y confianza; se diferencia de la paleta roja/naranja del sector restauración |
+| Secundario `#764ba2` | Morado | Forma gradiente con el primario; coherencia visual en toda la aplicación |
+| Éxito `#48bb78` | Verde | Convención universal para confirmación / estado activo |
+| Error `#fc8181` | Rojo suave | Menos agresivo que el rojo puro; alerta sin alarma |
+| Fondo `#f7fafc` | Gris muy claro | Reduce fatiga ocular en uso prolongado |
+
+---
+
+### ✅ Responsive sin framework CSS
+
+El diseño adapta el número de columnas sin media queries fijas, usando CSS Grid con `auto-fill` y `minmax`:
+
+```css
+grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+```
+
+En móvil se reduce a una columna, en tablet a dos, en escritorio a tres o más. Los modales usan `width: 90vw; max-width: 560px` para adaptarse a cualquier pantalla. No se usa Tailwind ni Bootstrap — CSS nativo con `<style scoped>` por componente.
+
+---
+
+### ✅ Usabilidad
+
+- **Feedback inmediato**: toast de confirmación tras cada acción (useToast, auto-cierre 2,5 s)
+- **Estados de carga**: botones deshabilitados con texto "Guardando…" durante peticiones
+- **Confirmación de destructivas**: eliminar un restaurante requiere checkbox explícito + botón de confirmar
+- **Errores contextuales**: los errores de validación se muestran junto al campo, no solo en consola
+
+---
+
+## SSG — Sistemas de Gestión · 2 min
+
+### ✅ Gestión de usuarios, roles y permisos
+
+El superadmin crea administradores desde `/admin/users`. Cada usuario tiene un único rol y el rol agrupa los permisos. La relación es:
+
+```
+usuario ─── rol ─── permisos
+              └─── restaurantes asignados (user_restaurant)
+```
+
+Un admin solo accede a los restaurantes que le han sido asignados explícitamente. El superadmin accede a todo sin restricción.
+
+---
+
+### ✅ Límites por cuenta
+
+Para prevenir abuso de recursos, `config/security.php` define topes configurables sin tocar código:
+
+| Límite | Por defecto | Variable de entorno |
+|--------|------------|---------------------|
+| Restaurantes por admin | 3 | `LIMIT_RESTAURANTS_PER_ADMIN` |
+| Catálogos por restaurante | 10 | `LIMIT_CATALOGS_PER_RESTAURANT` |
+| Secciones por catálogo | 20 | `LIMIT_SECTIONS_PER_CATALOG` |
+| Productos por sección | 100 | `LIMIT_PRODUCTS_PER_SECTION` |
+
+El superadmin puede ajustar límites globales adicionales desde `/admin/settings`, que los persiste en la tabla `settings` con `Setting::set()`.
+
+---
+
+### ✅ Auditoría de acciones
+
+Cada acción sensible queda en `audit_logs`: quién (`actor_user_id`), qué (`action`), sobre qué (`resource_type` / `resource_id`), desde dónde (`ip_address`, `user_agent`). El registro es asíncrono para no penalizar el tiempo de respuesta (ver DSW — Auditoría).
+
+---
+
+### ✅ Flujo completo: del clic del usuario al dato en pantalla
+
+```
+Clic en "Mis restaurantes"
+  → Vue Router comprueba meta.requiresAuth y roles (Pinia store)
+  → Restaurants.vue llama a restaurantService.getAll()
+  → api.js inyecta el Bearer token en la cabecera HTTP
+  → NGINX reenvía /api/restaurants a PHP-FPM
+  → Sanctum valida el token en personal_access_tokens
+  → RestaurantController filtra por rol (admin: solo los suyos; superadmin: todos)
+  → Devuelve JSON paginado
+  → restaurants.value = data.data  →  Vue actualiza el DOM
+```
+
+En una sola petición intervienen: Vue Router (autorización de navegación), Pinia (token), api.js (cabeceras), NGINX (enrutamiento), Sanctum (autenticación), Policy (autorización de recurso) y el Controller (lógica de negocio).
+
 
 ### RBAC propio
 

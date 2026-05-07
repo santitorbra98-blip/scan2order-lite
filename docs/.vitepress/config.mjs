@@ -14,16 +14,7 @@ export default defineConfig({
     nav: [
       { text: 'Inicio', link: '/' },
       { text: 'Arquitectura', link: '/arquitectura' },
-      {
-        text: 'Rubrica',
-        items: [
-          { text: 'DEW — Entorno Cliente', link: '/dew' },
-          { text: 'DSW — Entorno Servidor', link: '/dsw' },
-          { text: 'DPL — Despliegue', link: '/dpl' },
-          { text: 'DOR — Diseño de Interfaces', link: '/dor' }
-        ]
-      },
-      { text: 'Defensa', link: '/defensa' }
+      { text: 'Rúbrica y Defensa', link: '/defensa' }
     ],
     sidebar: [
       {
@@ -33,18 +24,9 @@ export default defineConfig({
         ]
       },
       {
-        text: 'Rubrica del Proyecto',
+        text: 'Rúbrica y Defensa',
         items: [
-          { text: 'DEW — Entorno Cliente', link: '/dew' },
-          { text: 'DSW — Entorno Servidor', link: '/dsw' },
-          { text: 'DPL — Despliegue', link: '/dpl' },
-          { text: 'DOR — Diseño de Interfaces', link: '/dor' }
-        ]
-      },
-      {
-        text: 'Defensa',
-        items: [
-          { text: 'Guion por asignatura', link: '/defensa' }
+          { text: 'Por asignatura (DSW/DEW/DPL/DOR/SSG)', link: '/defensa' }
         ]
       }
     ],
