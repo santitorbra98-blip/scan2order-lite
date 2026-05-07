@@ -207,7 +207,7 @@ DB_PASSWORD=postgres DB_PORT=55433 docker compose exec php php artisan migrate -
 DB_PASSWORD=postgres DB_PORT=55433 docker compose exec php php artisan app:create-superadmin
 ```
 
-La aplicación queda disponible en **http://localhost:8080**.
+La aplicación queda disponible en `http://localhost:8080`.
 
 ### Comandos útiles
 
