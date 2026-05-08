@@ -26,18 +26,22 @@ class AuthController extends Controller
             return response()->json(['message' => 'El email ya está registrado'], 422);
         }
 
-        $this->mfaService->sendToEmail(
-            email: $email,
-            purpose: 'register',
-            payload: [
-                'name'             => (string) $data['name'],
-                'phone'            => trim((string) ($data['phone'] ?? '')),
-                'accept_terms'     => (bool) $data['accept_terms'],
-                'accept_privacy'   => (bool) $data['accept_privacy'],
-                'accept_marketing' => (bool) ($data['accept_marketing'] ?? false),
-                'legal_version'    => (string) config('legal.version'),
-            ]
-        );
+        try {
+            $this->mfaService->sendToEmail(
+                email: $email,
+                purpose: 'register',
+                payload: [
+                    'name'             => (string) $data['name'],
+                    'phone'            => trim((string) ($data['phone'] ?? '')),
+                    'accept_terms'     => (bool) $data['accept_terms'],
+                    'accept_privacy'   => (bool) $data['accept_privacy'],
+                    'accept_marketing' => (bool) ($data['accept_marketing'] ?? false),
+                    'legal_version'    => (string) config('legal.version'),
+                ]
+            );
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 503);
+        }
 
         return response()->json([
             'message' => 'Enviamos un código a tu email para completar el registro.',
@@ -199,7 +203,11 @@ class AuthController extends Controller
         $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
         if ($user) {
-            $this->mfaService->sendToUser($user, 'password_reset');
+            try {
+                $this->mfaService->sendToUser($user, 'password_reset');
+            } catch (\RuntimeException) {
+                // swallow: always return the same generic response to avoid user enumeration
+            }
         }
 
         return response()->json([

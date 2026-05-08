@@ -111,15 +111,9 @@
           </div>
           <div class="form-group">
             <label for="u-role">Rol:</label>
-            <template v-if="isEditing">
-              <select id="u-role" v-model="form.role_id" required>
-                <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
-              </select>
-            </template>
-            <template v-else>
-              <div class="role-fixed-badge">admin</div>
-              <small class="role-hint">Los usuarios creados desde este panel siempre son administradores.</small>
-            </template>
+            <select id="u-role" v-model="form.role_id" required>
+              <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="u-status">Estado:</label>
@@ -286,9 +280,6 @@ function openCreateModal() {
   isEditing.value = false
   formError.value = null
   resetForm()
-  // Always create as admin
-  const adminRole = roles.value.find(r => r.name === 'admin')
-  if (adminRole) form.value.role_id = adminRole.id
   showFormModal.value = true
 }
 

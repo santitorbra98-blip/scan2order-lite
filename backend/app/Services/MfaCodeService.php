@@ -35,11 +35,15 @@ class MfaCodeService
             'attempts'   => 0,
         ]);
 
-        Mail::to($email)->queue(new MfaCodeMail(
-            code: $code,
-            minutes: $ttlMinutes,
-            purpose: $this->purposeLabel($purpose),
-        ));
+        try {
+            Mail::to($email)->queue(new MfaCodeMail(
+                code: $code,
+                minutes: $ttlMinutes,
+                purpose: $this->purposeLabel($purpose),
+            ));
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('No se pudo enviar el email. Por favor, inténtalo de nuevo más tarde.', 0, $e);
+        }
     }
 
     /**
@@ -66,11 +70,15 @@ class MfaCodeService
             'attempts'   => 0,
         ]);
 
-        Mail::to($email)->queue(new MfaCodeMail(
-            code: $code,
-            minutes: $ttlMinutes,
-            purpose: $this->purposeLabel($purpose),
-        ));
+        try {
+            Mail::to($email)->queue(new MfaCodeMail(
+                code: $code,
+                minutes: $ttlMinutes,
+                purpose: $this->purposeLabel($purpose),
+            ));
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('No se pudo enviar el email. Por favor, inténtalo de nuevo más tarde.', 0, $e);
+        }
     }
 
     /**

@@ -386,7 +386,7 @@ onMounted(() => fetchRestaurantsStats())
 .btn-back { padding: 0.5rem 1rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-weight: 600; }
 
 .loading { text-align: center; padding: 3rem; color: #64748b; }
-.empty-state, .empty-section { text-align: center; padding: 3rem; color: #64748b; }
+.empty-state, .empty-section { text-align: center; padding: 3rem; color: #1e293b; }
 
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
 .restaurant-card { background: white; border-radius: 12px; padding: 1.5rem; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: transform 0.2s; }

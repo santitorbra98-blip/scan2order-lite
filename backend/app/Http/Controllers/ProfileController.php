@@ -47,7 +47,11 @@ class ProfileController extends Controller
     {
         $user = $request->user('sanctum');
 
-        $this->mfaService->sendToUser($user, 'password_change');
+        try {
+            $this->mfaService->sendToUser($user, 'password_change');
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 503);
+        }
 
         return response()->json([
             'message' => 'Se ha enviado un código a tu correo para confirmar el cambio de contraseña.',
@@ -85,7 +89,11 @@ class ProfileController extends Controller
 
         $newEmail = mb_strtolower(trim((string) $data['new_email']));
 
-        $this->mfaService->sendToUser($user, 'email_change', $newEmail, ['new_email' => $newEmail]);
+        try {
+            $this->mfaService->sendToUser($user, 'email_change', $newEmail, ['new_email' => $newEmail]);
+        } catch (\RuntimeException $e) {
+            return response()->json(['message' => $e->getMessage()], 503);
+        }
 
         return response()->json([
             'message' => 'Se ha enviado un código al nuevo correo para confirmar el cambio.',

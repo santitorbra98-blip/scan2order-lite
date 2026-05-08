@@ -332,7 +332,7 @@ onMounted(() => fetchRestaurants())
 .loading, .error { text-align: center; padding: 3rem; color: #64748b; font-size: 1.1rem; }
 .error { color: #dc2626; }
 
-.empty-state { text-align: center; padding: 4rem 2rem; color: #64748b; }
+.empty-state { text-align: center; padding: 4rem 2rem; color: #1e293b; }
 .empty-state h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
 
 .restaurants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1.5rem; }
