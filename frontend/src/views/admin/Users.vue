@@ -25,7 +25,8 @@
         <p>Crea el primero para comenzar.</p>
       </div>
 
-      <table v-else class="users-table">
+      <div v-else class="table-scroll">
+      <table class="users-table">
         <thead>
           <tr>
             <th>Nombre</th>
@@ -74,6 +75,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
 
       <!-- Pagination -->
       <div v-if="pagination && pagination.last_page > 1" class="pagination">
@@ -540,4 +542,22 @@ onMounted(async () => {
 .page-btn:hover:not(:disabled) { background: #f8fafc; border-color: #667eea; color: #667eea; }
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .page-info { font-size: 0.9rem; color: #64748b; }
+
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+@media (max-width: 768px) {
+  .users-container { padding: 1rem; }
+  .header h1 { font-size: 1.5rem; }
+  .header-actions { flex-wrap: wrap; width: 100%; justify-content: flex-end; }
+  .search-bar { margin-bottom: 1rem; }
+  .users-table { min-width: 780px; font-size: 0.85rem; }
+  .users-table th, .users-table td { padding: 0.6rem 0.7rem; }
+  .cell-restaurants { max-width: 140px; }
+  .pagination { flex-wrap: wrap; gap: 0.5rem; }
+  .page-info { width: 100%; text-align: center; order: -1; }
+}
+
+@media (max-width: 480px) {
+  .limits-grid { grid-template-columns: 1fr; }
+}
 </style>

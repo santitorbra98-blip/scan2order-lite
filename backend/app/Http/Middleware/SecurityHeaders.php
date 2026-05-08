@@ -20,6 +20,7 @@ class SecurityHeaders
             'Content-Security-Policy',
             "default-src 'self'; " .
             "script-src 'self' 'unsafe-inline'; " .
+            "worker-src blob: 'self'; " .
             "connect-src 'self'; " .
             "img-src 'self' data: https:; " .
             "style-src 'self' 'unsafe-inline'; " .

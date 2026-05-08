@@ -20,15 +20,6 @@
           <label>Descripción:</label>
           <textarea v-model="form.description" placeholder="Descripción del producto"></textarea>
         </div>
-        <div class="form-group">
-          <label>Imagen (opcional):</label>
-          <input ref="fileInput" type="file" @change="onFileChange" accept="image/jpeg,image/png,image/gif,image/webp" class="file-input" />
-          <small>Formatos: JPG, PNG, GIF, WEBP. Máximo 5MB.</small>
-          <div v-if="imagePreview" class="image-preview">
-            <img :src="imagePreview" alt="Vista previa" />
-            <button type="button" @click="removeImage" class="btn-remove-image">✕ Eliminar</button>
-          </div>
-        </div>
         <div class="form-group checkbox-group">
           <label><input v-model="form.isNew" type="checkbox" /> Destacar como "NEW"</label>
         </div>
@@ -66,8 +57,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue'
-import { useImageField } from '../composables/useImageField'
+import { reactive, watch } from 'vue'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -79,8 +69,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'save'])
-
-const { inputRef: fileInput, file: imageFile, preview: imagePreview, reset: resetImage, handleChange } = useImageField()
 
 const form = reactive({ name: '', description: '', price: 0, isNew: false, allergens: [], dietTags: [] })
 
@@ -100,18 +88,78 @@ watch(() => props.editing, (val) => {
     form.allergens = []
     form.dietTags = []
   }
-  resetImage()
 }, { immediate: true })
 
-async function onFileChange(event) {
-  await handleChange(event)
-}
-
-function removeImage() {
-  resetImage()
-}
-
 function handleSubmit() {
-  emit('save', { form: { ...form }, imageFile: imageFile.value })
+  emit('save', { form: { ...form } })
 }
 </script>
+
+<style scoped>
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.modal {
+  background: white; border-radius: 16px; width: 100%; max-width: 550px;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-wide { max-width: 650px; }
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9;
+}
+.modal-header h2 { margin: 0; font-size: 1.3rem; color: #1e293b; }
+.btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+.modal-body { padding: 1.5rem; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.form-group { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1rem; }
+.form-group label { font-weight: 600; font-size: 0.9rem; color: #334155; }
+.form-group input, .form-group textarea {
+  width: 100%; padding: 0.6rem 0.8rem; border: 1.5px solid #e2e8f0;
+  border-radius: 8px; font-size: 0.95rem; font-family: inherit;
+}
+.form-group input:focus, .form-group textarea:focus { border-color: #667eea; outline: none; }
+.form-group textarea { min-height: 80px; resize: vertical; }
+.form-group small { color: #94a3b8; font-size: 0.8rem; }
+
+.file-input { font-size: 0.9rem; }
+.image-preview { margin-top: 0.5rem; }
+.image-preview img { max-width: 150px; border-radius: 8px; display: block; }
+.btn-remove-image {
+  display: block; margin-top: 0.4rem; background: none; border: none;
+  color: #dc2626; cursor: pointer; font-size: 0.85rem; padding: 0;
+}
+
+.checkbox-group label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 500; }
+
+.allergens-dropdown { margin: 1rem 0; border: 1px solid #e2e8f0; border-radius: 8px; }
+.allergens-dropdown summary { padding: 0.75rem 1rem; cursor: pointer; font-weight: 600; color: #475569; }
+.allergens-grid {
+  padding: 0.75rem 1rem;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem;
+}
+.allergen-option { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer; }
+
+.error { background: #fef2f2; color: #dc2626; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; margin: 0.75rem 0; }
+
+.form-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
+.btn-cancel {
+  padding: 0.6rem 1.2rem; background: #f1f5f9; border: none;
+  border-radius: 8px; cursor: pointer; font-weight: 600;
+}
+.btn-save {
+  padding: 0.6rem 1.2rem; background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+}
+.btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .modal { border-radius: 12px; }
+  .modal-body { padding: 1rem; }
+  .form-grid { grid-template-columns: 1fr; }
+  .allergens-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
+</style>

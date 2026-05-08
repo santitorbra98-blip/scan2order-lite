@@ -104,4 +104,13 @@ defineEmits(['edit', 'edit-schedule', 'qr', 'delete'])
 .day-abbr { display: block; font-weight: 700; }
 .day-hours { display: block; font-size: 0.7rem; }
 .card-schedule-empty { margin: 0; font-size: 0.85rem; color: #94a3b8; }
+
+@media (max-width: 640px) {
+  .restaurant-photo-wrap { height: 160px; }
+  .restaurant-main { padding: 1rem; }
+  .restaurant-meta { padding: 0 1rem; }
+  .restaurant-actions { padding: 0.75rem 1rem; gap: 0.4rem; }
+  .btn-action { flex: 1 1 calc(50% - 0.2rem); text-align: center; padding: 0.5rem 0.5rem; font-size: 0.82rem; }
+  .card-schedule-grid { grid-template-columns: repeat(4, 1fr); }
+}
 </style>

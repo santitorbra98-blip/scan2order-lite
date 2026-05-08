@@ -121,3 +121,77 @@ function handleSubmit() {
   emit('save', { form: { ...form }, imageFile: imageFile.value })
 }
 </script>
+
+<style scoped>
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 1rem;
+}
+.modal {
+  background: white; border-radius: 16px; width: 100%; max-width: 600px;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9;
+}
+.modal-header h2 { margin: 0; font-size: 1.3rem; color: #1e293b; }
+.btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+.modal-body { padding: 1.5rem; }
+
+.form-section { margin-bottom: 1.5rem; }
+.form-section h3 {
+  font-size: 1rem; color: #475569; margin: 0 0 1rem;
+  padding-bottom: 0.5rem; border-bottom: 1px solid #f1f5f9;
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.form-group { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; }
+.form-group label { font-weight: 600; font-size: 0.9rem; color: #334155; }
+.form-group input[type="text"],
+.form-group input[type="time"] {
+  padding: 0.6rem 0.8rem; border: 1.5px solid #e2e8f0;
+  border-radius: 8px; font-size: 0.95rem;
+}
+.form-group input:focus { border-color: #667eea; outline: none; }
+.form-group small { color: #94a3b8; font-size: 0.8rem; }
+
+.file-input { font-size: 0.9rem; }
+.image-preview { margin-top: 0.5rem; }
+.image-preview img { max-width: 200px; border-radius: 8px; display: block; }
+.btn-remove-image {
+  display: block; margin-top: 0.4rem; background: none; border: none;
+  color: #dc2626; cursor: pointer; font-size: 0.85rem; padding: 0;
+}
+
+.checkbox-group label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 500; }
+
+.schedule-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+.schedule-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.schedule-day-toggle {
+  display: flex; align-items: center; gap: 0.4rem;
+  min-width: 130px; font-size: 0.9rem; cursor: pointer; font-weight: 500;
+}
+.time-input { padding: 0.4rem; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.85rem; }
+.schedule-closed { color: #94a3b8; font-size: 0.85rem; }
+
+.error { background: #fef2f2; color: #dc2626; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; }
+
+.form-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
+.btn-cancel {
+  padding: 0.6rem 1.2rem; background: #f1f5f9; border: none;
+  border-radius: 8px; cursor: pointer; font-weight: 600;
+}
+.btn-save {
+  padding: 0.6rem 1.2rem; background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+}
+.btn-save:disabled, .btn-cancel:disabled { opacity: 0.6; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .modal { max-height: 95vh; border-radius: 12px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .schedule-day-toggle { min-width: 110px; }
+  .modal-body { padding: 1rem; }
+}
+</style>

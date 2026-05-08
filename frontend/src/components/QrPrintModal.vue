@@ -10,7 +10,6 @@
         <p class="qr-url">{{ menuUrl }}</p>
         <div class="qr-actions">
           <button @click="downloadQr" class="btn-download">⬇️ Descargar PNG</button>
-          <button @click="printQr" class="btn-print">🖨️ Imprimir</button>
           <button @click="copyUrl" class="btn-copy">📋 Copiar enlace</button>
         </div>
         <p v-if="copied" class="copied-msg">✅ Enlace copiado</p>
@@ -49,41 +48,6 @@ function downloadQr() {
   link.download = `qr-${props.restaurantName}.png`
   link.href = canvas.toDataURL('image/png')
   link.click()
-}
-
-function printQr() {
-  const canvas = qrContainer.value?.querySelector('canvas')
-  if (!canvas) return
-  const win = window.open('', '_blank')
-  if (!win) return
-
-  const doc = win.document
-  doc.open()
-  doc.write('<!doctype html><html><head><meta charset="utf-8"><title>QR</title></head><body></body></html>')
-  doc.close()
-
-  const style = doc.createElement('style')
-  style.textContent = 'body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;}h2{margin-bottom:1rem;}img{max-width:300px;}p{color:#666;margin-top:1rem;font-size:0.9rem;}'
-  doc.head.appendChild(style)
-
-  doc.title = `QR ${props.restaurantName}`
-
-  const title = doc.createElement('h2')
-  title.textContent = `🍽️ ${props.restaurantName}`
-
-  const image = doc.createElement('img')
-  image.src = canvas.toDataURL('image/png')
-  image.alt = 'QR menu'
-
-  const caption = doc.createElement('p')
-  caption.textContent = 'Escanea el QR para ver la carta'
-
-  doc.body.appendChild(title)
-  doc.body.appendChild(image)
-  doc.body.appendChild(caption)
-
-  win.document.close()
-  win.onload = () => { win.print(); win.close() }
 }
 
 async function copyUrl() {

@@ -420,4 +420,14 @@ onMounted(() => fetchRestaurants())
 }
 .owner-label { font-size: 0.85rem; font-weight: 600; color: #0369a1; }
 .owner-email { font-size: 0.75rem; color: #64748b; }
+
+@media (max-width: 640px) {
+  .restaurants-container { padding: 1rem; }
+  .header h1 { font-size: 1.4rem; }
+  .btn-create { padding: 0.6rem 1rem; font-size: 0.9rem; }
+  .restaurants-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .section-header { flex-wrap: wrap; gap: 0.5rem; }
+  .pagination { flex-wrap: wrap; gap: 0.5rem; padding: 1rem 0 0.5rem; }
+  .page-info { width: 100%; text-align: center; order: -1; }
+}
 </style>

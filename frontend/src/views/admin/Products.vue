@@ -86,8 +86,6 @@
                   </div>
 
                   <div v-for="product in section.products" :key="product.id" :class="['product-item', { 'product-item-inactive': !product.active }]">
-                    <img v-if="product.image" :src="`/storage/${product.image}`" alt="" class="product-thumbnail" />
-                    <div v-else class="product-no-image">📦</div>
                     <div class="product-name">
                       {{ product.name }}
                       <span v-if="product.is_new" class="badge-new">NEW</span>
@@ -310,7 +308,7 @@ function openProductForm(catalog, section, product = null) {
 function editProduct(catalog, section, product) { openProductForm(catalog, section, product) }
 function closeProductModal() { showProductModal.value = false; editingProduct.value = null }
 
-async function saveProduct({ form, imageFile }) {
+async function saveProduct({ form }) {
   isSavingProduct.value = true
   productFormError.value = null
   const cId = productCatalog.value.id
@@ -324,7 +322,6 @@ async function saveProduct({ form, imageFile }) {
     fd.append('active', '1')
     form.allergens.forEach(a => fd.append('allergens[]', a))
     form.dietTags.forEach(d => fd.append('diet_tags[]', d))
-    if (imageFile) fd.append('image', imageFile)
 
     if (editingProduct.value) {
       fd.append('_method', 'PUT')
@@ -486,4 +483,19 @@ onMounted(() => fetchRestaurantsStats())
 .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .error { background: #fef2f2; color: #dc2626; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; margin: 0.75rem 0; }
+
+@media (max-width: 640px) {
+  .products-container { padding: 1rem; }
+  .header h1 { font-size: 1.3rem; }
+  .stats-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .tools-row { gap: 0.5rem; }
+  .search-input { min-width: 0; width: 100%; }
+  .catalog-card { padding: 1rem; }
+  .sections-container { margin-left: 0.4rem; padding-left: 0.6rem; }
+  .product-item { flex-wrap: wrap; gap: 0.5rem; }
+  .product-name { flex: 1 1 calc(100% - 50px - 0.5rem); min-width: 0; }
+  .product-price { margin-left: auto; }
+  .product-actions { margin-left: auto; }
+  .form-grid { grid-template-columns: 1fr; }
+}
 </style>

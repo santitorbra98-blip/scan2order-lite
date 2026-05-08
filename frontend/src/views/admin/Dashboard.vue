@@ -14,10 +14,6 @@
         <p class="stat-label">Productos</p>
         <p class="stat-value">{{ stats.products }}</p>
       </StatsCard>
-      <StatsCard icon="📋">
-        <p class="stat-label">Catálogos</p>
-        <p class="stat-value">{{ stats.catalogs }}</p>
-      </StatsCard>
       <StatsCard v-if="isSuperadmin" icon="👥">
         <p class="stat-label">Usuarios</p>
         <p class="stat-value">{{ stats.users }}</p>
@@ -98,7 +94,7 @@ onMounted(() => fetchStats())
 
 .header { text-align: center; margin-bottom: 3rem; }
 .header h1 { font-size: 2.5rem; color: #1e293b; margin: 0; }
-.header p { font-size: 1.1rem; color: #64748b; margin-top: 0.5rem; }
+.header p { font-size: 1.1rem; color: #1e293b; margin-top: 0.5rem; }
 
 .dashboard-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
