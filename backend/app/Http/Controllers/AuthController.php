@@ -22,7 +22,7 @@ class AuthController extends Controller
         $data = $request->validated();
         $email = mb_strtolower(trim((string) $data['email']));
 
-        if (User::whereRaw('LOWER(email) = ?', [$email])->exists()) {
+        if (User::withTrashed()->whereRaw('LOWER(email) = ?', [$email])->exists()) {
             return response()->json(['message' => 'El email ya está registrado'], 422);
         }
 
@@ -63,7 +63,7 @@ class AuthController extends Controller
 
         try {
             $user = DB::transaction(function () use ($data, $email, $request) {
-                if (User::whereRaw('LOWER(email) = ?', [$email])->exists()) {
+                if (User::withTrashed()->whereRaw('LOWER(email) = ?', [$email])->exists()) {
                     throw new \Illuminate\Validation\ValidationException(
                         validator([], []),
                         response()->json(['message' => 'El email ya está registrado'], 422)
