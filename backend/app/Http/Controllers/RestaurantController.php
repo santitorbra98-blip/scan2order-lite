@@ -188,7 +188,7 @@ class RestaurantController extends Controller
         }
 
         $restaurantId = $restaurant->id;
-        $restaurant->delete();
+        $this->restaurantService->deleteRestaurant($restaurant);
 
         Cache::forget('public_restaurants');
         Cache::forget("restaurant_{$restaurantId}");

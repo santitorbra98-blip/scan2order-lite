@@ -3,13 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\AuthUserResource;
+use App\Models\Restaurant;
 use App\Services\MfaCodeService;
+use App\Services\RestaurantService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
-    public function __construct(private MfaCodeService $mfaService) {}
+    public function __construct(
+        private MfaCodeService $mfaService,
+        private RestaurantService $restaurantService,
+    ) {}
 
     public function show(Request $request)
     {
@@ -146,6 +151,11 @@ class ProfileController extends Controller
         if (!Hash::check($data['password'], $user->password)) {
             return response()->json(['message' => 'Contraseña incorrecta'], 422);
         }
+
+        // Delete all restaurants owned by this user (with their images and related data)
+        Restaurant::where('created_by', $user->id)->get()->each(
+            fn (Restaurant $r) => $this->restaurantService->deleteRestaurant($r)
+        );
 
         // Revoke all tokens before soft-deleting
         $user->tokens()->delete();

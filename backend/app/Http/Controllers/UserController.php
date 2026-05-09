@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Restaurant;
+use App\Services\RestaurantService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    public function __construct(private RestaurantService $restaurantService) {}
     public function index(Request $request)
     {
         $currentUser = $request->user();
@@ -131,6 +134,11 @@ class UserController extends Controller
         if ($user->id === $currentUser->id) {
             return response()->json(['message' => 'No puedes eliminar tu propia cuenta'], 403);
         }
+
+        // Delete all restaurants owned by this user (with their images and related data)
+        Restaurant::where('created_by', $user->id)->get()->each(
+            fn (Restaurant $r) => $this->restaurantService->deleteRestaurant($r)
+        );
 
         $user->tokens()->delete();
         $user->delete();

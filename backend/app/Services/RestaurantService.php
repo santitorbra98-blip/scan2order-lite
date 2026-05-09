@@ -34,6 +34,25 @@ class RestaurantService
         }
     }
 
+    /**
+     * Fully delete a restaurant: removes all product images, the restaurant
+     * image, and hard-deletes the record so DB cascades clean up catalogs,
+     * sections and products automatically.
+     */
+    public function deleteRestaurant(Restaurant $restaurant): void
+    {
+        // Delete all product images belonging to this restaurant
+        $restaurant->products()->whereNotNull('image')->pluck('image')->each(
+            fn (string $path) => Storage::disk('public')->delete($path)
+        );
+
+        // Delete the restaurant cover image
+        $this->deleteStoredRestaurantImage($restaurant->image);
+
+        // Force-delete triggers DB cascades: catalogs → sections → products
+        $restaurant->forceDelete();
+    }
+
     public function createRestaurant(array $data, User $creator, $imageFile = null): Restaurant
     {
         // Enforce per-admin restaurant limit (NULL = unlimited, superadmin is always unlimited)
