@@ -157,9 +157,9 @@ class ProfileController extends Controller
             fn (Restaurant $r) => $this->restaurantService->deleteRestaurant($r)
         );
 
-        // Revoke all tokens before soft-deleting
+        // Revoke all tokens and permanently delete the user so the email is freed
         $user->tokens()->delete();
-        $user->delete();
+        $user->forceDelete();
 
         return response()->json(['message' => 'Cuenta eliminada correctamente']);
     }

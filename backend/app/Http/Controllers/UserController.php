@@ -141,7 +141,7 @@ class UserController extends Controller
         );
 
         $user->tokens()->delete();
-        $user->delete();
+        $user->forceDelete();
 
         $this->auditAction(
             actor: $currentUser,
