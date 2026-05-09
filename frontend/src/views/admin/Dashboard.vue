@@ -97,7 +97,7 @@ onMounted(() => fetchStats())
 .header p { font-size: 1.1rem; color: #1e293b; margin-top: 0.5rem; }
 
 .dashboard-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
   gap: 1.5rem; margin-bottom: 3rem;
 }
 
@@ -111,7 +111,7 @@ onMounted(() => fetchStats())
 }
 .actions-section h2 { color: #1e293b; font-size: 1.4rem; margin: 0 0 1.5rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem; }
 
-.action-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+.action-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 1rem; }
 .action-btn {
   display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 1.5rem;
   background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none;
@@ -119,4 +119,13 @@ onMounted(() => fetchStats())
 }
 .action-btn:hover { transform: translateY(-3px); opacity: 0.9; }
 .btn-icon { font-size: 2rem; }
+
+@media (max-width: 640px) {
+  .admin-container { padding: 1rem; }
+  .header { margin-bottom: 1.5rem; }
+  .header h1 { font-size: 1.8rem; }
+  .dashboard-grid { grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+  .actions-section { padding: 1.25rem; }
+  .action-buttons { grid-template-columns: 1fr; }
+}
 </style>

@@ -265,5 +265,9 @@ body {
   .nav-brand h1 {
     font-size: 1.4rem;
   }
+
+  .main-content {
+    padding: 1rem;
+  }
 }
 </style>

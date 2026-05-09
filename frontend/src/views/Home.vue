@@ -357,7 +357,8 @@ onMounted(() => fetchRestaurants())
 .error-icon, .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
 .btn-retry { margin-top: 1rem; padding: 0.6rem 1.5rem; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
 
-.restaurants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+.restaurants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 1.5rem; }
+@media (max-width: 640px) { .restaurants-grid { grid-template-columns: 1fr; } }
 
 .restaurant-card {
   background: white; border-radius: 16px; overflow: hidden; cursor: pointer;
@@ -365,8 +366,9 @@ onMounted(() => fetchRestaurants())
 }
 .restaurant-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
 
-.card-image img { width: 100%; height: 200px; object-fit: cover; }
-.card-image-placeholder { height: 200px; display: flex; align-items: center; justify-content: center; font-size: 4rem; background: #f1f5f9; }
+.card-image { height: 200px; overflow: hidden; background: #f1f5f9; }
+.card-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.card-image-placeholder { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; }
 .card-body { padding: 1.25rem; }
 .card-body h3 { margin: 0 0 0.5rem; font-size: 1.2rem; color: #1e293b; }
 .detail-item { margin: 0.25rem 0; color: #64748b; font-size: 0.9rem; }
