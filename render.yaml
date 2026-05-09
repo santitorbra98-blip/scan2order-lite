@@ -66,17 +66,11 @@ services:
       - key: RUN_MIGRATIONS
         value: "true"
       - key: MAIL_MAILER
-        value: smtp
-      - key: MAIL_HOST
+        value: brevo
+      - key: BREVO_SMTP_LOGIN
         sync: false
-      - key: MAIL_PORT
-        value: "465"
-      - key: MAIL_USERNAME
+      - key: BREVO_SMTP_KEY
         sync: false
-      - key: MAIL_PASSWORD
-        sync: false
-      - key: MAIL_ENCRYPTION
-        value: ssl
       - key: MAIL_FROM_ADDRESS
         sync: false
       - key: MAIL_FROM_NAME
