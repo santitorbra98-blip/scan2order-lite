@@ -47,9 +47,11 @@
       <div v-else-if="allSections.length > 0" class="menu-layout">
         <nav class="sections-nav">
           <h3>📋 Secciones</h3>
-          <button v-for="s in allSections" :key="s.id" @click="selectSection(s)" :class="['nav-btn', { active: selectedSection?.id === s.id }]">
-            {{ s.name }}
-          </button>
+          <div class="nav-btn-wrapper">
+            <button v-for="s in allSections" :key="s.id" @click="selectSection(s)" :class="['nav-btn', { active: selectedSection?.id === s.id }]">
+              {{ s.name }}
+            </button>
+          </div>
         </nav>
 
         <div class="products-area">
@@ -202,7 +204,7 @@ onMounted(() => fetchMenu())
 </script>
 
 <style scoped>
-.menu-container { max-width: 1200px; margin: 0 auto; padding: 2rem; min-height: 100vh; background: #f8fafc; border-radius: 16px; }
+.menu-container { max-width: 1200px; margin: 0 auto; padding: 2rem; min-height: 100vh; background: #f8fafc; border-radius: 16px; box-sizing: border-box; }
 
 .header { margin-bottom: 2rem; }
 .restaurant-header { }
@@ -217,7 +219,7 @@ onMounted(() => fetchMenu())
 .filters { margin-bottom: 2rem; }
 .search-wrap { display: flex; align-items: center; background: white; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0 1rem; margin-bottom: 0.75rem; }
 .search-icon { margin-right: 0.5rem; }
-.search-input { flex: 1; border: none; outline: none; padding: 0.75rem 0; font-size: 0.95rem; background: transparent; }
+.search-input { flex: 1; border: none; outline: none; padding: 0.75rem 0; font-size: 0.95rem; background: transparent; min-width: 0; }
 .btn-clear { background: none; border: none; cursor: pointer; font-size: 1rem; color: #94a3b8; }
 
 .filter-toggles { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
@@ -235,7 +237,6 @@ onMounted(() => fetchMenu())
 .error-state { color: #dc2626; }
 
 .menu-layout { display: grid; grid-template-columns: 220px 1fr; gap: 2rem; }
-@media (max-width: 768px) { .menu-layout { grid-template-columns: 1fr; } }
 
 .sections-nav { position: sticky; top: 1rem; align-self: start; }
 .sections-nav h3 { margin: 0 0 1rem; font-size: 1rem; color: #475569; }
@@ -243,12 +244,45 @@ onMounted(() => fetchMenu())
 .nav-btn:hover { background: #f1f5f9; }
 .nav-btn.active { background: #667eea; color: white; font-weight: 600; }
 
-.products-area { min-height: 300px; }
+.products-area { min-height: 300px; min-width: 0; }
 .section-title-row { margin-bottom: 1.5rem; }
 .section-title-row h2 { margin: 0; color: #1e293b; font-size: 1.5rem; }
 .catalog-subtitle { margin: 0.25rem 0 0; color: #94a3b8; font-size: 0.85rem; }
 
 .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+
+/* ── Mobile ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .menu-container { padding: 1rem; border-radius: 0; }
+  .header { margin-bottom: 1.25rem; }
+  .restaurant-title-row h1 { font-size: 1.4rem; }
+  .filters { margin-bottom: 1.25rem; }
+
+  .menu-layout { grid-template-columns: 1fr; gap: 0; }
+
+  /* Sections: horizontal scrollable pill bar */
+  .sections-nav { position: static; display: flex; flex-direction: column; }
+  .sections-nav h3 { font-size: 0.85rem; margin-bottom: 0.6rem; }
+  .sections-nav > .nav-btn-wrapper {
+    display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem;
+    scrollbar-width: none;
+  }
+  .sections-nav > .nav-btn-wrapper::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    display: inline-block; width: auto; white-space: nowrap;
+    padding: 0.45rem 0.9rem; font-size: 0.82rem; margin-bottom: 0;
+  }
+
+  .products-area { margin-top: 1rem; }
+  .section-title-row h2 { font-size: 1.15rem; }
+  .products-grid { grid-template-columns: 1fr; gap: 0.85rem; }
+
+  .product-card.compact { flex-direction: row; }
+  .product-card.compact .product-image { width: 90px; }
+  .product-info { padding: 0.75rem; }
+  .product-title-row h3 { font-size: 0.95rem; }
+  .price { font-size: 1rem; }
+}
 
 .product-card {
   background: white; border-radius: 14px; overflow: hidden; cursor: pointer;

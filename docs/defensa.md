@@ -6,13 +6,13 @@ Criterios cubiertos y argumentación técnica por asignatura. El tiempo indicado
 
 ## DSW — Desarrollo Web en Entorno Servidor · 8 min
 
-### ✅ PHP + Laravel como backend de la API REST
+### PHP + Laravel como backend de la API REST
 
 El backend es una API REST construida con Laravel 11 sobre PHP 8.4-FPM. NGINX actúa como reverse proxy y redirige todo lo que llega a `/api/*` al proceso PHP-FPM. Las rutas están definidas en `backend/routes/api.php` y cada endpoint tiene su propio controlador, FormRequest de validación y, si aplica, su Policy de autorización.
 
 ---
 
-### ✅ RBAC propio (sin librerías)
+### RBAC propio (sin librerías)
 
 Hay dos roles de sistema: `admin` y `superadmin`. Los permisos van asociados al rol, no al usuario individual. El modelo `User` expone métodos de comprobación que cualquier capa del backend puede usar:
 
@@ -24,13 +24,13 @@ El acceso a cada restaurante se centraliza en `RestaurantPolicy`, registrada med
 
 ---
 
-### ✅ Laravel Sanctum (autenticación stateless)
+### Laravel Sanctum (autenticación stateless)
 
 El login devuelve un Bearer token que el frontend guarda en `sessionStorage`. Ese token se incluye en la cabecera `Authorization` de cada petición. El middleware `auth:sanctum` lo valida contra la tabla `personal_access_tokens`. No hay cookies ni sesiones — la API es consumible desde cualquier cliente. El logout elimina el token de la base de datos de forma inmediata.
 
 ---
 
-### ✅ Throttling diferenciado por endpoint
+### Throttling diferenciado por endpoint
 
 Cada flujo de autenticación tiene su propio límite, definido en `RouteServiceProvider` con `RateLimiter::for(...)`:
 
@@ -46,13 +46,13 @@ Un atacante que agote el límite de login no afecta al límite del API general n
 
 ---
 
-### ✅ Auditoría asíncrona
+### Auditoría asíncrona
 
 Cada acción sensible (crear restaurante, cambio de contraseña, login…) se registra en la tabla `audit_logs` con: actor, acción, recurso, IP y user-agent. El registro **no ocurre en el hilo de la petición** — se despacha un `LogAuditAction` job a la cola. Si la cola es `sync` (desarrollo) se ejecuta en el mismo proceso; en producción es asíncrono puro. Si el job falla, escribe un `Log::warning` y no rompe la petición original.
 
 ---
 
-### ✅ Mail dinámico y MFA por correo
+### Mail dinámico y MFA por correo
 
 Toda la lógica de códigos de verificación (registro, recuperación, cambio de email/contraseña) está centralizada en `MfaCodeService`. El servicio genera un código, lo guarda hasheado en `email_mfa_codes` con TTL configurable (`security.mfa_email_code_ttl_minutes`), y envía el Mailable de Laravel. Los límites de intentos se leen de `config/security.php`, que a su vez viene del `.env`, sin tocar código para cambiarlos.
 
@@ -60,31 +60,31 @@ Toda la lógica de códigos de verificación (registro, recuperación, cambio de
 
 ## DEW — Desarrollo Web en Entorno Cliente · 7 min
 
-### ✅ Vue 3 + SFC + Composition API
+### Vue 3 + SFC + Composition API
 
 Todos los componentes usan `<script setup>` (Single File Components). La Composition API permite colocar lógica, template y estilos en un mismo fichero sin mezclar responsabilidades. `ref()` crea estado reactivo, `computed()` deriva valores que se actualizan solos, y `watch()` reacciona a cambios. El componente `StatsCard.vue` usa además `<script setup lang="ts">` con genéricos de `defineProps`, cubriendo el requisito de TypeScript.
 
 ---
 
-### ✅ Vue Router con lazy loading y guards
+### Vue Router con lazy loading y guards
 
 Las rutas admin usan carga dinámica (`() => import(...)`) para que el código de cada vista se descargue solo cuando el usuario navega a ella. El guard `router.beforeEach` intercepta cada navegación: comprueba `meta.requiresAuth` y `meta.roles`, y redirige a `/login` o al dashboard según corresponda. Las rutas públicas (carta del cliente, login, legal) no requieren token.
 
 ---
 
-### ✅ Pinia — estado global de autenticación
+### Pinia — estado global de autenticación
 
 El único store global es `useAuthStore`. Centraliza el token, el objeto usuario, los métodos `login` / `logout`, y los helpers `hasRole` / `hasAnyRole` que usan tanto el router como los componentes. El token se persiste en `sessionStorage` al login y se elimina al logout.
 
 ---
 
-### ✅ Props, Emits y composición de componentes
+### Props, Emits y composición de componentes
 
 Las vistas admin están descompuestas en modales extraídos como componentes independientes (`ProductModal`, `CatalogModal`, `RestaurantFormModal`, `RestaurantDeleteModal`…). Cada modal recibe datos via `defineProps` y comunica el resultado al padre via `defineEmits`. El flujo siempre es unidireccional: datos bajan por props, eventos suben por emits.
 
 ---
 
-### ✅ Composables propios
+### Composables propios
 
 | Composable | Función |
 |-----------|---------|
@@ -96,7 +96,7 @@ Los composables evitan duplicar lógica entre vistas y encapsulan el ciclo de vi
 
 ---
 
-### ✅ localStorage / sessionStorage
+### localStorage / sessionStorage
 
 El token se almacena en `sessionStorage` (se borra al cerrar el tab). `api.js` lo inyecta automáticamente en la cabecera `Authorization` de cada petición. Hay lógica de migración para sesiones antiguas que usaban `localStorage`.
 
@@ -104,13 +104,13 @@ El token se almacena en `sessionStorage` (se borra al cerrar el tab). `api.js` l
 
 ## DPL — Despliegue de Aplicaciones Web · 5 min
 
-### ✅ NGINX + Docker + stack completo
+### NGINX + Docker + stack completo
 
 El stack local se levanta con `docker compose up -d --build` e incluye cinco servicios: **nginx** (reverse proxy, SSL local), **php** (Laravel FPM), **postgres** (PostgreSQL 15 con volumen persistente), **frontend** (build de Vite) y **scheduler** (ejecuta `artisan schedule:run` cada 60 s). Cada imagen usa Alpine para minimizar tamaño.
 
 ---
 
-### ✅ Dockerfile.railway multistage (dos entornos)
+### Dockerfile.railway multistage (dos entornos)
 
 Para producción existe `Dockerfile.railway`, una imagen única que fusiona todo en dos fases:
 
@@ -123,7 +123,7 @@ Los dos entornos diferenciados son: **local** (Docker Compose, debug activo, col
 
 ---
 
-### ✅ CI/CD con GitHub Actions
+### CI/CD con GitHub Actions
 
 **Workflow 1 — Docs a GitHub Pages** (`.github/workflows/docs-deploy.yml`): cada push a `main` que modifique `docs/` compila VitePress y publica automáticamente en GitHub Pages. Sin intervención manual.
 
@@ -131,13 +131,13 @@ Los dos entornos diferenciados son: **local** (Docker Compose, debug activo, col
 
 ---
 
-### ✅ Control de versiones
+### Control de versiones
 
 Repositorio en GitHub con rama `main`. Todos los ficheros de infraestructura (Dockerfiles, workflows, render.yaml, config) están versionados junto al código. El despliegue en Render se dispara automáticamente en cada push.
 
 ---
 
-### ✅ Documentación desplegada (VitePress + GitHub Pages)
+### Documentación desplegada (VitePress + GitHub Pages)
 
 La documentación se genera con VitePress (`npm run docs:build`) y se publica en `https://santitorbra98-blip.github.io/scan2order-lite/`. La configuración en `docs/.vitepress/config.mjs` ajusta el `base` automáticamente según el nombre del repositorio, sin configuración manual de GitHub Pages.
 
@@ -145,7 +145,7 @@ La documentación se genera con VitePress (`npm run docs:build`) y se publica en
 
 ## DOR — Diseño de Interfaces Web · 3 min
 
-### ✅ Dos interfaces visuales diferenciadas
+### Dos interfaces visuales diferenciadas
 
 **Carta del cliente** (`/restaurant/:id`): interfaz minimalista orientada al móvil, sin autenticación, sin sidebar. El comensal escanea el QR y ve únicamente los catálogos, secciones, productos con foto, precio y alérgenos.
 
@@ -153,7 +153,7 @@ La documentación se genera con VitePress (`npm run docs:build`) y se publica en
 
 ---
 
-### ✅ Paleta de colores justificada
+### Paleta de colores justificada
 
 | Rol | Hex | Justificación |
 |-----|-----|--------------|
@@ -165,7 +165,7 @@ La documentación se genera con VitePress (`npm run docs:build`) y se publica en
 
 ---
 
-### ✅ Responsive sin framework CSS
+### Responsive sin framework CSS
 
 El diseño adapta el número de columnas sin media queries fijas, usando CSS Grid con `auto-fill` y `minmax`:
 
@@ -177,7 +177,7 @@ En móvil se reduce a una columna, en tablet a dos, en escritorio a tres o más.
 
 ---
 
-### ✅ Usabilidad
+### Usabilidad
 
 - **Feedback inmediato**: toast de confirmación tras cada acción (useToast, auto-cierre 2,5 s)
 - **Estados de carga**: botones deshabilitados con texto "Guardando…" durante peticiones
@@ -188,7 +188,7 @@ En móvil se reduce a una columna, en tablet a dos, en escritorio a tres o más.
 
 ## SSG — Sistemas de Gestión · 2 min
 
-### ✅ Gestión de usuarios, roles y permisos
+### Gestión de usuarios, roles y permisos
 
 El superadmin crea administradores desde `/admin/users`. Cada usuario tiene un único rol y el rol agrupa los permisos. La relación es:
 
@@ -201,7 +201,7 @@ Un admin solo accede a los restaurantes que le han sido asignados explícitament
 
 ---
 
-### ✅ Límites por cuenta
+### Límites por cuenta
 
 Para prevenir abuso de recursos, `config/security.php` define topes configurables sin tocar código:
 
@@ -216,13 +216,13 @@ El superadmin puede ajustar límites globales adicionales desde `/admin/settings
 
 ---
 
-### ✅ Auditoría de acciones
+### Auditoría de acciones
 
 Cada acción sensible queda en `audit_logs`: quién (`actor_user_id`), qué (`action`), sobre qué (`resource_type` / `resource_id`), desde dónde (`ip_address`, `user_agent`). El registro es asíncrono para no penalizar el tiempo de respuesta (ver DSW — Auditoría).
 
 ---
 
-### ✅ Flujo completo: del clic del usuario al dato en pantalla
+### Flujo completo: del clic del usuario al dato en pantalla
 
 ```
 Clic en "Mis restaurantes"
