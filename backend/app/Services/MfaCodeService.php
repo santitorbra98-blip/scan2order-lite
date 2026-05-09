@@ -7,6 +7,7 @@ use App\Models\EmailMfaCode;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class MfaCodeService
@@ -42,6 +43,12 @@ class MfaCodeService
                 purpose: $this->purposeLabel($purpose),
             ));
         } catch (\Throwable $e) {
+            Log::error('MfaCodeService: fallo al enviar email (sendToUser)', [
+                'purpose' => $purpose,
+                'mailer'  => config('mail.default'),
+                'host'    => config('mail.mailers.smtp.host'),
+                'error'   => $e->getMessage(),
+            ]);
             throw new \RuntimeException('No se pudo enviar el email. Por favor, inténtalo de nuevo más tarde.', 0, $e);
         }
     }
@@ -77,6 +84,12 @@ class MfaCodeService
                 purpose: $this->purposeLabel($purpose),
             ));
         } catch (\Throwable $e) {
+            Log::error('MfaCodeService: fallo al enviar email (sendToEmail)', [
+                'purpose' => $purpose,
+                'mailer'  => config('mail.default'),
+                'host'    => config('mail.mailers.smtp.host'),
+                'error'   => $e->getMessage(),
+            ]);
             throw new \RuntimeException('No se pudo enviar el email. Por favor, inténtalo de nuevo más tarde.', 0, $e);
         }
     }

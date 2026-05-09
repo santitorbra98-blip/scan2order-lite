@@ -155,6 +155,6 @@ class UserController extends Controller
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
-        return response()->json(Role::select('id', 'name')->orderBy('name')->get());
+        return response()->json(Role::select('id', 'name')->where('name', '!=', 'superadmin')->orderBy('name')->get());
     }
 }
