@@ -46,7 +46,6 @@ La documentacion completa esta en [docs](docs) y se publica en GitHub Pages:
 - [Despliegue Render](docs/deploy-render.md)
 - [Smoke Tests](docs/smoke-tests.md)
 - [Defensa del proyecto](docs/defensa.md)
-- [Guia para el profesor](docs/guia-profesor.md)
 
 ## Scripts utiles
 
