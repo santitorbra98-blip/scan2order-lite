@@ -253,27 +253,28 @@ onMounted(() => fetchMenu())
 
 /* ── Mobile ────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .menu-container { padding: 1rem; border-radius: 0; }
+  .menu-container { padding: 1rem; border-radius: 0; overflow-x: hidden; }
+  .menu-content { width: 100%; overflow-x: hidden; }
   .header { margin-bottom: 1.25rem; }
   .restaurant-title-row h1 { font-size: 1.4rem; }
   .filters { margin-bottom: 1.25rem; }
 
-  .menu-layout { grid-template-columns: 1fr; gap: 0; }
+  .menu-layout { grid-template-columns: 1fr; gap: 0; width: 100%; }
 
   /* Sections: horizontal scrollable pill bar */
-  .sections-nav { position: static; display: flex; flex-direction: column; }
+  .sections-nav { position: static; display: flex; flex-direction: column; min-width: 0; width: 100%; }
   .sections-nav h3 { font-size: 0.85rem; margin-bottom: 0.6rem; }
   .sections-nav > .nav-btn-wrapper {
     display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem;
-    scrollbar-width: none;
+    scrollbar-width: none; width: 100%; min-width: 0;
   }
   .sections-nav > .nav-btn-wrapper::-webkit-scrollbar { display: none; }
   .nav-btn {
-    display: inline-block; width: auto; white-space: nowrap;
+    display: inline-block; width: auto; white-space: nowrap; flex-shrink: 0;
     padding: 0.45rem 0.9rem; font-size: 0.82rem; margin-bottom: 0;
   }
 
-  .products-area { margin-top: 1rem; }
+  .products-area { margin-top: 1rem; min-width: 0; width: 100%; }
   .section-title-row h2 { font-size: 1.15rem; }
   .products-grid { grid-template-columns: 1fr; gap: 0.85rem; }
 
