@@ -41,10 +41,6 @@ La documentacion completa esta en [docs](docs) y se publica en GitHub Pages:
 - [Inicio](docs/index.md)
 - [Guia Rapida](docs/guia-rapida.md)
 - [Arquitectura](docs/arquitectura.md)
-- [Autenticacion y seguridad](docs/api-auth.md)
-- [Checklist de Produccion](docs/produccion-checklist.md)
-- [Despliegue Render](docs/deploy-render.md)
-- [Smoke Tests](docs/smoke-tests.md)
 - [Defensa del proyecto](docs/defensa.md)
 
 ## Scripts utiles
