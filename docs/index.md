@@ -38,12 +38,7 @@ curl -k https://localhost:8443/api/hello
 
 - [Guia Rapida](./guia-rapida)
 - [Arquitectura](./arquitectura)
-- [Autenticacion y seguridad](./api-auth)
-- [Checklist de Produccion](./produccion-checklist)
-- [Despliegue Render](./deploy-render)
-- [Smoke Tests](./smoke-tests)
 - [Defensa del proyecto](./defensa)
-- [Guia para el profesor](./guia-profesor)
 
 ## Scripts utiles
 
