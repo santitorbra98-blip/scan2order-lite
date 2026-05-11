@@ -1,55 +1,77 @@
 # Scan2Order Lite
 
-Aplicacion web para crear y gestionar cartas digitales de restaurantes.
+Aplicacion web para crear y gestionar cartas digitales de restaurantes mediante codigos QR.
 
-## Resumen rapido
+## Stack
 
-- Backend: Laravel 12 + Sanctum + PostgreSQL
-- Frontend: Vue 3 + Vite + Pinia
-- Infra local: Docker Compose
-- Despliegue recomendado: Render (plan gratuito)
-- Documentacion: VitePress publicada en GitHub Pages
+| Capa | Tecnologia |
+|------|-----------|
+| Backend | Laravel 12 · PHP 8.4 · Sanctum |
+| Base de datos | PostgreSQL |
+| Frontend | Vue 3 · Vite · Pinia |
+| Infra local | Docker Compose (Nginx + PHP-FPM) |
+| Despliegue | Render (render.yaml incluido) |
+| Docs | VitePress → GitHub Pages |
 
-## Estado actual
+## Funcionalidades principales
 
-- Arranque local validado.
-- Endpoints de salud operativos: /api/hello y /api/health.
-- Despliegue en Render preparado con [render.yaml](render.yaml).
-- Smoke test de produccion automatizado por GitHub Actions.
+- Registro con verificacion por email (MFA de 6 digitos)
+- Autenticacion con tokens Sanctum (expiracion configurable)
+- Gestion de restaurantes, catalogos, secciones y productos
+- Subida segura de imagenes (validacion por MIME, bloqueo de ejecucion PHP en uploads)
+- Exportacion de catalogos a PDF
+- Panel de administracion: gestion de usuarios, roles y permisos
+- Ajustes de correo configurables desde el panel (superadmin)
+- Recuperacion de contrasena con codigo temporal
+- API publica de solo lectura para visualizacion de menus (sin autenticacion)
 
 ## Inicio rapido local
 
 ```bash
 cp .env.example .env
 DB_PASSWORD=postgres docker compose up -d --build
-DB_PASSWORD=postgres docker compose exec -T php php artisan migrate --seed --force --no-interaction
+DB_PASSWORD=postgres docker compose exec php php artisan migrate --seed --force --no-interaction
 curl -k https://localhost:8443/api/hello
 ```
 
-## Documentacion completa
+## Documentacion
 
-La documentacion de evaluacion y operacion esta en [docs](docs):
+La documentacion completa esta en [docs](docs) y se publica en GitHub Pages:
 
-- [Paso a paso completo](docs/paso-a-paso-completo.md)
 - [Inicio](docs/index.md)
 - [Guia Rapida](docs/guia-rapida.md)
 - [Arquitectura](docs/arquitectura.md)
+- [Autenticacion y seguridad](docs/api-auth.md)
 - [Checklist de Produccion](docs/produccion-checklist.md)
 - [Despliegue Render](docs/deploy-render.md)
-- [Smoke Tests explicados](docs/smoke-tests.md)
-- [Guia para defensa del proyecto](docs/guia-profesor.md)
+- [Smoke Tests](docs/smoke-tests.md)
+- [Defensa del proyecto](docs/defensa.md)
+- [Guia para el profesor](docs/guia-profesor.md)
 
 ## Scripts utiles
 
 ```bash
-npm run docs:dev
-npm run docs:build
-npm run docs:preview
+# Documentacion
+npm run docs:dev        # servidor local VitePress
+npm run docs:build      # compilar docs
+npm run docs:preview    # previsualizar build
+
+# Tests
+npm test                # Playwright e2e
+
+# Smoke test de produccion
 npm run smoke:render
-npm test
 ```
 
-## CI/CD configurado
+## CI/CD
 
 - Publicacion de documentacion en Pages: [.github/workflows/docs-deploy.yml](.github/workflows/docs-deploy.yml)
 - Smoke test de produccion: [.github/workflows/render-smoke-test.yml](.github/workflows/render-smoke-test.yml)
+
+## Seguridad destacada
+
+- Tokens de salud (`HEALTH_CHECK_TOKEN`) protegen `/api/health` en produccion
+- CSP, HSTS, X-Frame-Options y Permissions-Policy en cabeceras Nginx
+- Token almacenado en `sessionStorage` (no localStorage)
+- Validaciones de longitud en todos los campos de entrada
+- Mensajes genericos ante errores de autenticacion para evitar enumeracion de usuarios
