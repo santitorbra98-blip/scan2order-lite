@@ -4,7 +4,7 @@ Criterios cubiertos y argumentación técnica por asignatura. El tiempo indicado
 
 ---
 
-## DSW — Desarrollo Web en Entorno Servidor · 8 min
+## DSW — Desarrollo Web en Entorno Servidor
 
 ### PHP + Laravel como backend de la API REST
 
@@ -58,7 +58,7 @@ Toda la lógica de códigos de verificación (registro, recuperación, cambio de
 
 ---
 
-## DEW — Desarrollo Web en Entorno Cliente · 7 min
+## DEW — Desarrollo Web en Entorno Cliente
 
 ### Vue 3 + SFC + Composition API
 
@@ -102,7 +102,7 @@ El token se almacena en `sessionStorage` (se borra al cerrar el tab). `api.js` l
 
 ---
 
-## DPL — Despliegue de Aplicaciones Web · 5 min
+## DPL — Despliegue de Aplicaciones Web
 
 ### NGINX + Docker + stack completo
 
@@ -143,7 +143,7 @@ La documentación se genera con VitePress (`npm run docs:build`) y se publica en
 
 ---
 
-## DOR — Diseño de Interfaces Web · 3 min
+## DOR — Diseño de Interfaces Web
 
 ### Dos interfaces visuales diferenciadas
 
@@ -186,7 +186,7 @@ En móvil se reduce a una columna, en tablet a dos, en escritorio a tres o más.
 
 ---
 
-## SSG — Sistemas de Gestión · 2 min
+## SSG — Sistemas de Gestión
 
 ### Gestión de usuarios, roles y permisos
 
@@ -390,7 +390,7 @@ public function sendToUser(User $user, string $purpose, ...): void
 
 ---
 
-## DEW — Desarrollo Web en Entorno Cliente · 7 min
+## DEW — Desarrollo Web en Entorno Cliente
 
 ### Vue 3 Composition API y SFC
 
@@ -493,7 +493,7 @@ location / {
 
 ---
 
-## DPL — Despliegue de Aplicaciones Web · 5 min
+## DPL — Despliegue de Aplicaciones Web
 
 ### Docker Compose local
 
@@ -585,7 +585,7 @@ Si alguno falla, GitHub Actions marca el workflow en rojo y notifica por email.
 
 ---
 
-## DOR — Diseño de Interfaces Web · 3 min
+## DOR — Diseño de Interfaces Web
 
 ### Separación visual admin / cliente
 
@@ -629,7 +629,7 @@ En móvil (< 380px disponibles) se reduce a una columna; en tablet a dos; en esc
 
 ---
 
-## SSG — Sistemas de Gestión · 2 min
+## SSG — Sistemas de Gestión
 
 ### Gestión de usuarios y roles
 
