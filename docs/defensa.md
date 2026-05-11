@@ -110,6 +110,37 @@ El stack local se levanta con `docker compose up -d --build` e incluye cinco ser
 
 ---
 
+### Conexión de puertos entre servicios
+
+El tráfico entra siempre por Nginx y se distribuye según la URL:
+
+| Puerto (host → contenedor) | Quién lo usa | Qué hace |
+|---|---|---|
+| `:8080 → :80` | Nginx | Recibe HTTP y redirige a HTTPS |
+| `:8443 → :443` | Nginx | Entrada real de la aplicación |
+| `:5433 → :5432` | PostgreSQL | Acceso externo desde herramientas de BD (solo desarrollo) |
+
+Puertos solo internos (entre contenedores, no accesibles desde fuera):
+
+| Puerto interno | Entre quién | Qué hace |
+|---|---|---|
+| `php:9000` | Nginx → PHP-FPM | Nginx reenvía peticiones `/api/*` a Laravel via FastCGI |
+| `postgres:5432` | PHP → PostgreSQL | Laravel guarda y lee datos |
+
+**Flujo de una petición:**
+
+```
+Navegador
+  → :8443 (HTTPS) → Nginx
+       ├── /  o  /assets/   → sirve Vue compilado (volumen estático)
+       ├── /api/*            → FastCGI php:9000 → Laravel → postgres:5432
+       └── /storage/*        → sirve archivos subidos (volumen compartido)
+```
+
+El contenedor **frontend** solo compila el código Vue al arrancar y llena un volumen compartido; Nginx lee ese volumen en cada petición web. El contenedor **scheduler** corre en paralelo y no expone puertos.
+
+---
+
 ### Dockerfile.railway multistage (dos entornos)
 
 Para producción existe `Dockerfile.railway`, una imagen única que fusiona todo en dos fases:
