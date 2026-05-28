@@ -49,6 +49,25 @@ services:
         value: file
       - key: FILESYSTEM_DISK
         value: local
+      - key: IMAGE_FILESYSTEM_DISK
+        # Set to 's3' once you configure AWS_* / R2 credentials below.
+        # Until then images are stored on ephemeral local disk and will be
+        # lost on every container restart / redeploy (Render free plan).
+        value: public
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        sync: false
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_URL
+        # Optional: CDN or public bucket URL (e.g. https://pub-xxx.r2.dev for R2)
+        sync: false
+      - key: AWS_ENDPOINT
+        # Required for Cloudflare R2: https://<accountId>.r2.cloudflarestorage.com
+        sync: false
       - key: QUEUE_CONNECTION
         value: sync
       - key: SESSION_DRIVER

@@ -183,7 +183,7 @@ function formatDate(d) {
 }
 
 function getImageUrl(r) {
-  return r?.image ? `/storage/${r.image}` : ''
+  return r?.image || ''
 }
 
 async function fetchRestaurants(page = 1) {
@@ -229,7 +229,7 @@ function openEditModal(restaurant) {
 
 function closeFormModal() { showFormModal.value = false; formInitial.value = null }
 
-async function saveRestaurant({ form, imageFile }) {
+async function saveRestaurant({ form, imageFile, removeImage }) {
   isSaving.value = true
   formError.value = null
 
@@ -243,6 +243,8 @@ async function saveRestaurant({ form, imageFile }) {
 
     if (imageFile) {
       formData.append('image', imageFile)
+    } else if (removeImage) {
+      formData.append('remove_image', '1')
     }
 
     if (isEditing.value) {

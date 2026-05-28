@@ -12,15 +12,21 @@ use Illuminate\Support\Str;
 
 class RestaurantService
 {
+    private function imageDisk(): string
+    {
+        return config('filesystems.image_disk', 'public');
+    }
+
     public function storeRestaurantImage($image): string
     {
-        Storage::disk('public')->makeDirectory('restaurants');
+        $disk = $this->imageDisk();
+        Storage::disk($disk)->makeDirectory('restaurants');
         // Use the MIME-detected extension (not the client-supplied one) to prevent
         // a polyglot file (e.g. GIF+PHP code named evil.php) from being stored with
         // a .php extension and later executed by PHP-FPM.
         $ext = $image->guessExtension() ?: 'bin';
         $imageName = Str::uuid()->toString() . '.' . $ext;
-        $result = Storage::disk('public')->putFileAs('restaurants', $image, $imageName);
+        $result = Storage::disk($disk)->putFileAs('restaurants', $image, $imageName, ['visibility' => 'public']);
         if ($result === false) {
             throw new \RuntimeException('No se pudo guardar la imagen del restaurante.');
         }
@@ -30,7 +36,7 @@ class RestaurantService
     public function deleteStoredRestaurantImage(?string $imagePath): void
     {
         if (!empty($imagePath)) {
-            Storage::disk('public')->delete($imagePath);
+            Storage::disk($this->imageDisk())->delete($imagePath);
         }
     }
 
@@ -43,7 +49,7 @@ class RestaurantService
     {
         // Delete all product images belonging to this restaurant
         $restaurant->products()->whereNotNull('image')->pluck('image')->each(
-            fn (string $path) => Storage::disk('public')->delete($path)
+            fn (string $path) => Storage::disk($this->imageDisk())->delete($path)
         );
 
         // Delete the restaurant cover image

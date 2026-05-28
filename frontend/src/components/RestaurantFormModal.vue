@@ -83,7 +83,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'save'])
 
-const { inputRef: fileInput, file: imageFile, preview: imagePreview, reset: resetImage, setPreview, handleChange } = useImageField()
+const { inputRef: fileInput, file: imageFile, preview: imagePreview, remove: removeFlag, reset: resetImage, setPreview, handleChange, removeSelection } = useImageField()
 
 const form = reactive({
   id: null, name: '', address: '', phone: '', active: true, schedule: props.defaultSchedule(),
@@ -114,11 +114,11 @@ async function onFileChange(event) {
 }
 
 function removeImage() {
-  resetImage()
+  removeSelection()
 }
 
 function handleSubmit() {
-  emit('save', { form: { ...form }, imageFile: imageFile.value })
+  emit('save', { form: { ...form }, imageFile: imageFile.value, removeImage: removeFlag.value })
 }
 </script>
 

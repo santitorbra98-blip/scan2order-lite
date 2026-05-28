@@ -5,6 +5,7 @@
     <div class="header">
       <h1>👥 Gestión de Usuarios</h1>
       <div class="header-actions">
+        <button class="btn-ranking" @click="openRankingModal">📊 Ver ranking de locales</button>
         <router-link to="/admin/settings" class="btn-settings">⚙️ Configuración</router-link>
         <button class="btn-create" @click="openCreateModal">+ Crear Usuario</button>
       </div>
@@ -178,12 +179,65 @@
         </div>
       </div>
     </div>
+
+    <!-- Ranking Modal -->
+    <div v-if="showRankingModal" class="modal-overlay" @click.self="closeRankingModal">
+      <div class="modal modal-ranking">
+        <div class="modal-header">
+          <h2>📊 Ranking de locales</h2>
+          <button @click="closeRankingModal" class="btn-close">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="ranking-controls">
+            <div class="period-tabs">
+              <button
+                v-for="opt in periodOptions"
+                :key="opt.value"
+                class="period-tab"
+                :class="{ active: rankingPeriod === opt.value }"
+                @click="setRankingPeriod(opt.value)"
+              >{{ opt.label }}</button>
+            </div>
+          </div>
+
+          <div v-if="rankingLoading" class="ranking-loading">Cargando ranking...</div>
+          <div v-else-if="rankingError" class="ranking-error">{{ rankingError }}</div>
+          <div v-else-if="ranking.length === 0" class="ranking-empty">
+            <p>Sin datos para este periodo. Comienza a registrar visitas desde el menú público.</p>
+          </div>
+          <div v-else class="ranking-table-wrap">
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Restaurante</th>
+                  <th>Visitas totales</th>
+                  <th>Visitas únicas</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, index) in ranking" :key="item.restaurant_id">
+                  <td class="rank-pos">
+                    <span class="rank-medal" v-if="index < 3">{{ ['🥇','🥈','🥉'][index] }}</span>
+                    <span v-else>{{ index + 1 }}</span>
+                  </td>
+                  <td class="rank-name">{{ item.restaurant_name }}</td>
+                  <td class="rank-total">{{ item.total_visits.toLocaleString('es-ES') }}</td>
+                  <td class="rank-unique">{{ item.unique_visits.toLocaleString('es-ES') }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import { api } from '../../services/api'
+import { analyticsService } from '../../services/analyticsService'
 import { useAuthStore } from '../../stores/auth'
 
 const auth = useAuthStore()
@@ -374,6 +428,46 @@ onMounted(async () => {
   await Promise.all([fetchRoles(), fetchDefaults()])
   await fetchUsers()
 })
+
+// ─── Ranking ─────────────────────────────────────────────────────────────────
+const showRankingModal = ref(false)
+const ranking = ref([])
+const rankingLoading = ref(false)
+const rankingError = ref(null)
+const rankingPeriod = ref('all')
+
+const periodOptions = [
+  { value: 'all', label: 'Total' },
+  { value: '7d',  label: 'Últimos 7 días' },
+  { value: '30d', label: 'Últimos 30 días' },
+]
+
+async function fetchRanking() {
+  rankingLoading.value = true
+  rankingError.value = null
+  try {
+    const data = await analyticsService.getRanking(rankingPeriod.value)
+    ranking.value = Array.isArray(data) ? data : []
+  } catch (err) {
+    rankingError.value = err?.message || 'Error al cargar el ranking'
+  } finally {
+    rankingLoading.value = false
+  }
+}
+
+function openRankingModal() {
+  showRankingModal.value = true
+  fetchRanking()
+}
+
+function closeRankingModal() {
+  showRankingModal.value = false
+}
+
+function setRankingPeriod(period) {
+  rankingPeriod.value = period
+  fetchRanking()
+}
 </script>
 
 <style scoped>
@@ -551,4 +645,50 @@ onMounted(async () => {
 @media (max-width: 480px) {
   .limits-grid { grid-template-columns: 1fr; }
 }
+
+/* Ranking button */
+.btn-ranking {
+  padding: 0.75rem 1.25rem; background: white; color: #667eea;
+  border: 1.5px solid #667eea; border-radius: 10px; font-weight: 700;
+  cursor: pointer; font-size: 0.95rem; transition: all 0.2s;
+}
+.btn-ranking:hover { background: #667eea; color: white; }
+
+/* Ranking modal */
+.modal-ranking { max-width: 680px; }
+
+.ranking-controls { margin-bottom: 1.25rem; }
+
+.period-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.period-tab {
+  padding: 0.45rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 50px;
+  background: white; color: #64748b; font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.period-tab:hover { border-color: #667eea; color: #667eea; }
+.period-tab.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: transparent; }
+
+.ranking-loading, .ranking-error, .ranking-empty {
+  text-align: center; padding: 2.5rem; color: #64748b; font-size: 0.95rem;
+}
+.ranking-error { color: #dc2626; background: #fef2f2; border-radius: 8px; }
+
+.ranking-table-wrap { overflow-x: auto; }
+.ranking-table {
+  width: 100%; border-collapse: collapse; font-size: 0.92rem;
+}
+.ranking-table th {
+  background: #f8fafc; padding: 0.7rem 1rem; text-align: left;
+  font-size: 0.82rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;
+  border-bottom: 2px solid #e2e8f0;
+}
+.ranking-table td {
+  padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; color: #334155;
+}
+.ranking-table tr:hover td { background: #f8fafc; }
+.rank-pos { width: 48px; text-align: center; font-size: 1.1rem; }
+.rank-medal { font-size: 1.25rem; }
+.rank-name { font-weight: 600; }
+.rank-total { font-weight: 700; color: #667eea; }
+.rank-unique { color: #64748b; }
 </style>

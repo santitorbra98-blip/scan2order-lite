@@ -9,8 +9,7 @@
     "test:report": "playwright show-report e2e/report",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs",
-    "smoke:render": "node scripts/smoke-render.mjs"
+    "docs:preview": "vitepress preview docs"
   },
   "keywords": [],
   "author": "",

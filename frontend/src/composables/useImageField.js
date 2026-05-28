@@ -63,7 +63,7 @@ export function useImageField() {
 
     const reader = new FileReader()
     reader.onload = (loadEvent) => { preview.value = loadEvent?.target?.result || null }
-    reader.readAsDataURL(selectedFile)
+    reader.readAsDataURL(processedFile)
 
     return { ok: true, error: null }
   }

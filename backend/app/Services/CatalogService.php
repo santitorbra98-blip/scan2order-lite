@@ -14,16 +14,22 @@ use Illuminate\Support\Str;
 
 class CatalogService
 {
+    private function imageDisk(): string
+    {
+        return config('filesystems.image_disk', 'public');
+    }
+
     public function storeProductImage($image): string
     {
-        Storage::disk('public')->makeDirectory('products');
+        $disk = $this->imageDisk();
+        Storage::disk($disk)->makeDirectory('products');
 
         // Use the MIME-detected extension (not the client-supplied one) to prevent
         // a polyglot file (e.g. GIF+PHP code named evil.php) from being stored with
         // a .php extension and later executed by PHP-FPM.
         $ext = $image->guessExtension() ?: 'bin';
         $imageName = Str::uuid()->toString() . '.' . $ext;
-        $storedPath = Storage::disk('public')->putFileAs('products', $image, $imageName);
+        $storedPath = Storage::disk($disk)->putFileAs('products', $image, $imageName, ['visibility' => 'public']);
 
         if ($storedPath === false) {
             throw new \RuntimeException('No se pudo guardar la imagen del producto');
@@ -36,7 +42,7 @@ class CatalogService
     {
         foreach ($products as $product) {
             if (!empty($product->image)) {
-                Storage::disk('public')->delete($product->image);
+                Storage::disk($this->imageDisk())->delete($product->image);
             }
         }
     }
@@ -127,13 +133,13 @@ class CatalogService
     public function updateProduct(Product $product, array $data, $imageFile = null, bool $removeImage = false): Product
     {
         if ($removeImage && $product->image) {
-            Storage::disk('public')->delete($product->image);
+            Storage::disk($this->imageDisk())->delete($product->image);
             $data['image'] = null;
         }
 
         if ($imageFile) {
             if ($product->image) {
-                Storage::disk('public')->delete($product->image);
+                Storage::disk($this->imageDisk())->delete($product->image);
             }
             $data['image'] = $this->storeProductImage($imageFile);
         }

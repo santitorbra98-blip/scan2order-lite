@@ -58,6 +58,53 @@
 
     <div class="main-content">
       <div class="content-wrapper">
+
+        <!-- Top 5 most visited -->
+        <div class="top-section">
+          <div class="top-section-header">
+            <div>
+              <h2 class="section-title">🏆 Locales más visitados</h2>
+              <p class="section-subtitle">Los 5 restaurantes con más visitas</p>
+            </div>
+            <div class="top-period-tabs">
+              <button
+                v-for="opt in topPeriodOptions"
+                :key="opt.value"
+                class="top-period-tab"
+                :class="{ active: topPeriod === opt.value }"
+                @click="setTopPeriod(opt.value)"
+              >{{ opt.label }}</button>
+            </div>
+          </div>
+
+          <div v-if="topLoading" class="top-loading">
+            <div class="loader-spinner"></div>
+          </div>
+          <div v-else-if="topError" class="top-error">No se pudo cargar el ranking.</div>
+          <div v-else-if="topRestaurants.length === 0" class="top-empty">
+            Aún no hay datos de visitas. ¡Sé el primero en explorar!
+          </div>
+          <div v-else class="top-list">
+            <div
+              v-for="(item, index) in topRestaurants"
+              :key="item.restaurant_id"
+              class="top-item"
+            >
+              <div class="top-rank">
+                <span v-if="index < 3" class="top-medal">{{ ['🥇','🥈','🥉'][index] }}</span>
+                <span v-else class="top-num">{{ index + 1 }}</span>
+              </div>
+              <div class="top-info">
+                <span class="top-name">{{ item.restaurant_name }}</span>
+              </div>
+              <div class="top-stats">
+                <span class="top-stat" title="Visitas totales">👁 {{ item.total_visits.toLocaleString('es-ES') }}</span>
+                <span class="top-stat top-stat-unique" title="Visitas únicas">👤 {{ item.unique_visits.toLocaleString('es-ES') }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="section-header">
           <h2 class="section-title">Restaurantes</h2>
           <p class="section-subtitle">Consulta la carta de estos establecimientos</p>
@@ -151,6 +198,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { analyticsService } from '../services/analyticsService'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -229,7 +277,40 @@ function viewRestaurant(restaurant) {
   router.push({ name: 'RestaurantMenu', params: { id: restaurant.id } })
 }
 
-onMounted(() => fetchRestaurants())
+onMounted(() => {
+  fetchRestaurants()
+  fetchTopRestaurants()
+})
+
+// ─── Top 5 most visited ──────────────────────────────────────────────────────
+const topRestaurants = ref([])
+const topLoading = ref(false)
+const topError = ref(false)
+const topPeriod = ref('7d')
+
+const topPeriodOptions = [
+  { value: '7d',  label: '7 días' },
+  { value: '30d', label: '30 días' },
+  { value: 'all', label: 'Total' },
+]
+
+async function fetchTopRestaurants() {
+  topLoading.value = true
+  topError.value = false
+  try {
+    const data = await analyticsService.getTopRestaurants(topPeriod.value)
+    topRestaurants.value = Array.isArray(data) ? data : []
+  } catch {
+    topError.value = true
+  } finally {
+    topLoading.value = false
+  }
+}
+
+function setTopPeriod(period) {
+  topPeriod.value = period
+  fetchTopRestaurants()
+}
 </script>
 
 <style scoped>
@@ -322,6 +403,43 @@ onMounted(() => fetchRestaurants())
 
 .main-content { background: #f8fafc; padding: 3rem 1.5rem; }
 .content-wrapper { max-width: 1200px; margin: 0 auto; }
+
+/* ─── Top 5 section ─────────────────────────────────────────────────────── */
+.top-section {
+  background: white; border-radius: 16px; padding: 1.75rem 2rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 2.5rem;
+}
+.top-section-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;
+}
+.top-section-header .section-title { font-size: 1.4rem; margin: 0; }
+.top-section-header .section-subtitle { margin: 0.25rem 0 0; font-size: 0.9rem; }
+.top-period-tabs { display: flex; gap: 0.4rem; flex-shrink: 0; }
+.top-period-tab {
+  padding: 0.4rem 0.9rem; border: 1.5px solid #e2e8f0; border-radius: 50px;
+  background: white; color: #64748b; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.top-period-tab:hover { border-color: #667eea; color: #667eea; }
+.top-period-tab.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: transparent; }
+.top-loading { display: flex; justify-content: center; padding: 1.5rem; }
+.top-error, .top-empty { text-align: center; padding: 1.5rem; color: #94a3b8; font-size: 0.9rem; }
+.top-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.top-item {
+  display: flex; align-items: center; gap: 1rem; padding: 0.7rem 0.9rem;
+  border: 1px solid #f1f5f9; border-radius: 10px; transition: background 0.15s;
+}
+.top-item:hover { background: #f8fafc; }
+.top-rank { width: 36px; text-align: center; flex-shrink: 0; }
+.top-medal { font-size: 1.3rem; }
+.top-num { font-size: 1rem; font-weight: 700; color: #94a3b8; }
+.top-info { flex: 1; min-width: 0; }
+.top-name { font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.top-stats { display: flex; gap: 0.75rem; flex-shrink: 0; }
+.top-stat { font-size: 0.85rem; color: #475569; font-weight: 600; white-space: nowrap; }
+.top-stat-unique { color: #94a3b8; }
+/* ────────────────────────────────────────────────────────────────────────── */
 
 .section-header { text-align: center; margin-bottom: 2rem; }
 .section-title { font-size: 1.8rem; color: #1e293b; margin: 0; }

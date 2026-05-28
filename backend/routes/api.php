@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SetupController;
+use App\Http\Controllers\AnalyticsController;
 use Illuminate\Routing\Middleware\ThrottleRequests;
 
 /*
@@ -83,6 +84,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'deleteAccount']);
 });
 
+// Analytics - public endpoints
+Route::post('/analytics/event', [AnalyticsController::class, 'trackEvent'])->middleware('throttle:120,1');
+Route::get('/analytics/top-restaurants', [AnalyticsController::class, 'topRestaurants']);
+
 // Public API endpoints (viewing menu)
 Route::get('/restaurants', [RestaurantController::class, 'index']);
 Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->whereNumber('restaurant');
@@ -102,6 +107,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/users/{user}', [UserController::class, 'update']);
     Route::delete('/users/{user}', [UserController::class, 'destroy']);
     Route::get('/roles', [UserController::class, 'roles']);
+
+    // Analytics (superadmin only)
+    Route::get('/analytics/ranking', [AnalyticsController::class, 'ranking']);
 
     // Settings (superadmin only)
     Route::get('/settings', [SettingController::class, 'index']);
