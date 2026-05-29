@@ -104,7 +104,6 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getAllergenMeta } from '../../constants/allergens'
 import { DIET_TYPE_OPTIONS } from '../../constants/dietTypes'
-import { analyticsService } from '../../services/analyticsService'
 
 const route = useRoute()
 const isLoading = ref(false)
@@ -203,10 +202,6 @@ async function fetchMenu() {
 
 onMounted(() => {
   fetchMenu()
-  const restaurantId = parseInt(route.params.id, 10)
-  if (restaurantId) {
-    analyticsService.trackEvent(restaurantId, 'menu_view')
-  }
 })
 </script>
 

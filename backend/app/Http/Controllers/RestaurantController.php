@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\BusinessException;
 use App\Http\Resources\RestaurantResource;
+use App\Models\AnalyticsEvent;
 use App\Models\Product;
 use App\Models\Restaurant;
 use App\Services\RestaurantService;
@@ -125,6 +126,26 @@ class RestaurantController extends Controller
 
         if (!$user && !$restaurant->active) {
             return response()->json(['message' => 'Restaurante no disponible'], 404);
+        }
+
+        // Track every public menu view. Use IP+UA hash as session proxy so the
+        // same browser tallies as one unique visit while total_visits counts each hit.
+        if (!$user) {
+            $req = request();
+            $sessionProxy = md5(($req->ip() ?? '') . '|' . ($req->userAgent() ?? ''));
+            AnalyticsEvent::create([
+                'restaurant_id' => $restaurant->id,
+                'event_type'    => 'menu_view',
+                'session_id'    => $sessionProxy,
+                'ip_address'    => $req->ip(),
+                'user_agent'    => mb_substr($req->userAgent() ?? '', 0, 500),
+                'created_at'    => now(),
+            ]);
+            // Bust cached rankings so the next read reflects this visit.
+            foreach (['all', '7d', '30d'] as $p) {
+                Cache::forget("analytics.ranking.{$p}");
+                Cache::forget("analytics.top.{$p}");
+            }
         }
 
         return new RestaurantResource($this->loadRestaurantWithRelations($restaurant));
