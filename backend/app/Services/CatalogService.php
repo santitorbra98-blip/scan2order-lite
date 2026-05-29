@@ -22,14 +22,14 @@ class CatalogService
     public function storeProductImage($image): string
     {
         $disk = $this->imageDisk();
-        Storage::disk($disk)->makeDirectory('products');
-
         // Use the MIME-detected extension (not the client-supplied one) to prevent
         // a polyglot file (e.g. GIF+PHP code named evil.php) from being stored with
         // a .php extension and later executed by PHP-FPM.
         $ext = $image->guessExtension() ?: 'bin';
         $imageName = Str::uuid()->toString() . '.' . $ext;
-        $storedPath = Storage::disk($disk)->putFileAs('products', $image, $imageName, ['visibility' => 'public']);
+        // Do NOT pass ['visibility' => 'public'] — R2 rejects per-object ACL headers.
+        // Public access is controlled at bucket level in Cloudflare dashboard.
+        $storedPath = Storage::disk($disk)->putFileAs('products', $image, $imageName);
 
         if ($storedPath === false) {
             throw new \RuntimeException('No se pudo guardar la imagen del producto');

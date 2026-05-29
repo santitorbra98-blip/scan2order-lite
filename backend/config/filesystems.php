@@ -55,11 +55,14 @@ return [
             'secret'                  => env('AWS_SECRET_ACCESS_KEY'),
             'region'                  => env('AWS_DEFAULT_REGION', 'auto'),
             'bucket'                  => env('AWS_BUCKET'),
-            'url'                     => env('AWS_URL'),           // CDN or custom endpoint URL
-            'endpoint'                => env('AWS_ENDPOINT'),      // for R2: https://<account>.r2.cloudflarestorage.com
-            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw'                   => false,
-            'visibility'              => 'public',
+            'url'                     => env('AWS_URL'),      // Public bucket URL (e.g. https://pub-xxx.r2.dev)
+            'endpoint'                => env('AWS_ENDPOINT'), // R2: https://<account>.r2.cloudflarestorage.com
+            // R2 does not support per-object ACLs by default; bucket-level public
+            // access is set in the Cloudflare dashboard instead.
+            // Do NOT set 'visibility' => 'public' here — Flysystem would send
+            // x-amz-acl: public-read which R2 rejects with NotImplemented.
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', true),
+            'throw'                   => true,
         ],
 
     ],

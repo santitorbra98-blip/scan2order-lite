@@ -20,13 +20,14 @@ class RestaurantService
     public function storeRestaurantImage($image): string
     {
         $disk = $this->imageDisk();
-        Storage::disk($disk)->makeDirectory('restaurants');
         // Use the MIME-detected extension (not the client-supplied one) to prevent
         // a polyglot file (e.g. GIF+PHP code named evil.php) from being stored with
         // a .php extension and later executed by PHP-FPM.
         $ext = $image->guessExtension() ?: 'bin';
         $imageName = Str::uuid()->toString() . '.' . $ext;
-        $result = Storage::disk($disk)->putFileAs('restaurants', $image, $imageName, ['visibility' => 'public']);
+        // Do NOT pass ['visibility' => 'public'] — R2 rejects per-object ACL headers.
+        // Public access is controlled at bucket level in Cloudflare dashboard.
+        $result = Storage::disk($disk)->putFileAs('restaurants', $image, $imageName);
         if ($result === false) {
             throw new \RuntimeException('No se pudo guardar la imagen del restaurante.');
         }
