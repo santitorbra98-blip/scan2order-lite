@@ -37,6 +37,7 @@
         <button class="btn-export-pdf" :disabled="isExportingPdf" @click="exportMenuPdf">
           {{ isExportingPdf ? 'Generando PDF...' : '⬇️ Exportar PDF' }}
         </button>
+        <button class="btn-import-json" @click="showImportJsonModal = true">📥 Importar JSON</button>
         <button class="btn-print-qr" @click="showQrModal = true">📱 Generar QR</button>
       </div>
 
@@ -145,6 +146,14 @@
 
     <!-- QR Modal -->
     <QrPrintModal v-if="showQrModal" :restaurant-id="selectedRestaurantId" :restaurant-name="selectedRestaurantName" @close="showQrModal = false" />
+
+    <!-- Import JSON Modal -->
+    <ImportJsonModal
+      v-if="showImportJsonModal"
+      :restaurant-id="selectedRestaurantId"
+      @close="showImportJsonModal = false"
+      @import="importFromJson"
+    />
   </div>
 </template>
 
@@ -159,6 +168,7 @@ import QrPrintModal from '../../components/QrPrintModal.vue'
 import CatalogModal from '../../components/CatalogModal.vue'
 import SectionModal from '../../components/SectionModal.vue'
 import ProductModal from '../../components/ProductModal.vue'
+import ImportJsonModal from '../../components/ImportJsonModal.vue'
 
 const { toast, showToast } = useToast()
 
@@ -189,6 +199,10 @@ const productCatalog = ref(null)
 const productSection = ref(null)
 const isSavingProduct = ref(false)
 const productFormError = ref(null)
+
+// Import JSON modal
+const showImportJsonModal = ref(false)
+const isImportingJson = ref(false)
 
 const filteredCatalogs = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
@@ -347,6 +361,20 @@ async function deleteProduct(catalog, section, product) {
   } catch (err) { showToast(err.message || 'Error', 'error') }
 }
 
+async function importFromJson(jsonData) {
+  isImportingJson.value = true
+  try {
+    await catalogService.importJson(selectedRestaurantId.value, jsonData)
+    showToast('Carta importada correctamente')
+    showImportJsonModal.value = false
+    await fetchCatalogs()
+  } catch (err) {
+    showToast(err?.data?.message || err.message || 'Error al importar', 'error')
+  } finally {
+    isImportingJson.value = false
+  }
+}
+
 async function exportMenuPdf() {
   isExportingPdf.value = true
   try {
@@ -403,9 +431,10 @@ onMounted(() => fetchRestaurantsStats())
 .tools-row { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
 .search-input { flex: 1; min-width: 200px; padding: 0.6rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; }
 .search-input:focus { border-color: #667eea; outline: none; }
-.btn-clear-search, .btn-export-pdf, .btn-print-qr { padding: 0.6rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+.btn-clear-search, .btn-export-pdf, .btn-print-qr, .btn-import-json { padding: 0.6rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
 .btn-export-pdf { border-color: #667eea; color: #667eea; }
 .btn-print-qr { border-color: #667eea; color: #667eea; }
+.btn-import-json { border-color: #10b981; color: #10b981; }
 
 .catalogs-list { display: flex; flex-direction: column; gap: 1.5rem; }
 

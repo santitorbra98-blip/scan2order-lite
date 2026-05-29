@@ -119,6 +119,47 @@ class CatalogController extends Controller
         return $this->catalogService->exportCatalogPdf($restaurant);
     }
 
+    public function importJson(Request $request, $restaurantId)
+    {
+        $user = Auth::user();
+        if (!$user || !$user->hasPermission('manage_products')) {
+            return response()->json(['message' => 'No autorizado para gestionar el menú'], 403);
+        }
+
+        $restaurant = $this->authorizeRestaurant($restaurantId);
+
+        // Accept either an uploaded .json file OR a raw JSON body
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            if ($file->getClientOriginalExtension() !== 'json' && $file->getMimeType() !== 'application/json') {
+                return response()->json(['message' => 'El archivo debe ser un JSON válido'], 422);
+            }
+            $json = file_get_contents($file->getRealPath());
+        } else {
+            $json = $request->getContent();
+        }
+
+        $data = json_decode($json, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+            return response()->json(['message' => 'JSON inválido: ' . json_last_error_msg()], 422);
+        }
+
+        if (empty($data['name'])) {
+            return response()->json(['message' => 'El campo "name" del catálogo es obligatorio'], 422);
+        }
+
+        try {
+            $catalog = $this->catalogService->importFromJson($restaurant, $data, $user);
+        } catch (BusinessException $e) {
+            return response()->json($e->toResponseArray(), $e->getStatusCode());
+        }
+
+        Cache::forget(CacheKeys::restaurantCatalogs((int) $restaurantId));
+
+        return (new CatalogResource($catalog))->response()->setStatusCode(201);
+    }
+
     public function storeCatalog(StoreCatalogRequest $request, $restaurantId)
     {
         $user = Auth::user();

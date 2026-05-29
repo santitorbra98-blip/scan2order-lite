@@ -211,4 +211,76 @@ class CatalogService
             ];
         })->all();
     }
+
+    /**
+     * Import a full catalog (with sections and products) from a decoded JSON array.
+     * No images are imported — products are created without images.
+     */
+    public function importFromJson(Restaurant $restaurant, array $data, ?User $admin = null): Catalog
+    {
+        // Respect catalog limit for admin users
+        if ($admin && $admin->hasRole('admin') && !$admin->hasRole('superadmin')) {
+            $limit = $admin->max_catalogs;
+            if ($limit !== null) {
+                $managedIds = $admin->managedRestaurantIds();
+                $current = Catalog::whereIn('restaurant_id', $managedIds)->count();
+                if ($current >= $limit) {
+                    throw new BusinessException(
+                        "Has alcanzado el límite de {$limit} catálogo(s) permitido(s) para tu cuenta.",
+                        403
+                    );
+                }
+            }
+        }
+
+        $catalog = $restaurant->catalogs()->create([
+            'name'        => $data['name'],
+            'description' => $data['description'] ?? null,
+            'active'      => $data['active'] ?? true,
+            'order'       => $data['order'] ?? 0,
+        ]);
+
+        foreach ($data['sections'] ?? [] as $sectionData) {
+            $section = $catalog->sections()->create([
+                'name'        => $sectionData['name'],
+                'description' => $sectionData['description'] ?? null,
+                'active'      => $sectionData['active'] ?? true,
+                'order'       => $sectionData['order'] ?? 0,
+            ]);
+
+            // Respect product limit for admin users
+            if ($admin && $admin->hasRole('admin') && !$admin->hasRole('superadmin')) {
+                $productLimit = $admin->max_products;
+                if ($productLimit !== null) {
+                    $managedIds = $admin->managedRestaurantIds();
+                    $current = Product::whereIn('restaurant_id', $managedIds)->count();
+                    $incoming = count($sectionData['products'] ?? []);
+                    if (($current + $incoming) > $productLimit) {
+                        throw new BusinessException(
+                            "Importación cancelada: se superaría el límite de {$productLimit} producto(s) permitido(s).",
+                            403
+                        );
+                    }
+                }
+            }
+
+            foreach ($sectionData['products'] ?? [] as $productData) {
+                $section->products()->create([
+                    'restaurant_id' => $restaurant->id,
+                    'name'          => $productData['name'],
+                    'description'   => $productData['description'] ?? null,
+                    'price'         => (float) ($productData['price'] ?? 0),
+                    'active'        => $productData['active'] ?? true,
+                    'is_new'        => $productData['is_new'] ?? false,
+                    'allergens'     => $productData['allergens'] ?? [],
+                    'diet_tags'     => $productData['diet_tags'] ?? [],
+                    'show_image'    => false,
+                ]);
+            }
+        }
+
+        $catalog->load('sections.products');
+
+        return $catalog;
+    }
 }

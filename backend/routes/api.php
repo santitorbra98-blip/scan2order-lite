@@ -117,6 +117,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Catalog management
     Route::get('/restaurants/{restaurantId}/catalogs/export-pdf', [CatalogController::class, 'exportCatalogsPdf']);
+    Route::post('/restaurants/{restaurantId}/catalogs/import-json', [CatalogController::class, 'importJson']);
     Route::post('/restaurants/{restaurantId}/catalogs', [CatalogController::class, 'storeCatalog']);
     Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}', [CatalogController::class, 'updateCatalog']);
     Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}', [CatalogController::class, 'deleteCatalog']);

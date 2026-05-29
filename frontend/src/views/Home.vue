@@ -162,7 +162,7 @@
             @click="viewRestaurant(restaurant)"
           >
             <div class="card-image">
-              <img v-if="restaurant.image" :src="`/storage/${restaurant.image}`" :alt="restaurant.name" />
+              <img v-if="restaurant.image" :src="restaurant.image" :alt="restaurant.name" />
               <div v-else class="card-image-placeholder">🏪</div>
             </div>
             <div class="card-body">

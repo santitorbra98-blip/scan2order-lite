@@ -63,7 +63,7 @@
           <div v-if="filteredProducts.length > 0" class="products-grid">
             <div v-for="product in filteredProducts" :key="product.id" class="product-card" :class="{ compact: !product.image }" @click="toggleExpand(product.id, !!product.description)">
               <div v-if="product.image && product.show_image !== false" class="product-image">
-                <img :src="`/storage/${product.image}`" :alt="product.name" />
+                <img :src="product.image" :alt="product.name" />
               </div>
               <div class="product-info">
                 <div class="product-title-row">

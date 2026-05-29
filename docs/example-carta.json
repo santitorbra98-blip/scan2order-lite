@@ -1,0 +1,129 @@
+{
+  "name": "Carta de Verano 2025",
+  "description": "Menú de temporada con productos frescos",
+  "active": true,
+  "sections": [
+    {
+      "name": "Entrantes",
+      "description": "Para abrir boca",
+      "active": true,
+      "order": 1,
+      "products": [
+        {
+          "name": "Ensalada César",
+          "description": "Lechuga romana, pollo a la plancha, crutones y salsa césar",
+          "price": 8.50,
+          "active": true,
+          "is_new": false,
+          "allergens": ["eggs", "milk", "gluten", "fish"],
+          "diet_tags": []
+        },
+        {
+          "name": "Croquetas de jamón (6 ud.)",
+          "description": "Croquetas caseras de jamón ibérico",
+          "price": 7.00,
+          "active": true,
+          "is_new": true,
+          "allergens": ["gluten", "milk", "eggs"],
+          "diet_tags": []
+        }
+      ]
+    },
+    {
+      "name": "Platos principales",
+      "description": "Nuestros platos estrella",
+      "active": true,
+      "order": 2,
+      "products": [
+        {
+          "name": "Secreto ibérico a la plancha",
+          "description": "Con patatas al horno y salsa de miel y mostaza",
+          "price": 16.50,
+          "active": true,
+          "is_new": false,
+          "allergens": ["mustard"],
+          "diet_tags": ["gluten_free"]
+        },
+        {
+          "name": "Hamburguesa artesanal",
+          "description": "200g de carne de vaca, queso cheddar, lechuga, tomate y cebolla caramelizada",
+          "price": 13.00,
+          "active": true,
+          "is_new": false,
+          "allergens": ["gluten", "milk", "eggs"],
+          "diet_tags": []
+        },
+        {
+          "name": "Pasta al pesto vegana",
+          "description": "Pasta fresca con pesto de albahaca y piñones",
+          "price": 11.00,
+          "active": true,
+          "is_new": true,
+          "allergens": ["gluten", "nuts"],
+          "diet_tags": ["vegan", "vegetarian"]
+        }
+      ]
+    },
+    {
+      "name": "Postres",
+      "description": "",
+      "active": true,
+      "order": 3,
+      "products": [
+        {
+          "name": "Tarta de queso",
+          "description": "Tarta de queso al horno estilo La Viña con mermelada de frutos rojos",
+          "price": 5.50,
+          "active": true,
+          "is_new": false,
+          "allergens": ["milk", "eggs", "gluten"],
+          "diet_tags": ["vegetarian"]
+        },
+        {
+          "name": "Coulant de chocolate",
+          "description": "Con helado de vainilla",
+          "price": 6.00,
+          "active": true,
+          "is_new": false,
+          "allergens": ["gluten", "milk", "eggs", "nuts"],
+          "diet_tags": ["vegetarian"]
+        }
+      ]
+    },
+    {
+      "name": "Bebidas",
+      "description": "Refrescos, cervezas y vinos de la casa",
+      "active": true,
+      "order": 4,
+      "products": [
+        {
+          "name": "Refresco",
+          "description": "Coca-Cola, Fanta naranja, Fanta limón o agua",
+          "price": 2.50,
+          "active": true,
+          "is_new": false,
+          "allergens": [],
+          "diet_tags": ["vegan", "vegetarian", "gluten_free", "lactose_free"]
+        },
+        {
+          "name": "Cerveza nacional",
+          "description": "Caña o botellín",
+          "price": 2.00,
+          "active": true,
+          "is_new": false,
+          "allergens": ["gluten"],
+          "diet_tags": ["vegan", "vegetarian"]
+        },
+        {
+          "name": "Copa de vino de la casa",
+          "description": "Tinto, blanco o rosado",
+          "price": 3.00,
+          "active": true,
+          "is_new": false,
+          "allergens": ["sulfites"],
+          "diet_tags": ["vegan", "vegetarian", "gluten_free", "lactose_free"]
+        }
+      ]
+    }
+  ]
+}

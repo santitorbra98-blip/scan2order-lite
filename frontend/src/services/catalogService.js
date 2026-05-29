@@ -48,4 +48,8 @@ export const catalogService = {
   deleteProduct(restaurantId, catalogId, sectionId, productId) {
     return api.delete(`/restaurants/${restaurantId}/catalogs/${catalogId}/sections/${sectionId}/products/${productId}`)
   },
+
+  importJson(restaurantId, jsonData) {
+    return api.post(`/restaurants/${restaurantId}/catalogs/import-json`, jsonData)
+  },
 }
