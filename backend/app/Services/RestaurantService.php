@@ -84,11 +84,11 @@ class RestaurantService
 
         $data['created_by'] = $creator->id;
 
-        if ($imageFile) {
-            $data['image'] = $this->storeRestaurantImage($imageFile);
-        }
-
         try {
+            if ($imageFile) {
+                $data['image'] = $this->storeRestaurantImage($imageFile);
+            }
+
             $restaurant = Restaurant::create($data);
             $restaurant->refresh();
 

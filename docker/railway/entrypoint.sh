@@ -17,7 +17,7 @@ if [ -z "${APP_KEY:-}" ]; then
   echo "APP_KEY was not set; generated ephemeral runtime key."
 fi
 
-mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache
+mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache storage/app/public
 chown -R www-data:www-data storage bootstrap/cache || true
 
 if [ ! -L public/storage ]; then

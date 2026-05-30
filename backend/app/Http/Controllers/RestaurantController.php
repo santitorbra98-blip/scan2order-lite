@@ -105,8 +105,8 @@ class RestaurantController extends Controller
             'schedule'              => 'nullable|array|max:14',
             'schedule.*'            => 'array|max:5',
             'schedule.*.day'        => 'required_with:schedule.*|string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
-            'schedule.*.open'       => 'nullable|string|max:10|regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/',
-            'schedule.*.close'      => 'nullable|string|max:10|regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/',
+            'schedule.*.open'       => ['nullable', 'string', 'max:10', 'regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/'],
+            'schedule.*.close'      => ['nullable', 'string', 'max:10', 'regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/'],
             'schedule.*.closed'     => 'boolean',
         ]);
 
@@ -126,6 +126,13 @@ class RestaurantController extends Controller
                 ->setStatusCode(201);
         } catch (BusinessException $e) {
             return response()->json($e->toResponseArray(), $e->getStatusCode());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Unexpected error in restaurant store', [
+                'error' => $e->getMessage(),
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
+            ]);
+            return response()->json(['message' => 'Error interno del servidor'], 500);
         }
     }
 
@@ -192,8 +199,8 @@ class RestaurantController extends Controller
             'schedule'              => 'nullable|array|max:14',
             'schedule.*'            => 'array|max:5',
             'schedule.*.day'        => 'required_with:schedule.*|string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
-            'schedule.*.open'       => 'nullable|string|max:10|regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/',
-            'schedule.*.close'      => 'nullable|string|max:10|regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/',
+            'schedule.*.open'       => ['nullable', 'string', 'max:10', 'regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/'],
+            'schedule.*.close'      => ['nullable', 'string', 'max:10', 'regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/'],
             'schedule.*.closed'     => 'boolean',
         ]);
 
