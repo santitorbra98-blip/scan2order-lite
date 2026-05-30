@@ -38,6 +38,15 @@ class RestaurantController extends Controller
         ]);
     }
 
+    private function loadForPublic(Restaurant $restaurant): Restaurant
+    {
+        // Public visitors only need the base restaurant fields.
+        // The admins and creator relations are intentionally NOT loaded
+        // (they're guarded by $this->whenLoaded / $this->when($isAuthenticated)
+        // in RestaurantResource, so they won't appear in the response).
+        return $restaurant;
+    }
+
     public function index(Request $request)
     {
         $currentUser = $request->user('sanctum');

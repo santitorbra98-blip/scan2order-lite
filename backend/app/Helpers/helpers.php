@@ -14,6 +14,6 @@ if (! function_exists('saveFallbackData')) {
             }
         }
 
-        Log::channel('db_errors')->warning('db_fallback.operation_failed', $data);
+        Log::warning('db_fallback.operation_failed', $data);
     }
 }

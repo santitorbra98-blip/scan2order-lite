@@ -104,7 +104,7 @@ class RestaurantService
             return $restaurant;
         } catch (\Exception $e) {
             saveFallbackData(['action' => 'create_restaurant', 'data' => $data]);
-            Log::channel('db_errors')->error('Failed to create restaurant', ['exception' => $e]);
+            Log::error('Failed to create restaurant', ['exception' => $e->getMessage()]);
 
             throw new BusinessException('Database error, operation saved for later', 500);
         }
@@ -129,7 +129,7 @@ class RestaurantService
             return $restaurant;
         } catch (\Exception $e) {
             saveFallbackData(['action' => 'update_restaurant', 'id' => $restaurant->id, 'data' => $data]);
-            Log::channel('db_errors')->error('Failed to update restaurant', ['exception' => $e]);
+            Log::error('Failed to update restaurant', ['exception' => $e->getMessage()]);
 
             throw new BusinessException('Database error, operation saved for later', 500);
         }
