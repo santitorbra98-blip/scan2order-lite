@@ -49,6 +49,10 @@ export const catalogService = {
     return api.delete(`/restaurants/${restaurantId}/catalogs/${catalogId}/sections/${sectionId}/products/${productId}`)
   },
 
+  toggleProductActive(restaurantId, catalogId, sectionId, productId, active) {
+    return api.put(`/restaurants/${restaurantId}/catalogs/${catalogId}/sections/${sectionId}/products/${productId}`, { active })
+  },
+
   importJson(restaurantId, jsonData) {
     return api.post(`/restaurants/${restaurantId}/catalogs/import-json`, jsonData)
   },

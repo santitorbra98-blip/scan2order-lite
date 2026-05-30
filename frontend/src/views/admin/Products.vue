@@ -98,6 +98,13 @@
                     </div>
                     <div class="product-price">{{ Number(product.price).toFixed(2) }} €</div>
                     <div class="product-actions">
+                      <button
+                        class="btn-icon-small btn-toggle-active"
+                        :class="{ 'btn-hidden': !product.active }"
+                        :title="product.active ? 'Ocultar producto' : 'Mostrar producto'"
+                        :disabled="togglingProductId === product.id"
+                        @click="toggleActive(catalog, section, product)"
+                      >{{ product.active ? '👁️' : '🙈' }}</button>
                       <button class="btn-icon-small" @click="editProduct(catalog, section, product)" title="Editar">✏️</button>
                       <button class="btn-icon-small btn-danger" @click="deleteProduct(catalog, section, product)" title="Eliminar">🗑️</button>
                     </div>
@@ -203,6 +210,9 @@ const productFormError = ref(null)
 // Import JSON modal
 const showImportJsonModal = ref(false)
 const isImportingJson = ref(false)
+
+// Toggle product visibility
+const togglingProductId = ref(null)
 
 const filteredCatalogs = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
@@ -361,6 +371,18 @@ async function deleteProduct(catalog, section, product) {
   } catch (err) { showToast(err.message || 'Error', 'error') }
 }
 
+async function toggleActive(catalog, section, product) {
+  togglingProductId.value = product.id
+  try {
+    await catalogService.toggleProductActive(
+      selectedRestaurantId.value, catalog.id, section.id, product.id, !product.active
+    )
+    product.active = !product.active
+    showToast(product.active ? 'Producto visible' : 'Producto oculto')
+  } catch (err) { showToast(err.message || 'Error', 'error') }
+  finally { togglingProductId.value = null }
+}
+
 async function importFromJson(jsonData) {
   isImportingJson.value = true
   try {
@@ -448,6 +470,10 @@ onMounted(() => fetchRestaurantsStats())
 .btn-icon:hover { background: #f1f5f9; }
 .btn-icon.btn-danger:hover { background: #fef2f2; }
 .btn-icon-small { background: none; border: none; cursor: pointer; font-size: 0.9rem; padding: 0.2rem; }
+.btn-toggle-active { opacity: 0.7; transition: opacity 0.15s; }
+.btn-toggle-active:hover { opacity: 1; }
+.btn-toggle-active.btn-hidden { opacity: 0.4; }
+.btn-toggle-active:disabled { cursor: default; }
 
 .sections-container { margin-left: 1rem; border-left: 2px solid #e2e8f0; padding-left: 1rem; }
 

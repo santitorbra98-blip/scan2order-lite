@@ -5,6 +5,7 @@ import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import NotFound from '../views/NotFound.vue'
+import Unauthorized from '../views/Unauthorized.vue'
 
 const ClientMenu = () => import('../views/client/Menu.vue')
 
@@ -40,7 +41,8 @@ const routes = [
   { path: '/admin/settings', name: 'AdminSettings', component: AdminSettings, meta: { requiresAuth: true, roles: ['superadmin'] } },
   { path: '/admin/profile',  name: 'AdminProfile',  component: AdminProfile,  meta: { requiresAuth: true, roles: ['admin', 'superadmin'] } },
 
-  // 404
+  // 403 / 404
+  { path: '/unauthorized', name: 'Unauthorized', component: Unauthorized, meta: { requiresAuth: true } },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound, meta: { public: true } }
 ]
 
@@ -74,7 +76,7 @@ router.beforeEach((to) => {
       return { path: '/login', query: { redirect: to.fullPath } }
     }
     if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-      return '/admin'
+      return '/unauthorized'
     }
   }
 

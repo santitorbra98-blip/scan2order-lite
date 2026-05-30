@@ -14,21 +14,23 @@ class SecurityHeaders
 
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-Frame-Options', 'DENY');
-        $response->headers->set('Referrer-Policy', 'no-referrer');
+        $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+        // API-only backend: no inline scripts are served.
+        // 'unsafe-inline' was removed from script-src to eliminate the XSS bypass it introduces.
         $response->headers->set(
             'Content-Security-Policy',
-            "default-src 'self'; " .
-            "script-src 'self' 'unsafe-inline'; " .
-            "worker-src blob: 'self'; " .
+            "default-src 'none'; " .
+            "script-src 'none'; " .
             "connect-src 'self'; " .
             "img-src 'self' data: https:; " .
-            "style-src 'self' 'unsafe-inline'; " .
-            "font-src 'self' data:;"
+            "style-src 'none'; " .
+            "font-src 'none';"
         );
 
-        if ($request->isSecure()) {
-            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        // HSTS: always emit in production so downstream CDN/browsers cache the policy.
+        if (app()->environment('production') || $request->isSecure()) {
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
         }
 
         return $response;

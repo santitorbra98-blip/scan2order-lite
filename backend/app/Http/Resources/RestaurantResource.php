@@ -10,6 +10,8 @@ class RestaurantResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $isAuthenticated = $request->user() !== null;
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -20,8 +22,9 @@ class RestaurantResource extends JsonResource
                 : null,
             'active' => $this->active,
             'schedule' => $this->schedule,
-            'created_by' => $this->created_by,
-            'creator' => $this->whenLoaded('creator', function () {
+            // Internal user IDs must not leak to unauthenticated public users.
+            'created_by' => $this->when($isAuthenticated, $this->created_by),
+            'creator' => $this->when($isAuthenticated && $this->relationLoaded('creator'), function () {
                 return [
                     'id'    => $this->creator->id,
                     'name'  => $this->creator->name,

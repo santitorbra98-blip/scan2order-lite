@@ -20,7 +20,12 @@ class RouteServiceProvider extends ServiceProvider
 
         RateLimiter::for('auth-login', function (Request $request) {
             $login = strtolower((string) $request->input('login', 'guest'));
-            return Limit::perMinute(8)->by($login . '|' . $request->ip());
+            return [
+                // Per-(IP + credential): 8 attempts/min — stops casual brute force from one IP.
+                Limit::perMinute(8)->by($login . '|' . $request->ip()),
+                // Global per-credential: 20 attempts/5 min — stops distributed brute force across IPs.
+                Limit::perMinutes(5, 20)->by('login:cred:' . $login),
+            ];
         });
 
         RateLimiter::for('auth-register-request', function (Request $request) {

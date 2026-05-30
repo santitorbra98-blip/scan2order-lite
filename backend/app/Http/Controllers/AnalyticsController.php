@@ -7,11 +7,22 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class AnalyticsController extends Controller
 {
     private const VALID_PERIODS = ['all', '7d', '30d'];
     private const CACHE_TTL = 300; // 5 minutes
+
+    /** Allowlist of accepted event types from public clients. */
+    private const VALID_EVENT_TYPES = [
+        'menu_view',
+        'catalog_view',
+        'product_view',
+        'qr_scan',
+        'contact_click',
+        'schedule_view',
+    ];
 
     private function resolveStartDate(string $period): ?\Carbon\Carbon
     {
@@ -62,11 +73,21 @@ class AnalyticsController extends Controller
     {
         $data = $request->validate([
             'restaurant_id' => 'required|integer|exists:restaurants,id',
-            'event_type'    => 'required|string|max:50',
+            'event_type'    => ['required', 'string', Rule::in(self::VALID_EVENT_TYPES)],
             'session_id'    => 'nullable|string|max:64',
-            'metadata'      => 'nullable|array',
+            'metadata'      => 'nullable|array|max:10',
             'metadata.*'    => 'nullable|string|max:255',
         ]);
+
+        // Restrict metadata keys to alphanumeric + underscores to prevent
+        // arbitrary key injection into the analytics JSON store.
+        if (!empty($data['metadata'])) {
+            foreach (array_keys($data['metadata']) as $key) {
+                if (!preg_match('/^[a-zA-Z0-9_]{1,50}$/', (string) $key)) {
+                    return response()->json(['message' => 'Las claves de metadata solo pueden contener letras, números y guiones bajos (máx. 50 caracteres).'], 422);
+                }
+            }
+        }
 
         AnalyticsEvent::create([
             'restaurant_id' => $data['restaurant_id'],

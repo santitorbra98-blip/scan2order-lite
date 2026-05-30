@@ -74,7 +74,9 @@ class CatalogController extends Controller
         }
 
         $isManagementView = $user && $user->hasAnyRole(['superadmin', 'admin']);
-        $search = $request->query('search');
+        $rawSearch = $request->query('search');
+        $search = is_string($rawSearch) ? mb_substr(trim($rawSearch), 0, 100) : null;
+        $search = ($search !== '') ? $search : null;
         $activeFilter = $request->has('active') ? filter_var($request->query('active'), FILTER_VALIDATE_BOOLEAN) : null;
 
         $catalogsQuery = $restaurant->catalogs()->orderBy('order');
@@ -141,7 +143,14 @@ class CatalogController extends Controller
             $json = $request->getContent();
         }
 
-        $data = json_decode($json, true);
+        // Enforce a max body size (2 MB) to prevent memory exhaustion attacks.
+        if (strlen($json) > 2 * 1024 * 1024) {
+            return response()->json(['message' => 'El JSON supera el tamaño máximo permitido (2 MB)'], 422);
+        }
+
+        // Limit JSON nesting depth to prevent deeply-nested payloads from
+        // consuming excessive memory/CPU during parsing.
+        $data = json_decode($json, true, 8);
 
         if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
             return response()->json(['message' => 'JSON inválido: ' . json_last_error_msg()], 422);

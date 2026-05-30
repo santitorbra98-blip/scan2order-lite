@@ -87,34 +87,20 @@ Route::middleware('auth:sanctum')->group(function () {
 // Analytics - public endpoints
 // 30 writes/min per IP prevents analytics abuse; top-restaurants is read-only so 60/min is fine.
 Route::post('/analytics/event', [AnalyticsController::class, 'trackEvent'])->middleware('throttle:30,1');
-Route::get('/analytics/top-restaurants', [AnalyticsController::class, 'topRestaurants'])->middleware('throttle:60,1');
+Route::get('/analytics/top-restaurants', [AnalyticsController::class, 'topRestaurants'])->middleware('throttle:30,1');
 
 // Public API endpoints (viewing menu)
 Route::get('/restaurants', [RestaurantController::class, 'index']);
 Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->whereNumber('restaurant');
 Route::get('/restaurants/{restaurantId}/catalogs', [CatalogController::class, 'getCatalogsByRestaurant']);
 
-// Protected resource routes (admin only)
-Route::middleware(['auth:sanctum'])->group(function () {
+// Protected resource routes (admin + superadmin)
+Route::middleware(['auth:sanctum', 'role:admin,superadmin'])->group(function () {
     // Restaurant management
     Route::get('/restaurants/stats', [CatalogController::class, 'getRestaurantsStats']);
     Route::post('/restaurants', [RestaurantController::class, 'store']);
     Route::put('/restaurants/{restaurant}', [RestaurantController::class, 'update']);
     Route::delete('/restaurants/{restaurant}', [RestaurantController::class, 'destroy']);
-
-    // User management (superadmin only)
-    Route::get('/users', [UserController::class, 'index']);
-    Route::post('/users', [UserController::class, 'store']);
-    Route::put('/users/{user}', [UserController::class, 'update']);
-    Route::delete('/users/{user}', [UserController::class, 'destroy']);
-    Route::get('/roles', [UserController::class, 'roles']);
-
-    // Analytics (superadmin only)
-    Route::get('/analytics/ranking', [AnalyticsController::class, 'ranking']);
-
-    // Settings (superadmin only)
-    Route::get('/settings', [SettingController::class, 'index']);
-    Route::put('/settings', [SettingController::class, 'update']);
 
     // Catalog management
     Route::get('/restaurants/{restaurantId}/catalogs/export-pdf', [CatalogController::class, 'exportCatalogsPdf']);
@@ -132,4 +118,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}/products', [ProductController::class, 'storeProduct']);
     Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}/products/{productId}', [ProductController::class, 'updateProduct']);
     Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}/products/{productId}', [ProductController::class, 'deleteProduct']);
+});
+
+// Superadmin-only routes
+Route::middleware(['auth:sanctum', 'role:superadmin'])->group(function () {
+    // User management
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::put('/users/{user}', [UserController::class, 'update']);
+    Route::delete('/users/{user}', [UserController::class, 'destroy']);
+    Route::get('/roles', [UserController::class, 'roles']);
+
+    // Analytics
+    Route::get('/analytics/ranking', [AnalyticsController::class, 'ranking']);
+
+    // Settings
+    Route::get('/settings', [SettingController::class, 'index']);
+    Route::put('/settings', [SettingController::class, 'update']);
 });
