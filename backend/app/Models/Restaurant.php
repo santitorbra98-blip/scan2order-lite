@@ -47,12 +47,17 @@ class Restaurant extends Model
                     ->withPivot('role_id');
     }
 
+    /**
+     * Users that manage this restaurant with the 'admin' role.
+     *
+     * Uses a JOIN on the roles table instead of a whereHas subquery to avoid
+     * an extra EXISTS clause on every eager-load call.
+     */
     public function admins()
     {
         return $this->belongsToMany(User::class, 'user_restaurant')
             ->withPivot('role_id')
-            ->whereHas('role', function ($query) {
-                $query->where('name', 'admin');
-            });
+            ->join('roles', 'roles.id', '=', 'user_restaurant.role_id')
+            ->where('roles.name', 'admin');
     }
 }

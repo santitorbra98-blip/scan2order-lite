@@ -4,6 +4,8 @@ set -eu
 export PORT="${PORT:-8080}"
 export CACHE_STORE="${CACHE_STORE:-file}"
 export SESSION_DRIVER="${SESSION_DRIVER:-file}"
+export QUEUE_CONNECTION="${QUEUE_CONNECTION:-database}"
+export LOG_CHANNEL="${LOG_CHANNEL:-stderr}"
 
 envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/http.d/default.conf
 
@@ -37,5 +39,12 @@ if [ "${RUN_MIGRATIONS:-false}" = "true" ]; then
     sleep 5
   done
 fi
+
+# Cache config/routes/views for maximum performance in production.
+# Must run after migrations so DB-dependent config resolves correctly.
+php artisan config:cache --quiet  || true
+php artisan route:cache  --quiet  || true
+php artisan view:cache   --quiet  || true
+php artisan event:cache  --quiet  || true
 
 exec /usr/bin/supervisord -c /etc/supervisord.conf

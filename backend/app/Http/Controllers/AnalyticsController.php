@@ -78,11 +78,8 @@ class AnalyticsController extends Controller
             'created_at'    => now(),
         ]);
 
-        // Bust cached rankings for all periods so fresh data is served soon
-        foreach (self::VALID_PERIODS as $period) {
-            Cache::forget("analytics.ranking.{$period}");
-            Cache::forget("analytics.top.{$period}");
-        }
+        // The cached rankings have a 5-minute TTL and will refresh naturally.
+        // Busting 6 keys per event is wasteful at high traffic volumes.
 
         return response()->json(['ok' => true], 201);
     }

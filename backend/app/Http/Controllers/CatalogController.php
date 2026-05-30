@@ -34,12 +34,14 @@ class CatalogController extends Controller
         }
 
         if ($user->hasRole('superadmin')) {
-            $restaurants = Restaurant::with(['catalogs.sections.products'])->get();
+            $restaurants = Restaurant::with([
+                'catalogs.sections' => fn ($q) => $q->withCount('products'),
+            ])->get();
         } elseif ($user->hasRole('admin')) {
             $restaurantIds = $this->managedRestaurantIds($user);
-            $restaurants = Restaurant::with(['catalogs.sections.products'])
-                ->whereIn('id', $restaurantIds)
-                ->get();
+            $restaurants = Restaurant::with([
+                'catalogs.sections' => fn ($q) => $q->withCount('products'),
+            ])->whereIn('id', $restaurantIds)->get();
         } else {
             return response()->json(['message' => 'No autorizado'], 403);
         }
@@ -98,7 +100,7 @@ class CatalogController extends Controller
         }
 
         if (!$isManagementView) {
-            $catalogs = Cache::remember(CacheKeys::restaurantCatalogs((int) $restaurantId), 300, function () use ($catalogsQuery) {
+            $catalogs = Cache::remember(CacheKeys::restaurantCatalogs((int) $restaurantId), CacheKeys::CATALOG_TTL, function () use ($catalogsQuery) {
                 return $catalogsQuery->get();
             });
         } else {

@@ -189,24 +189,25 @@ class CatalogService
             $productsPerMenu = [];
 
             foreach ($catalogs as $catalog) {
+                // Use withCount-preloaded aggregate instead of loading full product rows.
                 $catalogProducts = 0;
                 foreach ($catalog->sections as $section) {
-                    $catalogProducts += $section->products->count();
+                    $catalogProducts += (int) ($section->products_count ?? 0);
                 }
                 $productsPerMenu[] = [
-                    'menu_name' => $catalog->name,
+                    'menu_name'      => $catalog->name,
                     'products_count' => $catalogProducts,
                 ];
                 $totalProducts += $catalogProducts;
             }
 
             return [
-                'id' => $restaurant->id,
-                'name' => $restaurant->name,
-                'address' => $restaurant->address ?? '',
-                'phone' => $restaurant->phone ?? '',
-                'menus_count' => $catalogs->count(),
-                'total_products' => $totalProducts,
+                'id'               => $restaurant->id,
+                'name'             => $restaurant->name,
+                'address'          => $restaurant->address ?? '',
+                'phone'            => $restaurant->phone ?? '',
+                'menus_count'      => $catalogs->count(),
+                'total_products'   => $totalProducts,
                 'products_per_menu' => $productsPerMenu,
             ];
         })->all();

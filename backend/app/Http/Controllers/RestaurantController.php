@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\BusinessException;
 use App\Http\Resources\RestaurantResource;
-use App\Models\AnalyticsEvent;
-use App\Models\Product;
+use App\Jobs\TrackAnalyticsEvent;
 use App\Models\Restaurant;
 use App\Services\RestaurantService;
+use App\Support\CacheKeys;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -66,11 +66,14 @@ class RestaurantController extends Controller
             );
         }
 
-        // Public: only active restaurants — no server-side cache so new
-        // restaurants appear immediately after creation.
-        $restaurants = Restaurant::with(['admins' => $adminSelector])
-            ->where('active', true)
-            ->get();
+        // Public: only active restaurants, cached for 60 s.
+        // Cache is busted in store() and update() so new/toggled restaurants
+        // appear within one minute at most.
+        $restaurants = Cache::remember(CacheKeys::publicRestaurants(), CacheKeys::PUBLIC_RESTAURANTS_TTL, function () use ($adminSelector) {
+            return Restaurant::with(['admins' => $adminSelector])
+                ->where('active', true)
+                ->get();
+        });
 
         return RestaurantResource::collection($restaurants);
     }
@@ -102,7 +105,7 @@ class RestaurantController extends Controller
                 $request->hasFile('image') ? $request->file('image') : null
             );
 
-            Cache::forget('public_restaurants');
+            Cache::forget(CacheKeys::publicRestaurants());
 
             return (new RestaurantResource($this->loadRestaurantWithRelations($restaurant)))
                 ->response()
@@ -128,24 +131,23 @@ class RestaurantController extends Controller
             return response()->json(['message' => 'Restaurante no disponible'], 404);
         }
 
-        // Track every public menu view. Use IP+UA hash as session proxy so the
-        // same browser tallies as one unique visit while total_visits counts each hit.
+        // Track every public menu view asynchronously so the HTTP response
+        // is not blocked by a synchronous DB write.
         if (!$user) {
             $req = request();
             $sessionProxy = md5(($req->ip() ?? '') . '|' . ($req->userAgent() ?? ''));
-            AnalyticsEvent::create([
-                'restaurant_id' => $restaurant->id,
-                'event_type'    => 'menu_view',
-                'session_id'    => $sessionProxy,
-                'ip_address'    => $req->ip(),
-                'user_agent'    => mb_substr($req->userAgent() ?? '', 0, 500),
-                'created_at'    => now(),
-            ]);
-            // Bust cached rankings so the next read reflects this visit.
-            foreach (['all', '7d', '30d'] as $p) {
-                Cache::forget("analytics.ranking.{$p}");
-                Cache::forget("analytics.top.{$p}");
-            }
+            TrackAnalyticsEvent::dispatch(
+                $restaurant->id,
+                'menu_view',
+                $sessionProxy,
+                $req->ip(),
+                mb_substr($req->userAgent() ?? '', 0, 500),
+            );
+        }
+
+        // Public visitors do not need the admins relation — skip the JOIN.
+        if (!$user) {
+            return new RestaurantResource($this->loadForPublic($restaurant));
         }
 
         return new RestaurantResource($this->loadRestaurantWithRelations($restaurant));
@@ -186,8 +188,7 @@ class RestaurantController extends Controller
                 $request->boolean('remove_image')
             );
 
-            Cache::forget('public_restaurants');
-            Cache::forget("restaurant_{$restaurant->id}");
+            Cache::forget(CacheKeys::publicRestaurants());
 
             return new RestaurantResource($this->loadRestaurantWithRelations($restaurant));
         } catch (BusinessException $e) {
@@ -211,8 +212,7 @@ class RestaurantController extends Controller
         $restaurantId = $restaurant->id;
         $this->restaurantService->deleteRestaurant($restaurant);
 
-        Cache::forget('public_restaurants');
-        Cache::forget("restaurant_{$restaurantId}");
+        Cache::forget(CacheKeys::publicRestaurants());
         Cache::forget("restaurant_{$restaurantId}_catalogs");
 
         return response()->json(null, 204);

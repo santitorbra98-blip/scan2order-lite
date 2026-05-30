@@ -26,6 +26,18 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
-    modulePreload: { polyfill: false }
+    modulePreload: { polyfill: false },
+    // Split vendor libraries into separate chunks so the browser can cache them
+    // independently from application code.
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          'qr-vendor':  ['qrcode'],
+        },
+      },
+    },
+    // Raise the inline-asset limit so small images are base64-inlined.
+    assetsInlineLimit: 4096,
   }
 })

@@ -85,8 +85,9 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Analytics - public endpoints
-Route::post('/analytics/event', [AnalyticsController::class, 'trackEvent'])->middleware('throttle:120,1');
-Route::get('/analytics/top-restaurants', [AnalyticsController::class, 'topRestaurants']);
+// 30 writes/min per IP prevents analytics abuse; top-restaurants is read-only so 60/min is fine.
+Route::post('/analytics/event', [AnalyticsController::class, 'trackEvent'])->middleware('throttle:30,1');
+Route::get('/analytics/top-restaurants', [AnalyticsController::class, 'topRestaurants'])->middleware('throttle:60,1');
 
 // Public API endpoints (viewing menu)
 Route::get('/restaurants', [RestaurantController::class, 'index']);
