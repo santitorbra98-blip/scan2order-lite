@@ -50,14 +50,16 @@ class Restaurant extends Model
     /**
      * Users that manage this restaurant with the 'admin' role.
      *
-     * Uses a JOIN on the roles table instead of a whereHas subquery to avoid
-     * an extra EXISTS clause on every eager-load call.
+     * Uses a whereIn subquery on role_id so that Eloquent's whereHas() can
+     * embed this relationship as a correlated EXISTS without needing the roles
+     * table in the outer FROM clause (which broke PostgreSQL).
      */
     public function admins()
     {
         return $this->belongsToMany(User::class, 'user_restaurant')
             ->withPivot('role_id')
-            ->join('roles', 'roles.id', '=', 'user_restaurant.role_id')
-            ->where('roles.name', 'admin');
+            ->whereIn('user_restaurant.role_id', function ($query) {
+                $query->select('id')->from('roles')->where('name', 'admin');
+            });
     }
 }

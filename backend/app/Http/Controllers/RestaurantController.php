@@ -10,7 +10,6 @@ use App\Services\RestaurantService;
 use App\Support\CacheKeys;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Validation\Rule;
 
 class RestaurantController extends Controller
 {
@@ -106,8 +105,8 @@ class RestaurantController extends Controller
             'schedule'              => 'nullable|array|max:7',
             'schedule.*'            => 'array|max:3',
             'schedule.*.enabled'    => 'boolean',
-            'schedule.*.open'       => ['nullable', 'string', 'max:10', Rule::regex('/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/')],
-            'schedule.*.close'      => ['nullable', 'string', 'max:10', Rule::regex('/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/')],
+            'schedule.*.open'       => ['nullable', 'string', 'max:10', fn ($a, $v, $fail) => $v !== null && !preg_match('/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/', $v) ? $fail('Formato de hora inválido (HH:MM).') : null],
+            'schedule.*.close'      => ['nullable', 'string', 'max:10', fn ($a, $v, $fail) => $v !== null && !preg_match('/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/', $v) ? $fail('Formato de hora inválido (HH:MM).') : null],
         ]);
 
         $data = array_filter($request->only(['name', 'address', 'phone', 'active', 'schedule']), fn ($v) => $v !== null);
@@ -199,8 +198,8 @@ class RestaurantController extends Controller
             'schedule'              => 'nullable|array|max:7',
             'schedule.*'            => 'array|max:3',
             'schedule.*.enabled'    => 'boolean',
-            'schedule.*.open'       => ['nullable', 'string', 'max:10', Rule::regex('/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/')],
-            'schedule.*.close'      => ['nullable', 'string', 'max:10', Rule::regex('/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/')],
+            'schedule.*.open'       => ['nullable', 'string', 'max:10', fn ($a, $v, $fail) => $v !== null && !preg_match('/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/', $v) ? $fail('Formato de hora inválido (HH:MM).') : null],
+            'schedule.*.close'      => ['nullable', 'string', 'max:10', fn ($a, $v, $fail) => $v !== null && !preg_match('/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/', $v) ? $fail('Formato de hora inválido (HH:MM).') : null],
         ]);
 
         $data = $request->only(['name', 'address', 'phone', 'active', 'schedule']);
