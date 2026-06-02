@@ -102,12 +102,11 @@ class RestaurantController extends Controller
             'phone'    => 'nullable|string|max:30',
             'image'    => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'active'   => 'boolean',
-            'schedule'              => 'nullable|array|max:14',
-            'schedule.*'            => 'array|max:5',
-            'schedule.*.day'        => 'required_with:schedule.*|string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'schedule'              => 'nullable|array|max:7',
+            'schedule.*'            => 'array|max:3',
+            'schedule.*.enabled'    => 'boolean',
             'schedule.*.open'       => ['nullable', 'string', 'max:10', 'regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/'],
             'schedule.*.close'      => ['nullable', 'string', 'max:10', 'regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/'],
-            'schedule.*.closed'     => 'boolean',
         ]);
 
         $data = array_filter($request->only(['name', 'address', 'phone', 'active', 'schedule']), fn ($v) => $v !== null);
@@ -196,12 +195,11 @@ class RestaurantController extends Controller
             'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'remove_image' => 'boolean',
             'active'       => 'boolean',
-            'schedule'              => 'nullable|array|max:14',
-            'schedule.*'            => 'array|max:5',
-            'schedule.*.day'        => 'required_with:schedule.*|string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'schedule'              => 'nullable|array|max:7',
+            'schedule.*'            => 'array|max:3',
+            'schedule.*.enabled'    => 'boolean',
             'schedule.*.open'       => ['nullable', 'string', 'max:10', 'regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/'],
             'schedule.*.close'      => ['nullable', 'string', 'max:10', 'regex:/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/'],
-            'schedule.*.closed'     => 'boolean',
         ]);
 
         $data = $request->only(['name', 'address', 'phone', 'active', 'schedule']);
