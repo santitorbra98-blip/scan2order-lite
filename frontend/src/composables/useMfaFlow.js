@@ -6,30 +6,37 @@ import { api } from '../services/api'
  * 1. Request a code  → POST requestUrl  with optional payload
  * 2. Confirm the code → POST confirmUrl with form data
  *
+ * Exposed refs match what Profile.vue expects:
+ *   requesting / requestError  — state for step 1
+ *   saving     / error         — state for step 2
+ *   codeSent                   — toggles the form between steps
+ *
  * @param {string} requestUrl  – endpoint to trigger the code email
  * @param {string} confirmUrl  – endpoint to verify the code and execute the change
  */
 export function useMfaFlow(requestUrl, confirmUrl) {
-  const loading   = ref(false)
-  const codeSent  = ref(false)
-  const error     = ref(null)
+  const requesting    = ref(false)
+  const saving        = ref(false)
+  const codeSent      = ref(false)
+  const requestError  = ref(null)
+  const error         = ref(null)
 
   async function requestCode(payload = {}) {
-    loading.value = true
-    error.value   = null
+    requesting.value   = true
+    requestError.value = null
     try {
       await api.post(requestUrl, payload)
       codeSent.value = true
     } catch (err) {
-      error.value = err?.data?.message || err.message || 'Error al enviar el código'
+      requestError.value = err?.data?.message || err.message || 'Error al enviar el código'
     } finally {
-      loading.value = false
+      requesting.value = false
     }
   }
 
   async function confirmCode(payload = {}) {
-    loading.value = true
-    error.value   = null
+    saving.value = true
+    error.value  = null
     try {
       const data = await api.post(confirmUrl, payload)
       codeSent.value = false
@@ -38,15 +45,17 @@ export function useMfaFlow(requestUrl, confirmUrl) {
       error.value = err?.data?.message || err.message || 'Código incorrecto o expirado'
       throw err
     } finally {
-      loading.value = false
+      saving.value = false
     }
   }
 
   function reset() {
-    codeSent.value = false
-    error.value    = null
-    loading.value  = false
+    codeSent.value     = false
+    requestError.value = null
+    error.value        = null
+    requesting.value   = false
+    saving.value       = false
   }
 
-  return { loading, codeSent, error, requestCode, confirmCode, reset }
+  return { requesting, saving, codeSent, requestError, error, requestCode, confirmCode, reset }
 }

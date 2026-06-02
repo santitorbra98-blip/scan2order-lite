@@ -99,7 +99,6 @@
               </div>
               <div class="top-stats">
                 <span class="top-stat" title="Visitas totales">👁 {{ item.total_visits.toLocaleString('es-ES') }}</span>
-                <span class="top-stat top-stat-unique" title="Visitas únicas">👤 {{ item.unique_visits.toLocaleString('es-ES') }}</span>
               </div>
             </div>
           </div>
@@ -438,7 +437,6 @@ function setTopPeriod(period) {
 .top-name { font-weight: 700; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 .top-stats { display: flex; gap: 0.75rem; flex-shrink: 0; }
 .top-stat { font-size: 0.85rem; color: #475569; font-weight: 600; white-space: nowrap; }
-.top-stat-unique { color: #94a3b8; }
 /* ────────────────────────────────────────────────────────────────────────── */
 
 .section-header { text-align: center; margin-bottom: 2rem; }
