@@ -11,6 +11,14 @@ export const catalogService = {
     return api.get(`/restaurants/${restaurantId}/catalogs`)
   },
 
+  exportPdf(restaurantId, restaurantName) {
+    return api.downloadBlob(
+      `/restaurants/${restaurantId}/catalogs/export-pdf`,
+      `menu-${restaurantName}.pdf`,
+      'application/pdf'
+    )
+  },
+
   createCatalog(restaurantId, data) {
     return api.post(`/restaurants/${restaurantId}/catalogs`, data)
   },

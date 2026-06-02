@@ -2,8 +2,9 @@ services:
   - type: web
     name: scan2order-lite
     env: docker
+    region: frankfurt
     dockerfilePath: ./Dockerfile.railway
-    plan: free
+    plan: starter
     healthCheckPath: /api/hello
     autoDeploy: true
     envVars:
@@ -125,6 +126,7 @@ services:
 
 databases:
   - name: scan2order-db
-    plan: free
+    region: frankfurt
+    plan: starter
     databaseName: scan2order_lite
     user: scan2order

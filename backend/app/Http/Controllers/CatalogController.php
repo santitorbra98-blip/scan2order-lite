@@ -11,10 +11,8 @@ use App\Http\Resources\CatalogResource;
 use App\Http\Resources\SectionResource;
 use App\Models\Restaurant;
 use App\Services\CatalogService;
-use App\Support\CacheKeys;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 
 class CatalogController extends Controller
 {
@@ -79,44 +77,16 @@ class CatalogController extends Controller
         $search = ($search !== '') ? $search : null;
         $activeFilter = $request->has('active') ? filter_var($request->query('active'), FILTER_VALIDATE_BOOLEAN) : null;
 
-        $catalogsQuery = $restaurant->catalogs()->orderBy('order');
-
-        $catalogsQuery->with(['sections' => function ($query) use ($isManagementView, $search, $activeFilter) {
-            if (!$isManagementView) {
-                $query->where('active', true);
-            }
-
-            $query->orderBy('order')
-                ->with(['products' => function ($q) use ($isManagementView, $search, $activeFilter) {
-                    if (!$isManagementView) {
-                        $q->where('active', true);
-                    }
-                    $q->when($search, fn ($pq, $s) => $pq->where('name', 'ilike', "%{$s}%"))
-                      ->when($activeFilter !== null, fn ($pq) => $pq->where('active', $activeFilter));
-                    $q->orderBy('name');
-                }]);
-        }]);
-
-        if (!$isManagementView) {
-            $catalogsQuery->where('active', true);
-        }
-
-        if (!$isManagementView) {
-            $catalogs = Cache::remember(CacheKeys::restaurantCatalogs((int) $restaurantId), CacheKeys::CATALOG_TTL, function () use ($catalogsQuery) {
-                return $catalogsQuery->get();
-            });
-        } else {
-            $catalogs = $catalogsQuery->get();
-        }
+        $catalogs = $this->catalogService->getCatalogsForDisplay($restaurant, $isManagementView, $search, $activeFilter);
 
         return CatalogResource::collection($catalogs);
     }
 
     public function exportCatalogsPdf($restaurantId)
     {
-        $user = Auth::user();
-        if (!$user || !$user->hasPermission('manage_products')) {
-            return response()->json(['message' => 'No autorizado'], 403);
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user->can_export_pdf && !$user->hasRole('superadmin')) {
+            return response()->json(['message' => 'Tu cuenta no tiene permisos para exportar PDF. Contacta con el administrador.'], 403);
         }
 
         $restaurant = $this->authorizeRestaurant($restaurantId);
@@ -125,11 +95,6 @@ class CatalogController extends Controller
 
     public function importJson(Request $request, $restaurantId)
     {
-        $user = Auth::user();
-        if (!$user || !$user->hasPermission('manage_products')) {
-            return response()->json(['message' => 'No autorizado para gestionar el menú'], 403);
-        }
-
         $restaurant = $this->authorizeRestaurant($restaurantId);
 
         // Accept either an uploaded .json file OR a raw JSON body
@@ -161,42 +126,32 @@ class CatalogController extends Controller
         }
 
         try {
-            $catalog = $this->catalogService->importFromJson($restaurant, $data, $user);
+            $catalog = $this->catalogService->importFromJson($restaurant, $data, Auth::user());
         } catch (BusinessException $e) {
             return response()->json($e->toResponseArray(), $e->getStatusCode());
         }
 
-        Cache::forget(CacheKeys::restaurantCatalogs((int) $restaurantId));
+        $this->catalogService->forgetRestaurantCache((int) $restaurantId);
 
         return (new CatalogResource($catalog))->response()->setStatusCode(201);
     }
 
     public function storeCatalog(StoreCatalogRequest $request, $restaurantId)
     {
-        $user = Auth::user();
-        if (!$user || !$user->hasPermission('manage_products')) {
-            return response()->json(['message' => 'No autorizado para gestionar el menú'], 403);
-        }
-
         $restaurant = $this->authorizeRestaurant($restaurantId);
 
         try {
-            $catalog = $this->catalogService->createCatalog($restaurant, $request->validated(), $user);
+            $catalog = $this->catalogService->createCatalog($restaurant, $request->validated(), Auth::user());
         } catch (BusinessException $e) {
             return response()->json($e->toResponseArray(), $e->getStatusCode());
         }
-        Cache::forget(CacheKeys::restaurantCatalogs((int) $restaurantId));
+        $this->catalogService->forgetRestaurantCache((int) $restaurantId);
 
         return (new CatalogResource($catalog))->response()->setStatusCode(201);
     }
 
     public function updateCatalog(UpdateCatalogRequest $request, $restaurantId, $catalogId)
     {
-        $user = Auth::user();
-        if (!$user || !$user->hasPermission('manage_products')) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
         $restaurant = $this->authorizeRestaurant($restaurantId);
         $catalog = $restaurant->catalogs()->find($catalogId);
         if (!$catalog) {
@@ -204,18 +159,13 @@ class CatalogController extends Controller
         }
 
         $catalog = $this->catalogService->updateCatalog($catalog, $request->validated());
-        Cache::forget(CacheKeys::restaurantCatalogs((int) $restaurantId));
+        $this->catalogService->forgetRestaurantCache((int) $restaurantId);
 
         return new CatalogResource($catalog);
     }
 
     public function deleteCatalog($restaurantId, $catalogId)
     {
-        $user = Auth::user();
-        if (!$user || !$user->hasPermission('manage_products')) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
         $restaurant = $this->authorizeRestaurant($restaurantId);
         $catalog = $restaurant->catalogs()->find($catalogId);
         if (!$catalog) {
@@ -223,18 +173,13 @@ class CatalogController extends Controller
         }
 
         $this->catalogService->deleteCatalog($catalog);
-        Cache::forget(CacheKeys::restaurantCatalogs((int) $restaurantId));
+        $this->catalogService->forgetRestaurantCache((int) $restaurantId);
 
         return response()->json(['message' => 'Catálogo eliminado']);
     }
 
     public function storeSection(StoreSectionRequest $request, $restaurantId, $catalogId)
     {
-        $user = Auth::user();
-        if (!$user || !$user->hasPermission('manage_products')) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
         $restaurant = $this->authorizeRestaurant($restaurantId);
         $catalog = $restaurant->catalogs()->find($catalogId);
         if (!$catalog) {
@@ -242,18 +187,13 @@ class CatalogController extends Controller
         }
 
         $section = $this->catalogService->createSection($catalog, $request->validated());
-        Cache::forget(CacheKeys::restaurantCatalogs((int) $restaurantId));
+        $this->catalogService->forgetRestaurantCache((int) $restaurantId);
 
         return (new SectionResource($section))->response()->setStatusCode(201);
     }
 
     public function updateSection(UpdateSectionRequest $request, $restaurantId, $catalogId, $sectionId)
     {
-        $user = Auth::user();
-        if (!$user || !$user->hasPermission('manage_products')) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
         $restaurant = $this->authorizeRestaurant($restaurantId);
         $catalog = $restaurant->catalogs()->find($catalogId);
         if (!$catalog) return response()->json(['message' => 'Catálogo no encontrado'], 404);
@@ -262,18 +202,13 @@ class CatalogController extends Controller
         if (!$section) return response()->json(['message' => 'Sección no encontrada'], 404);
 
         $section = $this->catalogService->updateSection($section, $request->validated());
-        Cache::forget(CacheKeys::restaurantCatalogs((int) $restaurantId));
+        $this->catalogService->forgetRestaurantCache((int) $restaurantId);
 
         return new SectionResource($section);
     }
 
     public function deleteSection($restaurantId, $catalogId, $sectionId)
     {
-        $user = Auth::user();
-        if (!$user || !$user->hasPermission('manage_products')) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
         $restaurant = $this->authorizeRestaurant($restaurantId);
         $catalog = $restaurant->catalogs()->find($catalogId);
         if (!$catalog) return response()->json(['message' => 'Catálogo no encontrado'], 404);
@@ -282,7 +217,7 @@ class CatalogController extends Controller
         if (!$section) return response()->json(['message' => 'Sección no encontrada'], 404);
 
         $this->catalogService->deleteSection($section);
-        Cache::forget(CacheKeys::restaurantCatalogs((int) $restaurantId));
+        $this->catalogService->forgetRestaurantCache((int) $restaurantId);
 
         return response()->json(['message' => 'Sección eliminada']);
     }

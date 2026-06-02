@@ -64,6 +64,7 @@
               <span class="limit-item" title="Restaurantes">🏠 {{ u.max_restaurants ?? '∞' }}</span>
               <span class="limit-item" title="Catálogos">📋 {{ u.max_catalogs ?? '∞' }}</span>
               <span class="limit-item" title="Productos">🍽️ {{ u.max_products ?? '∞' }}</span>
+              <span class="limit-item" :title="u.can_upload_images ? 'Puede subir imágenes' : 'Sin acceso a imágenes'">🖼️ {{ u.can_upload_images ? 'Sí' : 'No' }}</span>
             </td>
             <td>
               <span class="status-badge" :class="`status-${u.status}`">{{ statusLabel(u.status) }}</span>
@@ -125,7 +126,7 @@
             </select>
           </div>
 
-          <div class="limits-section">
+            <div class="limits-section">
             <div class="limits-title">Límites del administrador</div>
             <small class="limits-hint">Dejar en blanco para acceso ilimitado.</small>
             <div class="limits-grid">
@@ -141,6 +142,20 @@
                 <label for="u-max-products">🍽️ Máx. productos:</label>
                 <input id="u-max-products" v-model.number="form.max_products" type="number" min="0" max="9999" placeholder="Sin límite" />
               </div>
+            </div>
+            <div class="form-group premium-toggle">
+              <label class="toggle-label">
+                <input type="checkbox" v-model="form.can_upload_images" />
+                <span>🖼️ Permitir subir imágenes de productos <span class="badge-premium">Premium</span></span>
+              </label>
+              <small class="limits-hint">Activa esta opción para cuentas con plan de pago. Genera costes de almacenamiento en la nube.</small>
+            </div>
+            <div class="form-group premium-toggle">
+              <label class="toggle-label">
+                <input type="checkbox" v-model="form.can_export_pdf" />
+                <span>📄 Permitir exportar carta en PDF <span class="badge-premium">Premium</span></span>
+              </label>
+              <small class="limits-hint">Activa esta opción para permitir descargar el menú como PDF. Consume CPU del servidor.</small>
             </div>
           </div>
 
@@ -271,7 +286,7 @@ const deleteConfirmed = ref(false)
 const toast = ref({ show: false, type: 'success', message: '' })
 let toastTimer = null
 
-const form = ref({ id: null, name: '', email: '', phone: '', password: '', role_id: null, status: 'active', max_restaurants: null, max_catalogs: null, max_products: null })
+const form = ref({ id: null, name: '', email: '', phone: '', password: '', role_id: null, status: 'active', max_restaurants: null, max_catalogs: null, max_products: null, can_upload_images: false, can_export_pdf: false })
 
 function showToast(msg, type = 'success') {
   if (toastTimer) clearTimeout(toastTimer)
@@ -327,7 +342,7 @@ async function fetchDefaults() {
 }
 
 function resetForm() {
-  form.value = { id: null, name: '', email: '', phone: '', password: '', role_id: roles.value[0]?.id || null, status: 'active', max_restaurants: defaults.value.max_restaurants, max_catalogs: defaults.value.max_catalogs, max_products: defaults.value.max_products }
+  form.value = { id: null, name: '', email: '', phone: '', password: '', role_id: roles.value[0]?.id || null, status: 'active', max_restaurants: defaults.value.max_restaurants, max_catalogs: defaults.value.max_catalogs, max_products: defaults.value.max_products, can_upload_images: false, can_export_pdf: false }
 }
 
 function openCreateModal() {
@@ -351,6 +366,8 @@ function openEditModal(user) {
     max_restaurants: user.max_restaurants ?? null,
     max_catalogs: user.max_catalogs ?? null,
     max_products: user.max_products ?? null,
+    can_upload_images: user.can_upload_images ?? false,
+    can_export_pdf: user.can_export_pdf ?? false,
   }
   showFormModal.value = true
 }
@@ -370,6 +387,8 @@ async function saveUser() {
       max_restaurants: form.value.max_restaurants === '' ? null : form.value.max_restaurants,
       max_catalogs:    form.value.max_catalogs    === '' ? null : form.value.max_catalogs,
       max_products:    form.value.max_products    === '' ? null : form.value.max_products,
+      can_upload_images: form.value.can_upload_images,
+      can_export_pdf: form.value.can_export_pdf,
     }
 
     if (form.value.password) {
@@ -612,6 +631,10 @@ function setRankingPeriod(period) {
 .limits-hint { font-size: 0.8rem; color: #94a3b8; display: block; margin-bottom: 0.75rem; }
 .limits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
 .limits-grid .form-group { margin-bottom: 0; }
+.premium-toggle { margin-top: 0.75rem; border-top: 1px solid #e2e8f0; padding-top: 0.75rem; }
+.toggle-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+.toggle-label input[type="checkbox"] { width: 1rem; height: 1rem; cursor: pointer; }
+.badge-premium { background: #fef9c3; color: #854d0e; font-size: 0.7rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 4px; border: 1px solid #fde047; }
 
 .btn-delete-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
 

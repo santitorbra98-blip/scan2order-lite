@@ -44,6 +44,16 @@
           </div>
         </details>
 
+        <div v-if="canUploadImages" class="form-group">
+          <label>🖼️ Imagen del producto:</label>
+          <div v-if="currentImageUrl && !form.removeImage" class="image-preview">
+            <img :src="currentImageUrl" alt="Imagen actual" />
+            <button type="button" class="btn-remove-image" @click="form.removeImage = true">Eliminar imagen</button>
+          </div>
+          <input v-if="!currentImageUrl || form.removeImage" type="file" class="file-input" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" @change="onFileChange" />
+          <small>Máx. 5 MB. Formatos: JPEG, PNG, GIF, WEBP.</small>
+        </div>
+
         <div v-if="error" class="error">{{ error }}</div>
         <div class="form-actions">
           <button type="button" @click="$emit('close')" class="btn-cancel">Cancelar</button>
@@ -57,7 +67,7 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue'
+import { reactive, ref, computed, watch } from 'vue'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -66,13 +76,25 @@ const props = defineProps({
   dietOptions: { type: Array, default: () => [] },
   saving: Boolean,
   error: { type: String, default: null },
+  canUploadImages: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'save'])
 
-const form = reactive({ name: '', description: '', price: 0, isNew: false, allergens: [], dietTags: [] })
+const form = reactive({ name: '', description: '', price: 0, isNew: false, allergens: [], dietTags: [], removeImage: false })
+const selectedFile = ref(null)
+
+const currentImageUrl = computed(() => {
+  if (!props.editing) return null
+  return props.editing.image ?? null
+})
+
+function onFileChange(e) {
+  selectedFile.value = e.target.files[0] ?? null
+}
 
 watch(() => props.editing, (val) => {
+  selectedFile.value = null
   if (val) {
     form.name = val.name ?? ''
     form.description = val.description ?? ''
@@ -80,6 +102,7 @@ watch(() => props.editing, (val) => {
     form.isNew = Boolean(val.is_new)
     form.allergens = [...(val.allergens ?? [])]
     form.dietTags = [...(val.diet_tags ?? [])]
+    form.removeImage = false
   } else {
     form.name = ''
     form.description = ''
@@ -87,11 +110,12 @@ watch(() => props.editing, (val) => {
     form.isNew = false
     form.allergens = []
     form.dietTags = []
+    form.removeImage = false
   }
 }, { immediate: true })
 
 function handleSubmit() {
-  emit('save', { form: { ...form } })
+  emit('save', { form: { ...form }, imageFile: selectedFile.value })
 }
 </script>
 

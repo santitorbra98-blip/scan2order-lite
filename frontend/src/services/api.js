@@ -149,6 +149,45 @@ const apiClient = {
   delete(endpoint, data = null) {
     return this.request('DELETE', endpoint, data)
   },
+  /**
+   * Download a binary response (PDF, CSV…) and trigger a browser save-as dialog.
+   * @param {string} endpoint  API path
+   * @param {string} filename  Suggested filename for the downloaded file
+   * @param {string} accept    MIME type sent in the Accept header
+   */
+  async downloadBlob(endpoint, filename, accept = 'application/octet-stream') {
+    const controller = new AbortController()
+    const timeoutId  = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
+    try {
+      const headers = { Accept: accept }
+      const token = getToken()
+      if (token) headers['Authorization'] = `Bearer ${token}`
+      const xsrfToken = getCsrfToken()
+      if (xsrfToken) headers['X-XSRF-TOKEN'] = xsrfToken
+
+      const response = await fetch(`${baseURL}${endpoint}`, {
+        credentials: 'include',
+        signal: controller.signal,
+        headers,
+      })
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}))
+        throw { status: response.status, message: err.message || `HTTP ${response.status}` }
+      }
+
+      const blob = await response.blob()
+      const url  = URL.createObjectURL(blob)
+      const a    = document.createElement('a')
+      a.href     = url
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      clearTimeout(timeoutId)
+    }
+  },
   async upload(endpoint, formData) {
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)

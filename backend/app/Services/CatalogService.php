@@ -8,7 +8,9 @@ use App\Models\Product;
 use App\Models\Restaurant;
 use App\Models\Section;
 use App\Models\User;
+use App\Support\CacheKeys;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -17,6 +19,63 @@ class CatalogService
     private function imageDisk(): string
     {
         return config('filesystems.image_disk', 'public');
+    }
+
+    /**
+     * Invalidate the public catalog cache for the given restaurant.
+     * Controllers call this instead of referencing CacheKeys directly.
+     */
+    public function forgetRestaurantCache(int $restaurantId): void
+    {
+        Cache::forget(CacheKeys::restaurantCatalogs($restaurantId));
+    }
+
+    /**
+     * Build the catalog query with section/product eager-loads already applied.
+     * Encapsulates the nested query logic so controllers stay thin.
+     */
+    public function buildCatalogsQuery(Restaurant $restaurant, bool $isManagementView, ?string $search, ?bool $activeFilter)
+    {
+        $query = $restaurant->catalogs()->orderBy('order');
+
+        if (!$isManagementView) {
+            $query->where('active', true);
+        }
+
+        $query->with(['sections' => function ($q) use ($isManagementView, $search, $activeFilter) {
+            if (!$isManagementView) {
+                $q->where('active', true);
+            }
+            $q->orderBy('order')
+              ->with(['products' => function ($pq) use ($isManagementView, $search, $activeFilter) {
+                  if (!$isManagementView) {
+                      $pq->where('active', true);
+                  }
+                  $pq->when($search, fn ($q, $s) => $q->where('name', 'ilike', "%{$s}%"))
+                     ->when($activeFilter !== null, fn ($q) => $q->where('active', $activeFilter));
+                  $pq->orderBy('name');
+              }]);
+        }]);
+
+        return $query;
+    }
+
+    /**
+     * Fetch catalogs for display, applying the public cache for non-management views.
+     */
+    public function getCatalogsForDisplay(Restaurant $restaurant, bool $isManagementView, ?string $search, ?bool $activeFilter)
+    {
+        $query = $this->buildCatalogsQuery($restaurant, $isManagementView, $search, $activeFilter);
+
+        if ($isManagementView) {
+            return $query->get();
+        }
+
+        return Cache::remember(
+            CacheKeys::restaurantCatalogs($restaurant->id),
+            CacheKeys::CATALOG_TTL,
+            fn () => $query->get()
+        );
     }
 
     public function storeProductImage($image): string

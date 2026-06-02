@@ -31,6 +31,8 @@ class UserResource extends JsonResource
             'max_restaurants' => $this->max_restaurants,
             'max_catalogs'    => $this->max_catalogs,
             'max_products'    => $this->max_products,
+            'can_upload_images' => (bool) $this->can_upload_images,
+            'can_export_pdf'    => (bool) $this->can_export_pdf,
             'avatar' => $this->avatar,
             'terms_accepted_at' => $this->terms_accepted_at?->toIso8601String(),
             'privacy_accepted_at' => $this->privacy_accepted_at?->toIso8601String(),

@@ -31,6 +31,8 @@ class User extends Authenticatable
         'max_restaurants',
         'max_catalogs',
         'max_products',
+        'can_upload_images',
+        'can_export_pdf',
     ];
 
     protected $hidden = [
@@ -45,7 +47,10 @@ class User extends Authenticatable
         'privacy_accepted_at' => 'datetime',
         'marketing_consent_at' => 'datetime',        'max_restaurants'     => 'integer',
         'max_catalogs'        => 'integer',
-        'max_products'        => 'integer',    ];
+        'max_products'        => 'integer',
+        'can_upload_images'   => 'boolean',
+        'can_export_pdf'      => 'boolean',
+    ];
 
     public function role()
     {

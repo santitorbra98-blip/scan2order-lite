@@ -40,11 +40,11 @@
       <h2 class="card-title">Cambiar contraseña</h2>
       <p class="card-hint">Recibirás un código de verificación en tu correo actual para confirmar el cambio.</p>
 
-      <div v-if="!pwCodeSent">
-        <div v-if="pwRequestError" class="error">{{ pwRequestError }}</div>
+      <div v-if="!pwFlow.codeSent.value">
+        <div v-if="pwFlow.requestError.value" class="error">{{ pwFlow.requestError.value }}</div>
         <div class="form-actions">
-          <button class="btn-secondary" :disabled="pwRequesting" @click="requestPasswordChange">
-            {{ pwRequesting ? 'Enviando código...' : 'Enviar código de verificación' }}
+          <button class="btn-secondary" :disabled="pwFlow.requesting.value" @click="requestPasswordChange">
+            {{ pwFlow.requesting.value ? 'Enviando código...' : 'Enviar código de verificación' }}
           </button>
         </div>
       </div>
@@ -88,11 +88,11 @@
             />
           </div>
         </div>
-        <div v-if="pwError" class="error">{{ pwError }}</div>
+        <div v-if="pwFlow.error.value" class="error">{{ pwFlow.error.value }}</div>
         <div class="form-actions">
-          <button type="button" class="btn-text" @click="pwCodeSent = false">Cancelar</button>
-          <button type="submit" class="btn-primary" :disabled="pwSaving">
-            {{ pwSaving ? 'Cambiando...' : 'Cambiar contraseña' }}
+          <button type="button" class="btn-text" @click="pwFlow.reset()">Cancelar</button>
+          <button type="submit" class="btn-primary" :disabled="pwFlow.saving.value">
+            {{ pwFlow.saving.value ? 'Cambiando...' : 'Cambiar contraseña' }}
           </button>
         </div>
       </form>
@@ -103,7 +103,7 @@
       <h2 class="card-title">Cambiar email</h2>
       <p class="card-hint">Se enviará un código al nuevo correo para verificar que te pertenece.</p>
 
-      <div v-if="!emailCodeSent">
+      <div v-if="!emailFlow.codeSent.value">
         <form @submit.prevent="requestEmailChange" class="profile-form">
           <div class="form-group">
             <label for="email-new">Nuevo email</label>
@@ -117,10 +117,10 @@
               autocomplete="email"
             />
           </div>
-          <div v-if="emailRequestError" class="error">{{ emailRequestError }}</div>
+          <div v-if="emailFlow.requestError.value" class="error">{{ emailFlow.requestError.value }}</div>
           <div class="form-actions">
-            <button type="submit" class="btn-secondary" :disabled="emailRequesting">
-              {{ emailRequesting ? 'Enviando código...' : 'Enviar código al nuevo correo' }}
+            <button type="submit" class="btn-secondary" :disabled="emailFlow.requesting.value">
+              {{ emailFlow.requesting.value ? 'Enviando código...' : 'Enviar código al nuevo correo' }}
             </button>
           </div>
         </form>
@@ -143,11 +143,11 @@
             autocomplete="one-time-code"
           />
         </div>
-        <div v-if="emailError" class="error">{{ emailError }}</div>
+        <div v-if="emailFlow.error.value" class="error">{{ emailFlow.error.value }}</div>
         <div class="form-actions">
-          <button type="button" class="btn-text" @click="emailCodeSent = false">Cancelar</button>
-          <button type="submit" class="btn-primary" :disabled="emailSaving">
-            {{ emailSaving ? 'Verificando...' : 'Confirmar cambio de email' }}
+          <button type="button" class="btn-text" @click="emailFlow.reset()">Cancelar</button>
+          <button type="submit" class="btn-primary" :disabled="emailFlow.saving.value">
+            {{ emailFlow.saving.value ? 'Verificando...' : 'Confirmar cambio de email' }}
           </button>
         </div>
       </form>
@@ -196,20 +196,13 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../../services/api'
 import { useAuthStore } from '../../stores/auth'
+import { useToast } from '../../composables/useToast'
+import { useMfaFlow } from '../../composables/useMfaFlow'
 
 const auth   = useAuthStore()
 const router = useRouter()
 
-// ─── Toast ────────────────────────────────────────────────────
-
-const toast    = ref({ show: false, type: 'success', message: '' })
-let toastTimer = null
-
-function showToast(msg, type = 'success') {
-  if (toastTimer) clearTimeout(toastTimer)
-  toast.value = { show: true, type, message: msg }
-  toastTimer  = setTimeout(() => { toast.value.show = false }, 3000)
-}
+const { toast, showToast } = useToast()
 
 // ─── Personal data ────────────────────────────────────────────
 
@@ -241,81 +234,43 @@ async function saveProfile() {
 
 // ─── Password change ──────────────────────────────────────────
 
-const pwCodeSent    = ref(false)
-const pwRequesting  = ref(false)
-const pwSaving      = ref(false)
-const pwRequestError = ref(null)
-const pwError       = ref(null)
-const pwForm        = ref({ code: '', password: '', password_confirmation: '' })
+const pwFlow = useMfaFlow('/profile/request-password-change', '/profile/confirm-password-change')
+const pwForm = ref({ code: '', password: '', password_confirmation: '' })
 
 async function requestPasswordChange() {
-  pwRequesting.value  = true
-  pwRequestError.value = null
-  try {
-    await api.post('/profile/request-password-change', {})
-    pwCodeSent.value = true
-    pwForm.value     = { code: '', password: '', password_confirmation: '' }
-  } catch (err) {
-    pwRequestError.value = err.message || 'Error al enviar el código'
-  } finally {
-    pwRequesting.value = false
+  await pwFlow.requestCode({})
+  if (pwFlow.codeSent.value) {
+    pwForm.value = { code: '', password: '', password_confirmation: '' }
   }
 }
 
 async function confirmPasswordChange() {
-  pwSaving.value = true
-  pwError.value  = null
   try {
-    await api.post('/profile/confirm-password-change', pwForm.value)
-    pwCodeSent.value = false
-    pwForm.value     = { code: '', password: '', password_confirmation: '' }
+    await pwFlow.confirmCode(pwForm.value)
+    pwForm.value = { code: '', password: '', password_confirmation: '' }
     showToast('Contraseña actualizada correctamente')
-  } catch (err) {
-    pwError.value = err.message || 'Error al cambiar la contraseña'
-  } finally {
-    pwSaving.value = false
-  }
+  } catch { /* error shown via pwFlow.error */ }
 }
 
 // ─── Email change ─────────────────────────────────────────────
 
-const emailCodeSent    = ref(false)
-const emailRequesting  = ref(false)
-const emailSaving      = ref(false)
-const emailRequestError = ref(null)
-const emailError       = ref(null)
-const emailForm        = ref({ new_email: '', code: '' })
+const emailFlow = useMfaFlow('/profile/request-email-change', '/profile/confirm-email-change')
+const emailForm = ref({ new_email: '', code: '' })
 
 async function requestEmailChange() {
-  emailRequesting.value  = true
-  emailRequestError.value = null
-  try {
-    await api.post('/profile/request-email-change', { new_email: emailForm.value.new_email })
-    emailCodeSent.value  = true
+  await emailFlow.requestCode({ new_email: emailForm.value.new_email })
+  if (emailFlow.codeSent.value) {
     emailForm.value.code = ''
-  } catch (err) {
-    emailRequestError.value = err.message || 'Error al enviar el código'
-  } finally {
-    emailRequesting.value = false
   }
 }
 
 async function confirmEmailChange() {
-  emailSaving.value = true
-  emailError.value  = null
   try {
-    const data = await api.post('/profile/confirm-email-change', { code: emailForm.value.code })
-    if (auth.user) {
-      auth.user.email = data.email
-    }
-    emailCodeSent.value = false
-    emailForm.value     = { new_email: '', code: '' }
+    const data = await emailFlow.confirmCode({ code: emailForm.value.code })
+    if (auth.user) auth.user.email = data.email
+    emailForm.value = { new_email: '', code: '' }
     showToast('Email actualizado correctamente')
-  } catch (err) {
-    emailError.value = err.message || 'Error al verificar el código'
-  } finally {
-    emailSaving.value = false
-  }
+  } catch { /* error shown via emailFlow.error */ }
 }
 
 // ─── Delete account ───────────────────────────────────────────

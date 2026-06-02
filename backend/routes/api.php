@@ -102,22 +102,22 @@ Route::middleware(['auth:sanctum', 'role:admin,superadmin'])->group(function () 
     Route::put('/restaurants/{restaurant}', [RestaurantController::class, 'update']);
     Route::delete('/restaurants/{restaurant}', [RestaurantController::class, 'destroy']);
 
-    // Catalog management
-    Route::get('/restaurants/{restaurantId}/catalogs/export-pdf', [CatalogController::class, 'exportCatalogsPdf']);
-    Route::post('/restaurants/{restaurantId}/catalogs/import-json', [CatalogController::class, 'importJson']);
-    Route::post('/restaurants/{restaurantId}/catalogs', [CatalogController::class, 'storeCatalog']);
-    Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}', [CatalogController::class, 'updateCatalog']);
-    Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}', [CatalogController::class, 'deleteCatalog']);
+    // Catalog, section and product management — requires manage_products permission
+    Route::middleware('permission:manage_products')->group(function () {
+        Route::get('/restaurants/{restaurantId}/catalogs/export-pdf', [CatalogController::class, 'exportCatalogsPdf']);
+        Route::post('/restaurants/{restaurantId}/catalogs/import-json', [CatalogController::class, 'importJson']);
+        Route::post('/restaurants/{restaurantId}/catalogs', [CatalogController::class, 'storeCatalog']);
+        Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}', [CatalogController::class, 'updateCatalog']);
+        Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}', [CatalogController::class, 'deleteCatalog']);
 
-    // Section management
-    Route::post('/restaurants/{restaurantId}/catalogs/{catalogId}/sections', [CatalogController::class, 'storeSection']);
-    Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}', [CatalogController::class, 'updateSection']);
-    Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}', [CatalogController::class, 'deleteSection']);
+        Route::post('/restaurants/{restaurantId}/catalogs/{catalogId}/sections', [CatalogController::class, 'storeSection']);
+        Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}', [CatalogController::class, 'updateSection']);
+        Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}', [CatalogController::class, 'deleteSection']);
 
-    // Product management
-    Route::post('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}/products', [ProductController::class, 'storeProduct']);
-    Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}/products/{productId}', [ProductController::class, 'updateProduct']);
-    Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}/products/{productId}', [ProductController::class, 'deleteProduct']);
+        Route::post('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}/products', [ProductController::class, 'storeProduct']);
+        Route::put('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}/products/{productId}', [ProductController::class, 'updateProduct']);
+        Route::delete('/restaurants/{restaurantId}/catalogs/{catalogId}/sections/{sectionId}/products/{productId}', [ProductController::class, 'deleteProduct']);
+    });
 });
 
 // Superadmin-only routes

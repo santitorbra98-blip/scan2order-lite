@@ -34,7 +34,7 @@
       <div class="tools-row">
         <input v-model="searchQuery" type="text" class="search-input" placeholder="Buscar en catálogos, secciones y productos..." />
         <button v-if="searchQuery" class="btn-clear-search" @click="searchQuery = ''; fetchCatalogs()">Limpiar</button>
-        <button class="btn-export-pdf" :disabled="isExportingPdf" @click="exportMenuPdf">
+        <button v-if="canExportPdf" class="btn-export-pdf" :disabled="isExportingPdf" @click="exportMenuPdf">
           {{ isExportingPdf ? 'Generando PDF...' : '⬇️ Exportar PDF' }}
         </button>
         <button class="btn-import-json" @click="showImportJsonModal = true">📥 Importar JSON</button>
@@ -147,6 +147,7 @@
       :diet-options="DIET_OPTIONS"
       :saving="isSavingProduct"
       :error="productFormError"
+      :can-upload-images="canUploadImages"
       @close="closeProductModal"
       @save="saveProduct"
     />
@@ -166,9 +167,10 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { api, getToken } from '../../services/api'
+import { api } from '../../services/api'
 import { catalogService } from '../../services/catalogService'
 import { useToast } from '../../composables/useToast'
+import { useAuthStore } from '../../stores/auth'
 import { ALLERGEN_OPTIONS, getAllergenMeta } from '../../constants/allergens'
 import { DIET_TYPE_OPTIONS as DIET_OPTIONS } from '../../constants/dietTypes'
 import QrPrintModal from '../../components/QrPrintModal.vue'
@@ -178,6 +180,9 @@ import ProductModal from '../../components/ProductModal.vue'
 import ImportJsonModal from '../../components/ImportJsonModal.vue'
 
 const { toast, showToast } = useToast()
+const authStore = useAuthStore()
+const canUploadImages = computed(() => authStore.user?.can_upload_images || authStore.hasRole('superadmin'))
+const canExportPdf = computed(() => authStore.user?.can_export_pdf || authStore.hasRole('superadmin'))
 
 // State
 const restaurantsStats = ref([])
@@ -332,7 +337,7 @@ function openProductForm(catalog, section, product = null) {
 function editProduct(catalog, section, product) { openProductForm(catalog, section, product) }
 function closeProductModal() { showProductModal.value = false; editingProduct.value = null }
 
-async function saveProduct({ form }) {
+async function saveProduct({ form, imageFile }) {
   isSavingProduct.value = true
   productFormError.value = null
   const cId = productCatalog.value.id
@@ -347,8 +352,13 @@ async function saveProduct({ form }) {
     form.allergens.forEach(a => fd.append('allergens[]', a))
     form.dietTags.forEach(d => fd.append('diet_tags[]', d))
 
+    if (imageFile) {
+      fd.append('image', imageFile)
+    }
+
     if (editingProduct.value) {
       fd.append('_method', 'PUT')
+      if (form.removeImage) fd.append('remove_image', '1')
       await catalogService.updateProduct(selectedRestaurantId.value, cId, sId, editingProduct.value.id, fd)
       showToast('Producto actualizado')
     } else {
@@ -400,22 +410,7 @@ async function importFromJson(jsonData) {
 async function exportMenuPdf() {
   isExportingPdf.value = true
   try {
-    const headers = { Accept: 'application/pdf' }
-    const token = getToken()
-    if (token) headers['Authorization'] = `Bearer ${token}`
-    const xsrfMatch = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]*)/)
-    if (xsrfMatch) headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfMatch[1])
-    const response = await fetch(`/api/restaurants/${selectedRestaurantId.value}/catalogs/export-pdf`, {
-      credentials: 'include', headers,
-    })
-    if (!response.ok) throw new Error('Error al generar PDF')
-    const blob = await response.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `menu-${selectedRestaurantName.value}.pdf`
-    a.click()
-    URL.revokeObjectURL(url)
+    await catalogService.exportPdf(selectedRestaurantId.value, selectedRestaurantName.value)
   } catch (err) { showToast(err.message || 'Error al exportar', 'error') }
   finally { isExportingPdf.value = false }
 }
