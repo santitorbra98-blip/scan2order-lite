@@ -20,7 +20,7 @@
         <p class="stat-sub">últimos 30 días</p>
       </StatsCard>
       <StatsCard icon="📈">
-        <p class="stat-label">Visitas totales</p>
+        <p class="stat-label">Visitantes únicos</p>
         <p class="stat-value">{{ stats.allTimeVisits }}</p>
         <p class="stat-sub">histórico</p>
       </StatsCard>
@@ -98,7 +98,7 @@ async function fetchStats() {
       stats.totalVisits = visitsRes.value.total_visits ?? 0
     }
     if (allVisitsRes.status === 'fulfilled' && allVisitsRes.value) {
-      stats.allTimeVisits = allVisitsRes.value.total_visits ?? 0
+      stats.allTimeVisits = allVisitsRes.value.unique_visits ?? 0
     }
   } catch (err) {
     console.error('Error cargando estadísticas:', err)
