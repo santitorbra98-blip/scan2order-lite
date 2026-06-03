@@ -86,7 +86,7 @@ class UserController extends Controller
             'max_restaurants' => $data['max_restaurants'] ?? null,
             'max_catalogs'    => $data['max_catalogs'] ?? null,
             'max_products'    => $data['max_products'] ?? null,
-            'can_upload_images' => $data['can_upload_images'] ?? true,
+            'can_upload_images' => $data['can_upload_images'] ?? false,
             'can_export_pdf'    => $data['can_export_pdf'] ?? false,
         ]);
 

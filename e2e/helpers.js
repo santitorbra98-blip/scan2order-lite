@@ -6,7 +6,7 @@
  */
 
 const MAILPIT_URL = 'http://localhost:8025'
-const API_URL = 'http://localhost:8080/api'
+const API_URL = 'https://localhost:8443/api'
 
 /**
  * Espera hasta que Mailpit reciba un mensaje para `toAddress` y extrae
