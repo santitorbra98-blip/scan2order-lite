@@ -154,15 +154,15 @@ class UserController extends Controller
         }
 
         // Log audit BEFORE deleting the user
-        $this->auditAction(
-            actor: $currentUser,
-            action: 'user.deleted',
-            resourceType: 'user',
-            resourceId: $user->id,
-            targetUser: $user,
-            ipAddress: $request->ip(),
-            userAgent: (string) $request->userAgent()
-        );
+            $this->auditAction(
+                actor: $currentUser,
+                action: 'user.deleted',
+                resourceType: 'user',
+                resourceId: $user->id,
+                targetUser: null,
+                ipAddress: $request->ip(),
+                userAgent: (string) $request->userAgent()
+            );
 
         // Delete all restaurants owned by this user (with their images and related data)
         Restaurant::where('created_by', $user->id)->get()->each(
