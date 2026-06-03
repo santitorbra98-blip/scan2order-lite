@@ -183,7 +183,7 @@ import ImportJsonModal from '../../components/ImportJsonModal.vue'
 
 const { toast, showToast } = useToast()
 const authStore = useAuthStore()
-const canUploadImages = computed(() => authStore.user?.can_upload_images || authStore.hasRole('superadmin'))
+const canUploadImages = computed(() => authStore.hasAnyRole(['admin', 'superadmin']) || authStore.user?.can_upload_images)
 const canExportPdf = computed(() => authStore.user?.can_export_pdf || authStore.hasRole('superadmin'))
 
 // State
