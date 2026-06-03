@@ -339,7 +339,7 @@ function openProductForm(catalog, section, product = null) {
 function editProduct(catalog, section, product) { openProductForm(catalog, section, product) }
 function closeProductModal() { showProductModal.value = false; editingProduct.value = null }
 
-async function saveProduct({ form, imageFile }) {
+async function saveProduct({ form, imageFile, removeImage }) {
   isSavingProduct.value = true
   productFormError.value = null
   const cId = productCatalog.value.id
@@ -360,7 +360,7 @@ async function saveProduct({ form, imageFile }) {
 
     if (editingProduct.value) {
       fd.append('_method', 'PUT')
-      if (form.removeImage) fd.append('remove_image', '1')
+      if (removeImage || form.removeImage) fd.append('remove_image', '1')
       await catalogService.updateProduct(selectedRestaurantId.value, cId, sId, editingProduct.value.id, fd)
       showToast('Producto actualizado')
     } else {

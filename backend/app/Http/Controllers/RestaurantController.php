@@ -35,6 +35,7 @@ class RestaurantController extends Controller
     {
         return $restaurant->load([
             'admins' => fn ($query) => $query->select('users.id', 'users.name', 'users.email', 'users.phone'),
+            'creator.role',
         ]);
     }
 
@@ -58,7 +59,7 @@ class RestaurantController extends Controller
 
         if ($currentUser && $currentUser->hasRole('superadmin')) {
             return RestaurantResource::collection(
-                Restaurant::with(['admins' => $adminSelector, 'creator'])->paginate(25)
+                Restaurant::with(['admins' => $adminSelector, 'creator.role'])->paginate(25)
             );
         }
 

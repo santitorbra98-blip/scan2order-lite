@@ -1,0 +1,1 @@
+{"version":2,"defects":[],"times":{"Tests\\Feature\\RestaurantAndProductVisibilityTest::test_superadmin_restaurant_listing_includes_creator_role":0.359,"Tests\\Feature\\RestaurantAndProductVisibilityTest::test_superadmin_can_export_pdf_without_explicit_flag":0.345,"Tests\\Feature\\RestaurantAndProductVisibilityTest::test_uploaded_product_image_is_exposed_to_public_menu":0.203}}

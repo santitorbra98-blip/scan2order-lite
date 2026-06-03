@@ -85,7 +85,7 @@ class CatalogController extends Controller
     public function exportCatalogsPdf($restaurantId)
     {
         $user = \Illuminate\Support\Facades\Auth::user();
-        if (!$user->can_export_pdf && !$user->hasRole('superadmin')) {
+        if (!$user || (!$user->can_export_pdf && !$user->hasRole('superadmin'))) {
             return response()->json(['message' => 'Tu cuenta no tiene permisos para exportar PDF. Contacta con el administrador.'], 403);
         }
 

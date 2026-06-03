@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\Drivers\Gd\Driver as GdDriver;
+use Intervention\Image\ImageManager;
 
 class RestaurantService
 {
@@ -19,19 +21,23 @@ class RestaurantService
 
     public function storeRestaurantImage($image): string
     {
-        $disk = $this->imageDisk();
-        // Use the MIME-detected extension (not the client-supplied one) to prevent
-        // a polyglot file (e.g. GIF+PHP code named evil.php) from being stored with
-        // a .php extension and later executed by PHP-FPM.
-        $ext = $image->guessExtension() ?: 'bin';
-        $imageName = Str::uuid()->toString() . '.' . $ext;
+        $disk      = $this->imageDisk();
+        $imageName = Str::uuid()->toString() . '.jpg';
+        $path      = 'restaurants/' . $imageName;
+
+        // Compress: scale down to max 1200 px wide and encode as JPEG 80 %.
+        $manager = new ImageManager(new GdDriver());
+        $encoded = $manager->read($image->getRealPath())
+            ->scaleDown(width: 1200)
+            ->toJpeg(quality: 80);
+
         // Do NOT pass ['visibility' => 'public'] — R2 rejects per-object ACL headers.
         // Public access is controlled at bucket level in Cloudflare dashboard.
-        $result = Storage::disk($disk)->putFileAs('restaurants', $image, $imageName);
-        if ($result === false) {
+        $ok = Storage::disk($disk)->put($path, (string) $encoded);
+        if ($ok === false) {
             throw new \RuntimeException('No se pudo guardar la imagen del restaurante.');
         }
-        return 'restaurants/' . $imageName;
+        return $path;
     }
 
     public function deleteStoredRestaurantImage(?string $imagePath): void

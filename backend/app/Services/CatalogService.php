@@ -13,6 +13,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Intervention\Image\Drivers\Gd\Driver as GdDriver;
+use Intervention\Image\ImageManager;
 
 class CatalogService
 {
@@ -80,21 +82,26 @@ class CatalogService
 
     public function storeProductImage($image): string
     {
-        $disk = $this->imageDisk();
-        // Use the MIME-detected extension (not the client-supplied one) to prevent
-        // a polyglot file (e.g. GIF+PHP code named evil.php) from being stored with
-        // a .php extension and later executed by PHP-FPM.
-        $ext = $image->guessExtension() ?: 'bin';
-        $imageName = Str::uuid()->toString() . '.' . $ext;
+        $disk      = $this->imageDisk();
+        $imageName = Str::uuid()->toString() . '.jpg';
+        $path      = 'products/' . $imageName;
+
+        // Compress: scale down to max 1200 px wide and encode as JPEG 80 %.
+        // Reduces typical phone uploads from 3–8 MB to ~100–400 KB.
+        $manager = new ImageManager(new GdDriver());
+        $encoded = $manager->read($image->getRealPath())
+            ->scaleDown(width: 1200)
+            ->toJpeg(quality: 80);
+
         // Do NOT pass ['visibility' => 'public'] — R2 rejects per-object ACL headers.
         // Public access is controlled at bucket level in Cloudflare dashboard.
-        $storedPath = Storage::disk($disk)->putFileAs('products', $image, $imageName);
+        $ok = Storage::disk($disk)->put($path, (string) $encoded);
 
-        if ($storedPath === false) {
+        if ($ok === false) {
             throw new \RuntimeException('No se pudo guardar la imagen del producto');
         }
 
-        return 'products/' . $imageName;
+        return $path;
     }
 
     public function deleteStoredProductImages(iterable $products): void
@@ -181,6 +188,9 @@ class CatalogService
 
         if ($imageFile) {
             $data['image'] = $this->storeProductImage($imageFile);
+            if (!array_key_exists('show_image', $data)) {
+                $data['show_image'] = true;
+            }
         }
 
         $product = $section->products()->create($data);
@@ -194,6 +204,9 @@ class CatalogService
         if ($removeImage && $product->image) {
             Storage::disk($this->imageDisk())->delete($product->image);
             $data['image'] = null;
+            if (!array_key_exists('show_image', $data)) {
+                $data['show_image'] = false;
+            }
         }
 
         if ($imageFile) {
@@ -201,6 +214,9 @@ class CatalogService
                 Storage::disk($this->imageDisk())->delete($product->image);
             }
             $data['image'] = $this->storeProductImage($imageFile);
+            if (!array_key_exists('show_image', $data)) {
+                $data['show_image'] = true;
+            }
         }
 
         $product->update($data);

@@ -46,12 +46,13 @@
 
         <div v-if="canUploadImages" class="form-group">
           <label>🖼️ Imagen del producto:</label>
-          <div v-if="currentImageUrl && !form.removeImage" class="image-preview">
-            <img :src="currentImageUrl" alt="Imagen actual" />
-            <button type="button" class="btn-remove-image" @click="form.removeImage = true">Eliminar imagen</button>
-          </div>
-          <input v-if="!currentImageUrl || form.removeImage" type="file" class="file-input" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" @change="onFileChange" />
+          <input ref="fileInput" type="file" class="file-input" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" @change="onFileChange" />
           <small>Máx. 5 MB. Formatos: JPEG, PNG, GIF, WEBP.</small>
+          <div v-if="currentImageUrl" class="image-preview">
+            <img :src="currentImageUrl" alt="Imagen actual" />
+            <button type="button" class="btn-remove-image" @click="removeImage">Eliminar imagen</button>
+          </div>
+          <div v-if="imageError" class="error">{{ imageError }}</div>
         </div>
 
         <div v-if="error" class="error">{{ error }}</div>
@@ -68,6 +69,7 @@
 
 <script setup>
 import { reactive, ref, computed, watch } from 'vue'
+import { useImageField } from '../composables/useImageField'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -81,20 +83,42 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'save'])
 
+const {
+  inputRef: fileInput,
+  file: imageFile,
+  preview: imagePreview,
+  remove: removeFlag,
+  reset: resetImage,
+  setPreview,
+  handleChange,
+  removeSelection,
+} = useImageField()
+
 const form = reactive({ name: '', description: '', price: 0, isNew: false, allergens: [], dietTags: [], removeImage: false })
-const selectedFile = ref(null)
+const imageError = ref(null)
 
 const currentImageUrl = computed(() => {
-  if (!props.editing) return null
-  return props.editing.image ?? null
+  return imagePreview.value
 })
 
-function onFileChange(e) {
-  selectedFile.value = e.target.files[0] ?? null
+async function onFileChange(event) {
+  imageError.value = null
+  const result = await handleChange(event)
+  if (!result.ok) {
+    imageError.value = result.error
+    return
+  }
+
+  form.removeImage = false
+}
+
+function removeImage() {
+  imageError.value = null
+  form.removeImage = true
+  removeSelection()
 }
 
 watch(() => props.editing, (val) => {
-  selectedFile.value = null
   if (val) {
     form.name = val.name ?? ''
     form.description = val.description ?? ''
@@ -103,6 +127,7 @@ watch(() => props.editing, (val) => {
     form.allergens = [...(val.allergens ?? [])]
     form.dietTags = [...(val.diet_tags ?? [])]
     form.removeImage = false
+    setPreview(val.image ?? null)
   } else {
     form.name = ''
     form.description = ''
@@ -111,11 +136,13 @@ watch(() => props.editing, (val) => {
     form.allergens = []
     form.dietTags = []
     form.removeImage = false
+    imageError.value = null
+    resetImage()
   }
 }, { immediate: true })
 
 function handleSubmit() {
-  emit('save', { form: { ...form }, imageFile: selectedFile.value })
+  emit('save', { form: { ...form }, imageFile: imageFile.value, removeImage: removeFlag.value })
 }
 </script>
 
