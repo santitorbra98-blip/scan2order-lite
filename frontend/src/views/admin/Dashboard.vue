@@ -15,14 +15,14 @@
         <p class="stat-value">{{ stats.products }}</p>
       </StatsCard>
       <StatsCard icon="👁️">
-        <p class="stat-label">Visitas totales</p>
+        <p class="stat-label">Visitas</p>
         <p class="stat-value">{{ stats.totalVisits }}</p>
         <p class="stat-sub">últimos 30 días</p>
       </StatsCard>
-      <StatsCard icon="✨">
-        <p class="stat-label">Visitas únicas</p>
-        <p class="stat-value">{{ stats.uniqueVisits }}</p>
-        <p class="stat-sub">últimos 30 días</p>
+      <StatsCard icon="📈">
+        <p class="stat-label">Visitas totales</p>
+        <p class="stat-value">{{ stats.allTimeVisits }}</p>
+        <p class="stat-sub">histórico</p>
       </StatsCard>
       <StatsCard v-if="isSuperadmin" icon="👥">
         <p class="stat-label">Usuarios</p>
@@ -61,15 +61,16 @@ const auth = useAuthStore()
 const router = useRouter()
 const isSuperadmin = computed(() => auth.hasRole('superadmin'))
 
-const stats = reactive({ restaurants: 0, products: 0, catalogs: 0, users: 0, totalVisits: 0, uniqueVisits: 0 })
+const stats = reactive({ restaurants: 0, products: 0, catalogs: 0, users: 0, totalVisits: 0, allTimeVisits: 0 })
 
 async function fetchStats() {
   try {
-    const [restaurantsRes, statsRes, usersRes, visitsRes] = await Promise.allSettled([
+    const [restaurantsRes, statsRes, usersRes, visitsRes, allVisitsRes] = await Promise.allSettled([
       api.get('/restaurants'),
       api.get('/restaurants/stats'),
       isSuperadmin.value ? api.get('/users') : Promise.resolve(null),
       api.get('/analytics/my-stats?period=30d'),
+      api.get('/analytics/my-stats?period=all'),
     ])
 
     const restaurantsResult = restaurantsRes.status === 'fulfilled' ? restaurantsRes.value : null
@@ -94,8 +95,10 @@ async function fetchStats() {
     }
 
     if (visitsRes.status === 'fulfilled' && visitsRes.value) {
-      stats.totalVisits  = visitsRes.value.total_visits  ?? 0
-      stats.uniqueVisits = visitsRes.value.unique_visits ?? 0
+      stats.totalVisits = visitsRes.value.total_visits ?? 0
+    }
+    if (allVisitsRes.status === 'fulfilled' && allVisitsRes.value) {
+      stats.allTimeVisits = allVisitsRes.value.total_visits ?? 0
     }
   } catch (err) {
     console.error('Error cargando estadísticas:', err)
