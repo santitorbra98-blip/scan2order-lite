@@ -60,7 +60,7 @@ npm run smoke:render
 
 ## CI/CD
 
-- Publicacion de documentacion en Pages: [[.github/workflows/docs-deploy.yml](.github/workflows/docs-deploy.yml)](https://santitorbra98-blip.github.io/scan2order-lite/)
+- Publicacion de documentacion en Pages: (https://santitorbra98-blip.github.io/scan2order-lite/)
 
 ## Seguridad destacada
 
