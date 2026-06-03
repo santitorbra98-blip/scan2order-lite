@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Support\CacheKeys;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
@@ -83,19 +84,29 @@ class CatalogService
     public function storeProductImage($image): string
     {
         $disk      = $this->imageDisk();
-        $imageName = Str::uuid()->toString() . '.jpg';
-        $path      = 'products/' . $imageName;
+        $path = 'products/' . Str::uuid()->toString() . '.jpg';
 
-        // Compress: scale down to max 1200 px wide and encode as JPEG 80 %.
-        // Reduces typical phone uploads from 3–8 MB to ~100–400 KB.
-        $manager = new ImageManager(new GdDriver());
-        $encoded = $manager->read($image->getRealPath())
-            ->scaleDown(width: 1200)
-            ->toJpeg(quality: 80);
+        try {
+            // Compress: scale down to max 1200 px wide and encode as JPEG 80 %.
+            // If processing fails for any reason, fallback to the original upload.
+            $manager = new ImageManager(new GdDriver());
+            $encoded = $manager->read($image->getRealPath())
+                ->scaleDown(width: 1200)
+                ->toJpeg(quality: 80);
 
-        // Do NOT pass ['visibility' => 'public'] — R2 rejects per-object ACL headers.
-        // Public access is controlled at bucket level in Cloudflare dashboard.
-        $ok = Storage::disk($disk)->put($path, (string) $encoded);
+            // Do NOT pass ['visibility' => 'public'] — R2 rejects per-object ACL headers.
+            // Public access is controlled at bucket level in Cloudflare dashboard.
+            $ok = Storage::disk($disk)->put($path, $encoded->toString());
+        } catch (\Throwable $e) {
+            Log::warning('Product image compression failed, storing original upload', [
+                'disk' => $disk,
+                'error' => $e->getMessage(),
+            ]);
+
+            $ext = $image->guessExtension() ?: 'jpg';
+            $path = 'products/' . Str::uuid()->toString() . '.' . $ext;
+            $ok = Storage::disk($disk)->putFileAs('products', $image, basename($path));
+        }
 
         if ($ok === false) {
             throw new \RuntimeException('No se pudo guardar la imagen del producto');

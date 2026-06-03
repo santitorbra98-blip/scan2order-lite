@@ -22,18 +22,28 @@ class RestaurantService
     public function storeRestaurantImage($image): string
     {
         $disk      = $this->imageDisk();
-        $imageName = Str::uuid()->toString() . '.jpg';
-        $path      = 'restaurants/' . $imageName;
+        $path = 'restaurants/' . Str::uuid()->toString() . '.jpg';
 
-        // Compress: scale down to max 1200 px wide and encode as JPEG 80 %.
-        $manager = new ImageManager(new GdDriver());
-        $encoded = $manager->read($image->getRealPath())
-            ->scaleDown(width: 1200)
-            ->toJpeg(quality: 80);
+        try {
+            // Compress: scale down to max 1200 px wide and encode as JPEG 80 %.
+            $manager = new ImageManager(new GdDriver());
+            $encoded = $manager->read($image->getRealPath())
+                ->scaleDown(width: 1200)
+                ->toJpeg(quality: 80);
 
-        // Do NOT pass ['visibility' => 'public'] — R2 rejects per-object ACL headers.
-        // Public access is controlled at bucket level in Cloudflare dashboard.
-        $ok = Storage::disk($disk)->put($path, (string) $encoded);
+            // Do NOT pass ['visibility' => 'public'] — R2 rejects per-object ACL headers.
+            // Public access is controlled at bucket level in Cloudflare dashboard.
+            $ok = Storage::disk($disk)->put($path, $encoded->toString());
+        } catch (\Throwable $e) {
+            Log::warning('Restaurant image compression failed, storing original upload', [
+                'disk' => $disk,
+                'error' => $e->getMessage(),
+            ]);
+
+            $ext = $image->guessExtension() ?: 'jpg';
+            $path = 'restaurants/' . Str::uuid()->toString() . '.' . $ext;
+            $ok = Storage::disk($disk)->putFileAs('restaurants', $image, basename($path));
+        }
         if ($ok === false) {
             throw new \RuntimeException('No se pudo guardar la imagen del restaurante.');
         }
