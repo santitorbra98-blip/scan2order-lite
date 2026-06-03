@@ -17,29 +17,6 @@
       <button v-if="searchTerm" type="button" class="search-clear" @click="searchTerm = ''">✕</button>
     </div>
 
-    <div class="feature-filters">
-      <button
-        class="feature-filter-btn"
-        :class="{ active: featureFilter === null }"
-        @click="setFeatureFilter(null)"
-      >Todos</button>
-      <button
-        class="feature-filter-btn"
-        :class="{ active: featureFilter === 'images' }"
-        @click="setFeatureFilter('images')"
-      >🖼️ Imágenes</button>
-      <button
-        class="feature-filter-btn"
-        :class="{ active: featureFilter === 'pdf' }"
-        @click="setFeatureFilter('pdf')"
-      >📄 PDF</button>
-      <button
-        class="feature-filter-btn"
-        :class="{ active: featureFilter === 'both' }"
-        @click="setFeatureFilter('both')"
-      >⭐ Ambos</button>
-    </div>
-
     <div class="content">
       <div v-if="isLoading" class="loading">Cargando usuarios...</div>
       <div v-else-if="error" class="error">{{ error }}</div>
@@ -87,7 +64,6 @@
               <span class="limit-item" title="Restaurantes">🏠 {{ u.max_restaurants ?? '∞' }}</span>
               <span class="limit-item" title="Catálogos">📋 {{ u.max_catalogs ?? '∞' }}</span>
               <span class="limit-item" title="Productos">🍽️ {{ u.max_products ?? '∞' }}</span>
-              <span class="limit-item" :title="u.can_upload_images ? 'Puede subir imágenes' : 'Sin acceso a imágenes'">🖼️ {{ u.can_upload_images ? 'Sí' : 'No' }}</span>
             </td>
             <td>
               <span class="status-badge" :class="`status-${u.status}`">{{ statusLabel(u.status) }}</span>
@@ -165,20 +141,6 @@
                 <label for="u-max-products">🍽️ Máx. productos:</label>
                 <input id="u-max-products" v-model.number="form.max_products" type="number" min="0" max="9999" placeholder="Sin límite" />
               </div>
-            </div>
-            <div class="form-group premium-toggle">
-              <label class="toggle-label">
-                <input type="checkbox" v-model="form.can_upload_images" />
-                <span>🖼️ Permitir subir imágenes de productos <span class="badge-premium">Premium</span></span>
-              </label>
-              <small class="limits-hint">Activa esta opción para cuentas con plan de pago. Genera costes de almacenamiento en la nube.</small>
-            </div>
-            <div class="form-group premium-toggle">
-              <label class="toggle-label">
-                <input type="checkbox" v-model="form.can_export_pdf" />
-                <span>📄 Permitir exportar carta en PDF <span class="badge-premium">Premium</span></span>
-              </label>
-              <small class="limits-hint">Activa esta opción para permitir descargar el menú como PDF. Consume CPU del servidor.</small>
             </div>
           </div>
 
@@ -288,12 +250,6 @@ const defaults = ref({ max_restaurants: 1, max_catalogs: 20, max_products: null 
 const isLoading = ref(false)
 const error = ref(null)
 const searchTerm = ref('')
-const featureFilter = ref(null) // null | 'images' | 'pdf' | 'both'
-
-function setFeatureFilter(value) {
-  featureFilter.value = value
-  fetchUsers(1)
-}
 
 const filteredUsers = computed(() => {
   const term = searchTerm.value.trim().toLowerCase()
@@ -315,7 +271,7 @@ const deleteConfirmed = ref(false)
 const toast = ref({ show: false, type: 'success', message: '' })
 let toastTimer = null
 
-const form = ref({ id: null, name: '', email: '', phone: '', password: '', role_id: null, status: 'active', max_restaurants: null, max_catalogs: null, max_products: null, can_upload_images: false, can_export_pdf: false })
+const form = ref({ id: null, name: '', email: '', phone: '', password: '', role_id: null, status: 'active', max_restaurants: null, max_catalogs: null, max_products: null })
 
 function showToast(msg, type = 'success') {
   if (toastTimer) clearTimeout(toastTimer)
@@ -337,14 +293,6 @@ async function fetchUsers(page = 1) {
   error.value = null
   try {
     const params = new URLSearchParams({ page })
-    if (featureFilter.value === 'images') {
-      params.append('can_upload_images', 'true')
-    } else if (featureFilter.value === 'pdf') {
-      params.append('can_export_pdf', 'true')
-    } else if (featureFilter.value === 'both') {
-      params.append('can_upload_images', 'true')
-      params.append('can_export_pdf', 'true')
-    }
     const result = await api.get(`/users?${params.toString()}`)
     if (result && result.meta) {
       users.value = result.data
@@ -380,7 +328,7 @@ async function fetchDefaults() {
 }
 
 function resetForm() {
-  form.value = { id: null, name: '', email: '', phone: '', password: '', role_id: roles.value[0]?.id || null, status: 'active', max_restaurants: defaults.value.max_restaurants, max_catalogs: defaults.value.max_catalogs, max_products: defaults.value.max_products, can_upload_images: false, can_export_pdf: false }
+  form.value = { id: null, name: '', email: '', phone: '', password: '', role_id: roles.value[0]?.id || null, status: 'active', max_restaurants: defaults.value.max_restaurants, max_catalogs: defaults.value.max_catalogs, max_products: defaults.value.max_products }
 }
 
 function openCreateModal() {
@@ -404,8 +352,6 @@ function openEditModal(user) {
     max_restaurants: user.max_restaurants ?? null,
     max_catalogs: user.max_catalogs ?? null,
     max_products: user.max_products ?? null,
-    can_upload_images: user.can_upload_images ?? false,
-    can_export_pdf: user.can_export_pdf ?? false,
   }
   showFormModal.value = true
 }
@@ -425,8 +371,6 @@ async function saveUser() {
       max_restaurants: form.value.max_restaurants === '' ? null : form.value.max_restaurants,
       max_catalogs:    form.value.max_catalogs    === '' ? null : form.value.max_catalogs,
       max_products:    form.value.max_products    === '' ? null : form.value.max_products,
-      can_upload_images: form.value.can_upload_images,
-      can_export_pdf: form.value.can_export_pdf,
     }
 
     if (form.value.password) {

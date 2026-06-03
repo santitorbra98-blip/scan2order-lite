@@ -23,14 +23,6 @@ class UserController extends Controller
 
         $query = User::with(['role', 'restaurants'])->orderBy('created_at', 'desc');
 
-        // Feature filters
-        if ($request->query('can_upload_images') !== null) {
-            $query->where('can_upload_images', filter_var($request->query('can_upload_images'), FILTER_VALIDATE_BOOLEAN));
-        }
-        if ($request->query('can_export_pdf') !== null) {
-            $query->where('can_export_pdf', filter_var($request->query('can_export_pdf'), FILTER_VALIDATE_BOOLEAN));
-        }
-
         $users = $query->paginate(25);
 
         return UserResource::collection($users);
@@ -43,14 +35,10 @@ class UserController extends Controller
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
-        $withImages = User::where('can_upload_images', true)->count();
-        $withPdf    = User::where('can_export_pdf', true)->count();
-        $withBoth   = User::where('can_upload_images', true)->where('can_export_pdf', true)->count();
-
         return response()->json([
-            'with_images' => $withImages,
-            'with_pdf'    => $withPdf,
-            'with_both'   => $withBoth,
+            'with_images' => User::count(),
+            'with_pdf'    => User::count(),
+            'with_both'   => User::count(),
         ]);
     }
 
@@ -71,8 +59,6 @@ class UserController extends Controller
             'max_restaurants' => 'nullable|integer|min:0|max:9999',
             'max_catalogs'    => 'nullable|integer|min:0|max:9999',
             'max_products'    => 'nullable|integer|min:0|max:9999',
-            'can_upload_images' => 'nullable|boolean',
-            'can_export_pdf'    => 'nullable|boolean',
         ]);
 
         $user = User::create([
@@ -86,8 +72,8 @@ class UserController extends Controller
             'max_restaurants' => $data['max_restaurants'] ?? null,
             'max_catalogs'    => $data['max_catalogs'] ?? null,
             'max_products'    => $data['max_products'] ?? null,
-            'can_upload_images' => $data['can_upload_images'] ?? false,
-            'can_export_pdf'    => $data['can_export_pdf'] ?? false,
+            'can_upload_images' => true,
+            'can_export_pdf'    => true,
         ]);
 
         $this->auditAction(
@@ -126,8 +112,6 @@ class UserController extends Controller
             'max_restaurants' => 'sometimes|nullable|integer|min:0|max:9999',
             'max_catalogs'    => 'sometimes|nullable|integer|min:0|max:9999',
             'max_products'    => 'sometimes|nullable|integer|min:0|max:9999',
-            'can_upload_images' => 'sometimes|boolean',
-            'can_export_pdf'    => 'sometimes|boolean',
         ]);
 
         $updateData = [];
@@ -140,8 +124,6 @@ class UserController extends Controller
         if (array_key_exists('max_restaurants', $data)) $updateData['max_restaurants'] = $data['max_restaurants'];
         if (array_key_exists('max_catalogs', $data))    $updateData['max_catalogs']    = $data['max_catalogs'];
         if (array_key_exists('max_products', $data))    $updateData['max_products']    = $data['max_products'];
-        if (array_key_exists('can_upload_images', $data)) $updateData['can_upload_images'] = $data['can_upload_images'];
-        if (array_key_exists('can_export_pdf', $data))    $updateData['can_export_pdf']    = $data['can_export_pdf'];
 
         $user->update($updateData);
         $user->load('role');
@@ -171,14 +153,7 @@ class UserController extends Controller
             return response()->json(['message' => 'No puedes eliminar tu propia cuenta'], 403);
         }
 
-        // Delete all restaurants owned by this user (with their images and related data)
-        Restaurant::where('created_by', $user->id)->get()->each(
-            fn (Restaurant $r) => $this->restaurantService->deleteRestaurant($r)
-        );
-
-        $user->tokens()->delete();
-        $user->forceDelete();
-
+        // Log audit BEFORE deleting the user
         $this->auditAction(
             actor: $currentUser,
             action: 'user.deleted',
@@ -188,6 +163,14 @@ class UserController extends Controller
             ipAddress: $request->ip(),
             userAgent: (string) $request->userAgent()
         );
+
+        // Delete all restaurants owned by this user (with their images and related data)
+        Restaurant::where('created_by', $user->id)->get()->each(
+            fn (Restaurant $r) => $this->restaurantService->deleteRestaurant($r)
+        );
+
+        $user->tokens()->delete();
+        $user->forceDelete();
 
         return response()->json(['message' => 'Usuario eliminado']);
     }

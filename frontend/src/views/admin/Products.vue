@@ -183,8 +183,8 @@ import ImportJsonModal from '../../components/ImportJsonModal.vue'
 
 const { toast, showToast } = useToast()
 const authStore = useAuthStore()
-const canUploadImages = computed(() => authStore.user?.can_upload_images || authStore.hasRole('superadmin'))
-const canExportPdf = computed(() => authStore.user?.can_export_pdf || authStore.hasRole('superadmin'))
+const canUploadImages = computed(() => true)
+const canExportPdf = computed(() => true)
 
 // State
 const restaurantsStats = ref([])
