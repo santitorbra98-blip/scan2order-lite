@@ -102,6 +102,9 @@ Route::middleware(['auth:sanctum', 'role:admin,superadmin'])->group(function () 
     Route::put('/restaurants/{restaurant}', [RestaurantController::class, 'update']);
     Route::delete('/restaurants/{restaurant}', [RestaurantController::class, 'destroy']);
 
+    // Analytics (own restaurants)
+    Route::get('/analytics/my-stats', [AnalyticsController::class, 'myStats']);
+
     // Catalog, section and product management — requires manage_products permission
     Route::middleware('permission:manage_products')->group(function () {
         Route::get('/restaurants/{restaurantId}/catalogs/export-pdf', [CatalogController::class, 'exportCatalogsPdf']);

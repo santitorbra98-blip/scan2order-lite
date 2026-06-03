@@ -106,6 +106,50 @@ class AnalyticsController extends Controller
     }
 
     /**
+     * GET /api/analytics/my-stats?period=all|7d|30d
+     * Admin: total and unique visits for their own restaurants.
+     */
+    public function myStats(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $period = in_array($request->query('period'), self::VALID_PERIODS, true)
+            ? $request->query('period')
+            : '30d';
+
+        $restaurantIds = $user->hasRole('superadmin')
+            ? null
+            : $this->managedRestaurantIds($user);
+
+        // Admin with no restaurants yet
+        if ($restaurantIds !== null && empty($restaurantIds)) {
+            return response()->json(['total_visits' => 0, 'unique_visits' => 0]);
+        }
+
+        $query = DB::table('analytics_events')
+            ->select(
+                DB::raw('COUNT(*) as total_visits'),
+                DB::raw('COUNT(DISTINCT session_id) as unique_visits')
+            );
+
+        if ($restaurantIds !== null) {
+            $query->whereIn('restaurant_id', $restaurantIds);
+        }
+
+        $startDate = $this->resolveStartDate($period);
+        if ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        }
+
+        $row = $query->first();
+
+        return response()->json([
+            'total_visits'  => (int) ($row->total_visits ?? 0),
+            'unique_visits' => (int) ($row->unique_visits ?? 0),
+            'period'        => $period,
+        ]);
+    }
+
+    /**
      * GET /api/analytics/ranking?period=all|7d|30d
      * Superadmin: full restaurant ranking (up to 50).
      */

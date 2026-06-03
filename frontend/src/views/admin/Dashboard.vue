@@ -14,6 +14,16 @@
         <p class="stat-label">Productos</p>
         <p class="stat-value">{{ stats.products }}</p>
       </StatsCard>
+      <StatsCard icon="👁️">
+        <p class="stat-label">Visitas totales</p>
+        <p class="stat-value">{{ stats.totalVisits }}</p>
+        <p class="stat-sub">últimos 30 días</p>
+      </StatsCard>
+      <StatsCard icon="✨">
+        <p class="stat-label">Visitas únicas</p>
+        <p class="stat-value">{{ stats.uniqueVisits }}</p>
+        <p class="stat-sub">últimos 30 días</p>
+      </StatsCard>
       <StatsCard v-if="isSuperadmin" icon="👥">
         <p class="stat-label">Usuarios</p>
         <p class="stat-value">{{ stats.users }}</p>
@@ -51,14 +61,15 @@ const auth = useAuthStore()
 const router = useRouter()
 const isSuperadmin = computed(() => auth.hasRole('superadmin'))
 
-const stats = reactive({ restaurants: 0, products: 0, catalogs: 0, users: 0 })
+const stats = reactive({ restaurants: 0, products: 0, catalogs: 0, users: 0, totalVisits: 0, uniqueVisits: 0 })
 
 async function fetchStats() {
   try {
-    const [restaurantsRes, statsRes, usersRes] = await Promise.allSettled([
+    const [restaurantsRes, statsRes, usersRes, visitsRes] = await Promise.allSettled([
       api.get('/restaurants'),
       api.get('/restaurants/stats'),
       isSuperadmin.value ? api.get('/users') : Promise.resolve(null),
+      api.get('/analytics/my-stats?period=30d'),
     ])
 
     const restaurantsResult = restaurantsRes.status === 'fulfilled' ? restaurantsRes.value : null
@@ -80,6 +91,11 @@ async function fetchStats() {
       stats.users = usersResult?.meta
         ? usersResult.meta.total
         : (Array.isArray(usersResult) ? usersResult.length : 0)
+    }
+
+    if (visitsRes.status === 'fulfilled' && visitsRes.value) {
+      stats.totalVisits  = visitsRes.value.total_visits  ?? 0
+      stats.uniqueVisits = visitsRes.value.unique_visits ?? 0
     }
   } catch (err) {
     console.error('Error cargando estadísticas:', err)
@@ -104,6 +120,7 @@ onMounted(() => fetchStats())
 /* stat-card styles moved to StatsCard.vue */
 .stat-label { color: #1e293b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 0.3rem; }
 .stat-value { color: #1e293b; font-size: 2rem; font-weight: 700; margin: 0; }
+.stat-sub   { color: #94a3b8; font-size: 0.75rem; margin: 0.2rem 0 0; }
 
 .actions-section {
   background: white; border-radius: 12px; padding: 2rem;
