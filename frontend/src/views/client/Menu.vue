@@ -215,8 +215,8 @@ onMounted(() => {
 .open-badge { padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; }
 .badge-open { background: #dcfce7; color: #166534; }
 .badge-closed { background: #fef2f2; color: #dc2626; }
-.today-hours { margin: 0.5rem 0 0; color: #64748b; font-size: 0.95rem; }
-.restaurant-info { margin: 0.25rem 0 0; color: #64748b; font-size: 0.9rem; }
+.today-hours { margin: 0.5rem 0 0; color: #1e293b; font-size: 0.95rem; }
+.restaurant-info { margin: 0.25rem 0 0; color: #1e293b; font-size: 0.9rem; }
 
 .filters { margin-bottom: 2rem; }
 .search-wrap { display: flex; align-items: center; background: white; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0 1rem; margin-bottom: 0.75rem; }
@@ -235,7 +235,7 @@ onMounted(() => {
 .diet-pill { padding: 0.4rem 0.9rem; border: 1px solid #e2e8f0; border-radius: 50px; background: white; cursor: pointer; font-size: 0.85rem; transition: all 0.15s; }
 .diet-pill.active { background: #f0fdf4; border-color: #22c55e; color: #166534; font-weight: 600; }
 
-.loading, .error-state { text-align: center; padding: 3rem; color: #64748b; }
+.loading, .error-state { text-align: center; padding: 3rem; color: #1e293b; }
 .error-state { color: #dc2626; }
 
 .menu-layout { display: grid; grid-template-columns: 220px 1fr; gap: 2rem; }
@@ -303,7 +303,7 @@ onMounted(() => {
 .product-title-row h3 { margin: 0; font-size: 1.05rem; color: #1e293b; }
 .badge-new { background: #f59e0b; color: white; font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 700; }
 
-.description { color: #64748b; font-size: 0.88rem; margin: 0.5rem 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.description { color: #1e293b; font-size: 0.88rem; margin: 0.5rem 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .description.expanded { -webkit-line-clamp: unset; }
 
 .allergen-chips { display: flex; gap: 0.3rem; flex-wrap: wrap; margin: 0.5rem 0; }

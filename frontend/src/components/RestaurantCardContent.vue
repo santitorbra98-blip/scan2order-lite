@@ -77,7 +77,7 @@ defineEmits(['edit', 'edit-schedule', 'qr', 'delete'])
 
 .restaurant-main { padding: 1.25rem; }
 .restaurant-name { font-size: 1.2rem; color: #1e293b; margin: 0 0 0.5rem; }
-.restaurant-address, .restaurant-phone, .restaurant-created { margin: 0.2rem 0; color: #64748b; font-size: 0.9rem; }
+.restaurant-address, .restaurant-phone, .restaurant-created { margin: 0.2rem 0; color: #1e293b; font-size: 0.9rem; }
 
 .restaurant-meta { padding: 0 1.25rem; display: flex; gap: 0.5rem; }
 .status-badge { padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; }

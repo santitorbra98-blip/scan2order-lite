@@ -84,7 +84,7 @@ async function handleSubmit() {
 .onboarding-header { text-align: center; margin-bottom: 2.5rem; }
 .onboarding-icon { font-size: 3.5rem; margin-bottom: 1rem; }
 .onboarding-header h1 { font-size: 1.8rem; color: #1e293b; margin: 0 0 0.75rem; }
-.onboarding-header p { color: #64748b; font-size: 0.95rem; line-height: 1.5; margin: 0; }
+.onboarding-header p { color: #1e293b; font-size: 0.95rem; line-height: 1.5; margin: 0; }
 .onboarding-form { display: flex; flex-direction: column; gap: 1.25rem; }
 .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
 .form-group label { font-weight: 600; font-size: 0.9rem; color: #334155; }
@@ -104,5 +104,5 @@ async function handleSubmit() {
 .btn-primary:hover:not(:disabled) { opacity: 0.9; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-skip { text-align: center; color: #94a3b8; font-size: 0.9rem; text-decoration: none; padding: 0.5rem; }
-.btn-skip:hover { color: #64748b; }
+.btn-skip:hover { color: #1e293b; }
 </style>

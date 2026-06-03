@@ -311,7 +311,7 @@ async function deleteAccount() {
 /* Header */
 .header { margin-bottom: 2rem; }
 .header h1  { font-size: 2rem; color: #1e293b; margin: 0 0 0.25rem; }
-.header-sub { color: #64748b; margin: 0; font-size: 0.95rem; }
+.header-sub { color: #1e293b; margin: 0; font-size: 0.95rem; }
 
 /* Card */
 .card {
@@ -368,7 +368,7 @@ async function deleteAccount() {
 .btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-text {
-  padding: 0.65rem 1rem; background: transparent; color: #64748b;
+  padding: 0.65rem 1rem; background: transparent; color: #1e293b;
   border: none; border-radius: 8px; font-size: 0.95rem; cursor: pointer;
 }
 .btn-text:hover { color: #1e293b; }

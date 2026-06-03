@@ -527,10 +527,10 @@ function setRankingPeriod(period) {
 .search-clear { background: none; border: none; cursor: pointer; font-size: 1rem; color: #94a3b8; padding: 0.25rem; }
 .search-clear:hover { color: #475569; }
 
-.loading, .error { text-align: center; padding: 3rem; color: #64748b; font-size: 1.1rem; }
+.loading, .error { text-align: center; padding: 3rem; color: #1e293b; font-size: 1.1rem; }
 .error { color: #dc2626; background: #fef2f2; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; }
 
-.empty-state { text-align: center; padding: 4rem 2rem; color: #64748b; }
+.empty-state { text-align: center; padding: 4rem 2rem; color: #1e293b; }
 .empty-state h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
 
 .users-table {
@@ -539,7 +539,7 @@ function setRankingPeriod(period) {
 }
 .users-table th {
   background: #f8fafc; padding: 0.85rem 1rem; text-align: left;
-  font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;
+  font-size: 0.85rem; color: #1e293b; text-transform: uppercase; letter-spacing: 0.05em;
   border-bottom: 2px solid #e2e8f0;
 }
 .users-table td {
@@ -560,7 +560,7 @@ function setRankingPeriod(period) {
   padding: 0.25rem 0.6rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600;
 }
 .status-active { background: #dcfce7; color: #166534; }
-.status-inactive { background: #f1f5f9; color: #64748b; }
+.status-inactive { background: #f1f5f9; color: #1e293b; }
 .status-suspended { background: #fef2f2; color: #dc2626; }
 
 .btn-action {
@@ -649,7 +649,7 @@ function setRankingPeriod(period) {
 }
 .page-btn:hover:not(:disabled) { background: #f8fafc; border-color: #667eea; color: #667eea; }
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.page-info { font-size: 0.9rem; color: #64748b; }
+.page-info { font-size: 0.9rem; color: #1e293b; }
 
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
@@ -685,14 +685,14 @@ function setRankingPeriod(period) {
 .period-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .period-tab {
   padding: 0.45rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 50px;
-  background: white; color: #64748b; font-size: 0.88rem; font-weight: 600;
+  background: white; color: #1e293b; font-size: 0.88rem; font-weight: 600;
   cursor: pointer; transition: all 0.2s;
 }
 .period-tab:hover { border-color: #667eea; color: #667eea; }
 .period-tab.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: transparent; }
 
 .ranking-loading, .ranking-error, .ranking-empty {
-  text-align: center; padding: 2.5rem; color: #64748b; font-size: 0.95rem;
+  text-align: center; padding: 2.5rem; color: #1e293b; font-size: 0.95rem;
 }
 .ranking-error { color: #dc2626; background: #fef2f2; border-radius: 8px; }
 
@@ -702,7 +702,7 @@ function setRankingPeriod(period) {
 }
 .ranking-table th {
   background: #f8fafc; padding: 0.7rem 1rem; text-align: left;
-  font-size: 0.82rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;
+  font-size: 0.82rem; color: #1e293b; text-transform: uppercase; letter-spacing: 0.04em;
   border-bottom: 2px solid #e2e8f0;
 }
 .ranking-table td {
@@ -713,5 +713,5 @@ function setRankingPeriod(period) {
 .rank-medal { font-size: 1.25rem; }
 .rank-name { font-weight: 600; }
 .rank-total { font-weight: 700; color: #667eea; }
-.rank-unique { color: #64748b; }
+.rank-unique { color: #1e293b; }
 </style>

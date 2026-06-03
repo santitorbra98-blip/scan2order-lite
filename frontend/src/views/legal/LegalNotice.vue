@@ -69,8 +69,8 @@ onMounted(() => load())
 .legal-page h2 { color: #334155; font-size: 1.2rem; margin: 1.5rem 0 0.75rem; }
 .legal-page p, .legal-page li { color: #475569; line-height: 1.7; }
 .legal-page ul { padding-left: 1.5rem; }
-.loading { text-align: center; padding: 2rem; color: #64748b; }
-.back-link { display: inline-block; margin-bottom: 1.5rem; color: #64748b; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+.loading { text-align: center; padding: 2rem; color: #1e293b; }
+.back-link { display: inline-block; margin-bottom: 1.5rem; color: #1e293b; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
 .back-link:hover { color: #334155; }
 .legal-version { margin-top: 2rem; color: #94a3b8; font-size: 0.85rem; }
 

@@ -76,7 +76,7 @@ async function copyUrl() {
 .btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
 .qr-body { padding: 1.5rem; text-align: center; }
 .qr-canvas { display: flex; justify-content: center; margin-bottom: 1rem; }
-.qr-url { color: #64748b; font-size: 0.85rem; word-break: break-all; margin: 0 0 1.5rem; }
+.qr-url { color: #1e293b; font-size: 0.85rem; word-break: break-all; margin: 0 0 1.5rem; }
 .qr-actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
 .qr-actions button {
   padding: 0.6rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px;

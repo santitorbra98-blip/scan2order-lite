@@ -237,12 +237,12 @@ async function handleResetPassword() {
 }
 
 .card-nav { margin-bottom: 1rem; }
-.btn-home { color: #64748b; font-size: 0.9rem; text-decoration: none; font-weight: 500; }
+.btn-home { color: #1e293b; font-size: 0.9rem; text-decoration: none; font-weight: 500; }
 .btn-home:hover { color: #334155; }
 .login-header { text-align: center; margin-bottom: 2rem; }
 .login-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
 .login-header h1 { margin: 0; font-size: 1.8rem; color: #1e293b; }
-.login-header p { color: #64748b; margin-top: 0.5rem; }
+.login-header p { color: #1e293b; margin-top: 0.5rem; }
 
 .login-form { display: flex; flex-direction: column; gap: 1.25rem; }
 
@@ -269,5 +269,5 @@ async function handleResetPassword() {
 .link-btn { background: none; border: none; color: #667eea; cursor: pointer; font-size: 0.9rem; text-decoration: none; }
 .link-btn:hover { text-decoration: underline; }
 
-.step-info { color: #64748b; font-size: 0.95rem; margin: 0; }
+.step-info { color: #1e293b; font-size: 0.95rem; margin: 0; }
 </style>

@@ -139,7 +139,7 @@ onMounted(fetchSettings)
 .header { margin-bottom: 2rem; }
 .header h1 { font-size: 2rem; color: #1e293b; margin: 0; }
 
-.loading { color: #64748b; padding: 2rem; text-align: center; }
+.loading { color: #1e293b; padding: 2rem; text-align: center; }
 .error   { color: #dc2626; background: #fef2f2; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
 
 .card {

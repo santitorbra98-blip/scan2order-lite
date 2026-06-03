@@ -200,12 +200,12 @@ onUnmounted(() => { if (cooldownTimer) clearInterval(cooldownTimer) })
 }
 
 .card-nav { margin-bottom: 1rem; }
-.btn-home { color: #64748b; font-size: 0.9rem; text-decoration: none; font-weight: 500; }
+.btn-home { color: #1e293b; font-size: 0.9rem; text-decoration: none; font-weight: 500; }
 .btn-home:hover { color: #334155; }
 .register-header { text-align: center; margin-bottom: 2rem; }
 .register-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
 .register-header h1 { margin: 0; font-size: 1.8rem; color: #1e293b; }
-.register-header p { color: #64748b; margin-top: 0.5rem; }
+.register-header p { color: #1e293b; margin-top: 0.5rem; }
 
 .register-form { display: flex; flex-direction: column; gap: 1.25rem; }
 
@@ -238,7 +238,7 @@ onUnmounted(() => { if (cooldownTimer) clearInterval(cooldownTimer) })
 .verify-step { text-align: center; }
 .verify-icon { font-size: 3rem; margin-bottom: 1rem; }
 .verify-step h2 { color: #1e293b; margin: 0 0 0.5rem; }
-.verify-step p { color: #64748b; margin-bottom: 1.5rem; }
+.verify-step p { color: #1e293b; margin-bottom: 1.5rem; }
 
 .code-input { text-align: center; font-size: 1.5rem !important; letter-spacing: 0.5rem; font-weight: 700; }
 </style>

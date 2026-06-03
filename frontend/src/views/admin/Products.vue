@@ -430,14 +430,14 @@ onMounted(() => fetchRestaurantsStats())
 .header h1 { font-size: 1.8rem; color: #1e293b; margin: 0; }
 .btn-back { padding: 0.5rem 1rem; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-weight: 600; }
 
-.loading { text-align: center; padding: 3rem; color: #64748b; }
+.loading { text-align: center; padding: 3rem; color: #1e293b; }
 .empty-state, .empty-section { text-align: center; padding: 3rem; color: #1e293b; }
 
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
 .restaurant-card { background: white; border-radius: 12px; padding: 1.5rem; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: transform 0.2s; }
 .restaurant-card:hover { transform: translateY(-3px); }
 .restaurant-card-header h3 { margin: 0 0 0.25rem; color: #1e293b; }
-.restaurant-card-header p { margin: 0; color: #64748b; font-size: 0.9rem; }
+.restaurant-card-header p { margin: 0; color: #1e293b; font-size: 0.9rem; }
 .restaurant-stats { display: flex; gap: 2rem; margin-top: 1rem; }
 .stat-item { text-align: center; }
 .stat-label { display: block; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; }
@@ -458,7 +458,7 @@ onMounted(() => fetchRestaurantsStats())
 .catalog-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
 .catalog-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
 .catalog-info h3 { margin: 0; color: #1e293b; }
-.catalog-info p { margin: 0.25rem 0 0; color: #64748b; font-size: 0.9rem; }
+.catalog-info p { margin: 0.25rem 0 0; color: #1e293b; font-size: 0.9rem; }
 .catalog-actions { display: flex; gap: 0.25rem; }
 
 .btn-icon { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0.3rem; border-radius: 6px; }

@@ -417,7 +417,7 @@ function setTopPeriod(period) {
 .top-period-tabs { display: flex; gap: 0.4rem; flex-shrink: 0; }
 .top-period-tab {
   padding: 0.4rem 0.9rem; border: 1.5px solid #e2e8f0; border-radius: 50px;
-  background: white; color: #64748b; font-size: 0.85rem; font-weight: 600;
+  background: white; color: #1e293b; font-size: 0.85rem; font-weight: 600;
   cursor: pointer; transition: all 0.2s;
 }
 .top-period-tab:hover { border-color: #667eea; color: #667eea; }
@@ -441,14 +441,14 @@ function setTopPeriod(period) {
 
 .section-header { text-align: center; margin-bottom: 2rem; }
 .section-title { font-size: 1.8rem; color: #1e293b; margin: 0; }
-.section-subtitle { color: #64748b; margin-top: 0.5rem; }
+.section-subtitle { color: #1e293b; margin-top: 0.5rem; }
 
 .toolbar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
 .search-box { flex: 1; min-width: 250px; display: flex; align-items: center; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0 1rem; }
 .search-box-icon { font-size: 1.1rem; margin-right: 0.5rem; }
 .search-box-input { flex: 1; border: none; outline: none; padding: 0.75rem 0; font-size: 0.95rem; background: transparent; }
 .search-box-clear { background: none; border: none; cursor: pointer; font-size: 1rem; color: #94a3b8; }
-.results-summary { color: #64748b; font-size: 0.9rem; white-space: nowrap; }
+.results-summary { color: #1e293b; font-size: 0.9rem; white-space: nowrap; }
 
 .open-filter-btn {
   display: flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1rem;
@@ -487,11 +487,11 @@ function setTopPeriod(period) {
 .card-image-placeholder { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; }
 .card-body { padding: 1.25rem; }
 .card-body h3 { margin: 0 0 0.5rem; font-size: 1.2rem; color: #1e293b; }
-.detail-item { margin: 0.25rem 0; color: #64748b; font-size: 0.9rem; }
+.detail-item { margin: 0.25rem 0; color: #1e293b; font-size: 0.9rem; }
 .card-footer { display: flex; justify-content: space-between; padding: 1rem 1.25rem; border-top: 1px solid #f1f5f9; color: #667eea; font-weight: 600; }
 
 .pagination-bar { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem; }
 .pagination-bar button { padding: 0.5rem 1rem; background: white; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-weight: 600; }
 .pagination-bar button:disabled { opacity: 0.5; cursor: not-allowed; }
-.pagination-bar span { color: #64748b; }
+.pagination-bar span { color: #1e293b; }
 </style>

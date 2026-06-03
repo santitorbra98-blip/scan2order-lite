@@ -102,7 +102,7 @@ onMounted(() => fetchStats())
 }
 
 /* stat-card styles moved to StatsCard.vue */
-.stat-label { color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 0.3rem; }
+.stat-label { color: #1e293b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 0.3rem; }
 .stat-value { color: #1e293b; font-size: 2rem; font-weight: 700; margin: 0; }
 
 .actions-section {

@@ -319,7 +319,7 @@ onMounted(() => fetchRestaurants())
 }
 .page-btn:hover:not(:disabled) { background: #f8fafc; border-color: #667eea; color: #667eea; }
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.page-info { font-size: 0.9rem; color: #64748b; }
+.page-info { font-size: 0.9rem; color: #1e293b; }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
 .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
@@ -331,7 +331,7 @@ onMounted(() => fetchRestaurants())
 }
 .btn-create:hover { opacity: 0.9; }
 
-.loading, .error { text-align: center; padding: 3rem; color: #64748b; font-size: 1.1rem; }
+.loading, .error { text-align: center; padding: 3rem; color: #1e293b; font-size: 1.1rem; }
 .error { color: #dc2626; }
 
 .empty-state { text-align: center; padding: 4rem 2rem; color: #1e293b; }
@@ -421,7 +421,7 @@ onMounted(() => fetchRestaurants())
   border-bottom: 1px solid #bae6fd;
 }
 .owner-label { font-size: 0.85rem; font-weight: 600; color: #0369a1; }
-.owner-email { font-size: 0.75rem; color: #64748b; }
+.owner-email { font-size: 0.75rem; color: #1e293b; }
 
 @media (max-width: 640px) {
   .restaurants-container { padding: 1rem; }

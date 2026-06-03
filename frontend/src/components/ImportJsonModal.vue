@@ -169,7 +169,7 @@ async function doImport() {
   padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0;
 }
 .modal-header h2 { margin: 0; font-size: 1.2rem; color: #1e293b; }
-.btn-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b; }
+.btn-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #1e293b; }
 .btn-close:hover { color: #dc2626; }
 
 .modal-body { padding: 1.5rem; }
@@ -209,7 +209,7 @@ async function doImport() {
 .badge-active { font-size: 0.7rem; padding: 2px 7px; border-radius: 20px; font-weight: 600; }
 .badge-yes { background: #dcfce7; color: #166534; }
 .badge-no  { background: #fee2e2; color: #991b1b; }
-.preview-desc { font-size: 0.85rem; color: #64748b; margin: 0.25rem 0 0.5rem; }
+.preview-desc { font-size: 0.85rem; color: #1e293b; margin: 0.25rem 0 0.5rem; }
 .preview-stats { display: flex; gap: 1rem; font-size: 0.8rem; color: #667eea; font-weight: 600; margin-bottom: 0.75rem; }
 .preview-section { margin-bottom: 0.75rem; }
 .preview-section-name {
