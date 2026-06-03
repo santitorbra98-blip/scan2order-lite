@@ -17,6 +17,29 @@
       <button v-if="searchTerm" type="button" class="search-clear" @click="searchTerm = ''">✕</button>
     </div>
 
+    <div class="feature-filters">
+      <button
+        class="feature-filter-btn"
+        :class="{ active: featureFilter === null }"
+        @click="setFeatureFilter(null)"
+      >Todos</button>
+      <button
+        class="feature-filter-btn"
+        :class="{ active: featureFilter === 'images' }"
+        @click="setFeatureFilter('images')"
+      >🖼️ Imágenes</button>
+      <button
+        class="feature-filter-btn"
+        :class="{ active: featureFilter === 'pdf' }"
+        @click="setFeatureFilter('pdf')"
+      >📄 PDF</button>
+      <button
+        class="feature-filter-btn"
+        :class="{ active: featureFilter === 'both' }"
+        @click="setFeatureFilter('both')"
+      >⭐ Ambos</button>
+    </div>
+
     <div class="content">
       <div v-if="isLoading" class="loading">Cargando usuarios...</div>
       <div v-else-if="error" class="error">{{ error }}</div>
@@ -265,6 +288,12 @@ const defaults = ref({ max_restaurants: 1, max_catalogs: 20, max_products: null 
 const isLoading = ref(false)
 const error = ref(null)
 const searchTerm = ref('')
+const featureFilter = ref(null) // null | 'images' | 'pdf' | 'both'
+
+function setFeatureFilter(value) {
+  featureFilter.value = value
+  fetchUsers(1)
+}
 
 const filteredUsers = computed(() => {
   const term = searchTerm.value.trim().toLowerCase()
@@ -307,7 +336,16 @@ async function fetchUsers(page = 1) {
   isLoading.value = true
   error.value = null
   try {
-    const result = await api.get(`/users?page=${page}`)
+    const params = new URLSearchParams({ page })
+    if (featureFilter.value === 'images') {
+      params.append('can_upload_images', 'true')
+    } else if (featureFilter.value === 'pdf') {
+      params.append('can_export_pdf', 'true')
+    } else if (featureFilter.value === 'both') {
+      params.append('can_upload_images', 'true')
+      params.append('can_export_pdf', 'true')
+    }
+    const result = await api.get(`/users?${params.toString()}`)
     if (result && result.meta) {
       users.value = result.data
       pagination.value = result.meta
@@ -526,6 +564,17 @@ function setRankingPeriod(period) {
 .search-input { flex: 1; border: none; outline: none; padding: 0.75rem 0; font-size: 0.95rem; background: transparent; }
 .search-clear { background: none; border: none; cursor: pointer; font-size: 1rem; color: #94a3b8; padding: 0.25rem; }
 .search-clear:hover { color: #475569; }
+
+.feature-filters {
+  display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+}
+.feature-filter-btn {
+  padding: 0.4rem 0.9rem; border-radius: 20px; border: 1.5px solid #e2e8f0;
+  background: white; color: #475569; font-size: 0.83rem; font-weight: 600; cursor: pointer;
+  transition: all 0.15s;
+}
+.feature-filter-btn:hover { border-color: #667eea; color: #667eea; }
+.feature-filter-btn.active { background: #667eea; border-color: #667eea; color: white; }
 
 .loading, .error { text-align: center; padding: 3rem; color: #1e293b; font-size: 1.1rem; }
 .error { color: #dc2626; background: #fef2f2; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; }

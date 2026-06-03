@@ -131,6 +131,7 @@ Route::middleware(['auth:sanctum', 'role:superadmin'])->group(function () {
     Route::put('/users/{user}', [UserController::class, 'update']);
     Route::delete('/users/{user}', [UserController::class, 'destroy']);
     Route::get('/roles', [UserController::class, 'roles']);
+    Route::get('/users/feature-stats', [UserController::class, 'featureStats']);
 
     // Analytics
     Route::get('/analytics/ranking', [AnalyticsController::class, 'ranking']);

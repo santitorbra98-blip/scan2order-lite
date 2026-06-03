@@ -21,9 +21,37 @@ class UserController extends Controller
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
-        $users = User::with(['role', 'restaurants'])->orderBy('created_at', 'desc')->paginate(25);
+        $query = User::with(['role', 'restaurants'])->orderBy('created_at', 'desc');
+
+        // Feature filters
+        if ($request->query('can_upload_images') !== null) {
+            $query->where('can_upload_images', filter_var($request->query('can_upload_images'), FILTER_VALIDATE_BOOLEAN));
+        }
+        if ($request->query('can_export_pdf') !== null) {
+            $query->where('can_export_pdf', filter_var($request->query('can_export_pdf'), FILTER_VALIDATE_BOOLEAN));
+        }
+
+        $users = $query->paginate(25);
 
         return UserResource::collection($users);
+    }
+
+    public function featureStats(Request $request)
+    {
+        $currentUser = $request->user();
+        if (!$currentUser || !$currentUser->hasRole('superadmin')) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $withImages = User::where('can_upload_images', true)->count();
+        $withPdf    = User::where('can_export_pdf', true)->count();
+        $withBoth   = User::where('can_upload_images', true)->where('can_export_pdf', true)->count();
+
+        return response()->json([
+            'with_images' => $withImages,
+            'with_pdf'    => $withPdf,
+            'with_both'   => $withBoth,
+        ]);
     }
 
     public function store(Request $request)

@@ -19,7 +19,7 @@
         <p class="stat-value">{{ stats.totalVisits }}</p>
         <p class="stat-sub">últimos 30 días</p>
       </StatsCard>
-      <StatsCard icon="📈">
+      <StatsCard icon="👥">
         <p class="stat-label">Visitantes únicos</p>
         <p class="stat-value">{{ stats.allTimeVisits }}</p>
         <p class="stat-sub">histórico</p>
@@ -27,6 +27,21 @@
       <StatsCard v-if="isSuperadmin" icon="👥">
         <p class="stat-label">Usuarios</p>
         <p class="stat-value">{{ stats.users }}</p>
+      </StatsCard>
+      <StatsCard v-if="isSuperadmin" icon="🖼️">
+        <p class="stat-label">Con imágenes</p>
+        <p class="stat-value">{{ stats.withImages }}</p>
+        <p class="stat-sub">cuentas activas</p>
+      </StatsCard>
+      <StatsCard v-if="isSuperadmin" icon="📄">
+        <p class="stat-label">Con PDF</p>
+        <p class="stat-value">{{ stats.withPdf }}</p>
+        <p class="stat-sub">cuentas activas</p>
+      </StatsCard>
+      <StatsCard v-if="isSuperadmin" icon="⭐">
+        <p class="stat-label">Con ambos</p>
+        <p class="stat-value">{{ stats.withBoth }}</p>
+        <p class="stat-sub">imágenes + PDF</p>
       </StatsCard>
     </div>
 
@@ -61,16 +76,17 @@ const auth = useAuthStore()
 const router = useRouter()
 const isSuperadmin = computed(() => auth.hasRole('superadmin'))
 
-const stats = reactive({ restaurants: 0, products: 0, catalogs: 0, users: 0, totalVisits: 0, allTimeVisits: 0 })
+const stats = reactive({ restaurants: 0, products: 0, catalogs: 0, users: 0, totalVisits: 0, allTimeVisits: 0, withImages: 0, withPdf: 0, withBoth: 0 })
 
 async function fetchStats() {
   try {
-    const [restaurantsRes, statsRes, usersRes, visitsRes, allVisitsRes] = await Promise.allSettled([
+    const [restaurantsRes, statsRes, usersRes, visitsRes, allVisitsRes, featureRes] = await Promise.allSettled([
       api.get('/restaurants'),
       api.get('/restaurants/stats'),
       isSuperadmin.value ? api.get('/users') : Promise.resolve(null),
       api.get('/analytics/my-stats?period=30d'),
       api.get('/analytics/my-stats?period=all'),
+      isSuperadmin.value ? api.get('/users/feature-stats') : Promise.resolve(null),
     ])
 
     const restaurantsResult = restaurantsRes.status === 'fulfilled' ? restaurantsRes.value : null
@@ -99,6 +115,11 @@ async function fetchStats() {
     }
     if (allVisitsRes.status === 'fulfilled' && allVisitsRes.value) {
       stats.allTimeVisits = allVisitsRes.value.unique_visits ?? 0
+    }
+    if (featureRes?.status === 'fulfilled' && featureRes.value) {
+      stats.withImages = featureRes.value.with_images ?? 0
+      stats.withPdf    = featureRes.value.with_pdf    ?? 0
+      stats.withBoth   = featureRes.value.with_both   ?? 0
     }
   } catch (err) {
     console.error('Error cargando estadísticas:', err)
