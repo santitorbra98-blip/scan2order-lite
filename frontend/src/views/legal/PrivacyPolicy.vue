@@ -8,28 +8,46 @@
         <section>
           <h2>1. Responsable del tratamiento</h2>
           <p><strong>{{ meta.company_name }}</strong> ({{ meta.brand_name }})</p>
-          <p>Email: {{ meta.privacy_email }}</p>
+          <ul>
+            <li><strong>NIF:</strong> {{ meta.tax_id }}</li>
+            <li><strong>Domicilio:</strong> {{ meta.address }}, {{ meta.postal_code }} {{ meta.city }} ({{ meta.province }}), {{ meta.country }}</li>
+            <li><strong>Email de privacidad:</strong> <a :href="'mailto:' + meta.privacy_email">{{ meta.privacy_email }}</a></li>
+          </ul>
         </section>
         <section>
           <h2>2. Datos que recopilamos</h2>
           <ul>
-            <li>Datos de registro: nombre, email y contraseña (cifrada).</li>
+            <li>Datos de registro: nombre, email y contraseña (cifrada con bcrypt).</li>
             <li>Datos de restaurante: nombre, dirección, teléfono, imagen y horario.</li>
             <li>Datos de productos: nombre, descripción, precio, imagen, alérgenos.</li>
             <li>Registros de auditoría: acciones realizadas en el panel de administración.</li>
+            <li>Datos técnicos de sesión: dirección IP y agente de navegador en el momento de aceptación legal.</li>
           </ul>
         </section>
         <section>
           <h2>3. Finalidad del tratamiento</h2>
-          <p>Los datos se tratan para gestionar la cuenta de usuario, permitir la creación y publicación de cartas digitales, y garantizar la seguridad del sistema.</p>
+          <p>Los datos se tratan para gestionar la cuenta de usuario, permitir la creación y publicación de cartas digitales, garantizar la seguridad del sistema y cumplir las obligaciones legales aplicables.</p>
         </section>
         <section>
           <h2>4. Base legal</h2>
-          <p>El tratamiento se basa en el consentimiento del usuario (art. 6.1.a RGPD) y la ejecución del contrato de servicio (art. 6.1.b RGPD).</p>
+          <ul>
+            <li>Ejecución del contrato de servicio (art. 6.1.b RGPD).</li>
+            <li>Consentimiento del usuario para tratamientos opcionales como comunicaciones comerciales (art. 6.1.a RGPD).</li>
+            <li>Cumplimiento de obligaciones legales (art. 6.1.c RGPD).</li>
+          </ul>
         </section>
         <section>
-          <h2>5. Derechos del usuario</h2>
-          <p>Puede ejercer sus derechos de acceso, rectificación, supresión, portabilidad, limitación y oposición escribiendo a <strong>{{ meta.privacy_email }}</strong>.</p>
+          <h2>5. Plazo de conservación</h2>
+          <p>Los datos se conservarán mientras la cuenta permanezca activa y, tras su cancelación, durante los plazos legalmente exigidos (hasta 5 años para obligaciones fiscales y mercantiles en España).</p>
+        </section>
+        <section>
+          <h2>6. Comunicación de datos a terceros</h2>
+          <p>Los datos no se ceden a terceros salvo obligación legal. El análisis de uso del servicio se realiza con herramientas propias que no transfieren datos fuera del sistema.</p>
+        </section>
+        <section>
+          <h2>7. Derechos del usuario</h2>
+          <p>Puede ejercer sus derechos de acceso, rectificación, supresión, portabilidad, limitación y oposición escribiendo a <a :href="'mailto:' + meta.privacy_email"><strong>{{ meta.privacy_email }}</strong></a>. Debe acompañar copia de documento identificativo.</p>
+          <p>Tiene también derecho a presentar una reclamación ante la <strong>Agencia Española de Protección de Datos (AEPD)</strong> en <a href="https://www.aepd.es" target="_blank" rel="noopener noreferrer">www.aepd.es</a>.</p>
         </section>
         <p class="legal-version">Versión {{ meta.version }}</p>
       </div>

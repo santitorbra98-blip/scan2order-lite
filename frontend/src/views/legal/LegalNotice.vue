@@ -9,10 +9,13 @@
           <h2>1. Datos identificativos</h2>
           <p>En cumplimiento del deber de información recogido en el artículo 10 de la Ley 34/2002, de Servicios de la Sociedad de la Información y del Comercio Electrónico (LSSI-CE), a continuación se reflejan los siguientes datos:</p>
           <ul>
-            <li><strong>Denominación social:</strong> {{ meta.company_name }}</li>
+            <li><strong>Titular:</strong> {{ meta.company_name }}</li>
             <li><strong>Nombre comercial:</strong> {{ meta.brand_name }}</li>
+            <li><strong>NIF:</strong> {{ meta.tax_id }}</li>
+            <li><strong>Domicilio:</strong> {{ meta.address }}, {{ meta.postal_code }} {{ meta.city }} ({{ meta.province }}), {{ meta.country }}</li>
             <li><strong>Actividad:</strong> {{ meta.activity_description }}</li>
-            <li><strong>Email de contacto:</strong> {{ meta.contact_email }}</li>
+            <li><strong>Email de contacto:</strong> <a :href="'mailto:' + meta.contact_email">{{ meta.contact_email }}</a></li>
+            <li><strong>Teléfono:</strong> {{ meta.support_phone }}</li>
           </ul>
         </section>
         <section>

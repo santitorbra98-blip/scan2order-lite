@@ -29,12 +29,14 @@
     </main>
 
     <LegalFooter />
+    <CookieBanner />
   </div>
 </template>
 
 <script setup>
 import { useAuthStore } from './stores/auth'
 import LegalFooter from '@/components/legal/LegalFooter.vue'
+import CookieBanner from '@/components/legal/CookieBanner.vue'
 import { ref, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 

@@ -7,22 +7,29 @@
       <div v-else class="legal-content">
         <section>
           <h2>1. ¿Qué son las cookies?</h2>
-          <p>Las cookies son pequeños archivos de texto que se almacenan en su navegador al visitar un sitio web. Se utilizan para recordar preferencias y facilitar la navegación.</p>
+          <p>Las cookies son pequeños archivos de texto que se almacenan en su navegador al visitar un sitio web. Se utilizan para mantener la sesión iniciada y garantizar la seguridad de las operaciones.</p>
         </section>
         <section>
           <h2>2. Cookies que utilizamos</h2>
-          <ul>
-            <li><strong>Cookies técnicas (necesarias):</strong> cookies de sesión y CSRF para el correcto funcionamiento de la autenticación.</li>
-            <li><strong>Cookies de preferencias:</strong> almacenan su consentimiento de cookies.</li>
-          </ul>
+          <p>Este sitio utiliza únicamente cookies técnicas necesarias para su funcionamiento. No se utilizan cookies de seguimiento ni de terceros.</p>
+          <table class="cookie-table">
+            <thead>
+              <tr><th>Nombre</th><th>Finalidad</th><th>Duración</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>laravel_session</code></td><td>Mantiene la sesión autenticada del usuario</td><td>Sesión (2 horas)</td></tr>
+              <tr><td><code>XSRF-TOKEN</code></td><td>Protección contra ataques CSRF</td><td>Sesión</td></tr>
+            </tbody>
+          </table>
+          <p>Las cookies técnicas son estrictamente necesarias para el funcionamiento del servicio. Su uso no requiere consentimiento según el art. 22.2 de la LSSI-CE.</p>
         </section>
         <section>
           <h2>3. Gestión de cookies</h2>
-          <p>Puede configurar su navegador para rechazar cookies o eliminar las existentes. Tenga en cuenta que algunas funcionalidades del sitio podrían verse afectadas.</p>
+          <p>Puede configurar su navegador para rechazar o eliminar cookies, aunque esto impedirá el correcto funcionamiento de la autenticación. Más información en la ayuda de su navegador.</p>
         </section>
         <section>
-          <h2>4. Más información</h2>
-          <p>Para cualquier consulta sobre nuestra política de cookies, contacte con <strong>{{ meta.contact_email }}</strong>.</p>
+          <h2>4. Contacto</h2>
+          <p>Para cualquier consulta: <a :href="'mailto:' + meta.contact_email"><strong>{{ meta.contact_email }}</strong></a>.</p>
         </section>
         <p class="legal-version">Versión {{ meta.version }}</p>
       </div>
@@ -68,6 +75,12 @@ onMounted(() => load())
 .back-link { display: inline-block; margin-bottom: 1.5rem; color: #64748b; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
 .back-link:hover { color: #334155; }
 .legal-version { margin-top: 2rem; color: #94a3b8; font-size: 0.85rem; }
+.cookie-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+.cookie-table th, .cookie-table td { border: 1px solid #e2e8f0; padding: 0.6rem 0.8rem; text-align: left; color: #475569; }
+.cookie-table th { background: #f8fafc; font-weight: 600; color: #334155; }
+.cookie-table td code { background: #f1f5f9; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.85rem; }
+.cookie-table a { color: #6366f1; }
+.legal-page a { color: #6366f1; }
 
 @media (max-width: 768px) {
   .legal-view {

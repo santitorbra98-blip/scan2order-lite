@@ -36,7 +36,11 @@
         </section>
         <section>
           <h2>7. Contacto</h2>
-          <p>Para cualquier consulta: <strong>{{ meta.contact_email }}</strong></p>
+          <p>Para cualquier consulta: <a :href="'mailto:' + meta.contact_email"><strong>{{ meta.contact_email }}</strong></a></p>
+        </section>
+        <section>
+          <h2>8. Legislación aplicable y jurisdicción</h2>
+          <p>Estos términos se rigen por la legislación española. Para la resolución de conflictos, las partes se someten a los juzgados y tribunales del domicilio del usuario, salvo que la normativa de consumidores y usuarios establezca otro fuero imperativo.</p>
         </section>
         <p class="legal-version">Versión {{ meta.version }}</p>
       </div>

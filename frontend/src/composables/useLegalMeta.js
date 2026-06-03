@@ -3,12 +3,22 @@ import { ref } from 'vue'
 const defaultMeta = {
   brand_name: 'Scan2Order',
   company_name: 'PENDIENTE_DE_CONFIGURAR',
+  tax_id: 'PENDIENTE',
+  address: 'PENDIENTE_DE_CONFIGURAR',
+  postal_code: '00000',
+  city: 'PENDIENTE',
+  province: 'PENDIENTE',
+  country: 'España',
+  registry_data: 'PENDIENTE_DE_CONFIGURAR',
   activity_description: 'Software de digitalización de menús para restauración.',
   contact_email: 'legal@tu-dominio.com',
   support_email: 'soporte@tu-dominio.com',
   privacy_email: 'privacidad@tu-dominio.com',
   support_phone: '+34 000 000 000',
+  jurisdiction_city: 'Madrid',
+  uses_optional_cookies: false,
   version: '2026-04',
+  last_updated: '2026-04-11',
 }
 
 let cachedMeta = null
