@@ -99,8 +99,12 @@ async function fetchStats() {
     stats.catalogs = statsList.reduce((sum, r) => sum + Number(r?.total_catalogs || 0), 0)
 
     if (!isSuperadmin.value && stats.restaurants === 0) {
-      router.replace('/admin/onboarding')
-      return
+      if (sessionStorage.getItem('onboarding_skipped')) {
+        sessionStorage.removeItem('onboarding_skipped')
+      } else {
+        router.replace('/admin/onboarding')
+        return
+      }
     }
 
     if (isSuperadmin.value) {

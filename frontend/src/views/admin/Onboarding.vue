@@ -36,7 +36,7 @@
           <button type="submit" class="btn-primary" :disabled="isSaving">
             {{ isSaving ? 'Creando...' : 'Crear mi restaurante' }}
           </button>
-          <router-link to="/admin" class="btn-skip">Configurar más tarde</router-link>
+          <button type="button" class="btn-skip" @click="skipOnboarding">Configurar más tarde</button>
         </div>
       </form>
     </div>
@@ -69,6 +69,11 @@ async function handleSubmit() {
   } finally {
     isSaving.value = false
   }
+}
+
+function skipOnboarding() {
+  sessionStorage.setItem('onboarding_skipped', '1')
+  router.push('/admin')
 }
 </script>
 

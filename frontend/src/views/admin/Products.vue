@@ -87,6 +87,8 @@
                   </div>
 
                   <div v-for="product in section.products" :key="product.id" :class="['product-item', { 'product-item-inactive': !product.active }]">
+                    <img v-if="product.image" :src="product.image" :alt="product.name" class="product-thumbnail" />
+                    <div v-else class="product-no-image">🍽️</div>
                     <div class="product-name">
                       {{ product.name }}
                       <span v-if="product.is_new" class="badge-new">NEW</span>
