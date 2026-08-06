@@ -30,7 +30,7 @@
 
         <div class="form-links">
           <button type="button" class="link-btn" @click="step = 'forgot'">¿Olvidaste tu contraseña?</button>
-          <router-link to="/register" class="link-btn">Crear cuenta</router-link>
+          <router-link to="/contacto" class="link-btn">Solicitar acceso</router-link>
         </div>
       </form>
 

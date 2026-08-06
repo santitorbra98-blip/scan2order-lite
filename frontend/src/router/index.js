@@ -3,7 +3,7 @@ import { useAuthStore } from '../stores/auth'
 
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue'
-import Register from '../views/Register.vue'
+import Contact from '../views/Contact.vue'
 import NotFound from '../views/NotFound.vue'
 import Unauthorized from '../views/Unauthorized.vue'
 
@@ -25,7 +25,8 @@ const TermsConditions = () => import('../views/legal/TermsConditions.vue')
 const routes = [
   { path: '/', name: 'Home', component: Home, meta: { public: true } },
   { path: '/login', name: 'Login', component: Login, meta: { public: true } },
-  { path: '/register', name: 'Register', component: Register, meta: { public: true } },
+  { path: '/register', redirect: '/contacto' },
+  { path: '/contacto', name: 'Contact', component: Contact, meta: { public: true } },
   { path: '/restaurant/:id', name: 'RestaurantMenu', component: ClientMenu, meta: { public: true } },
   { path: '/legal/aviso-legal', name: 'LegalNotice', component: LegalNotice, meta: { public: true } },
   { path: '/legal/privacidad', name: 'PrivacyPolicy', component: PrivacyPolicy, meta: { public: true } },
@@ -64,8 +65,8 @@ router.beforeEach((to) => {
   const userRole = auth.userRole
 
   if (isPublic) {
-    // Redirect authenticated users away from login, register, and home
-    if (auth.isAuthenticated && (to.name === 'Login' || to.name === 'Register' || to.name === 'Home')) {
+    // Redirect authenticated users away from login and home.
+    if (auth.isAuthenticated && (to.name === 'Login' || to.name === 'Home')) {
       return '/admin'
     }
     return true

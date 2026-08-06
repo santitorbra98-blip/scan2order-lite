@@ -56,48 +56,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function register(name, phone, email, password, passwordConfirmation, legal = {}) {
-    isLoading.value = true
-    error.value = null
-    try {
-      await apiClient.getCsrfCookie()
-      return await apiClient.post('/register', {
-        name, phone, email, password,
-        password_confirmation: passwordConfirmation ?? password,
-        accept_terms: Boolean(legal.acceptTerms),
-        accept_privacy: Boolean(legal.acceptPrivacy),
-        accept_marketing: Boolean(legal.acceptMarketing),
-      })
-    } catch (err) {
-      error.value = err.message || 'Registration failed'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  async function verifyRegister(email, code, password, passwordConfirmation) {
-    isLoading.value = true
-    error.value = null
-    try {
-      // Ensure CSRF cookie is fresh — the verification form is a new POST
-      await apiClient.getCsrfCookie()
-      const data = await apiClient.post('/register/verify', {
-        email, code, password,
-        password_confirmation: passwordConfirmation ?? password,
-      })
-      user.value = data.user
-      token.value = data.token
-      setToken(data.token)
-      return data
-    } catch (err) {
-      error.value = err.message || 'Verification failed'
-      throw err
-    } finally {
-      isLoading.value = false
-    }
-  }
-
   async function forgotPassword(email) {
     isLoading.value = true
     error.value = null
@@ -165,7 +123,7 @@ export const useAuthStore = defineStore('auth', () => {
     user, token, initialized, isLoading, error,
     isAuthenticated, userRole,
     hasRole, hasAnyRole,
-    fetchCurrentUser, login, register, verifyRegister,
+    fetchCurrentUser, login,
     forgotPassword, verifyResetCode, resetPassword,
     logout, initFromStorage
   }

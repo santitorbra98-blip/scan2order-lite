@@ -3,135 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\AuthUserResource;
-use App\Mail\WelcomeMail;
-use App\Models\Role;
 use App\Models\User;
 use App\Services\MfaCodeService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 class AuthController extends Controller
 {
     public function __construct(private MfaCodeService $mfaService) {}
 
-    public function register(RegisterRequest $request)
+    public function register(Request $request)
     {
-        $data = $request->validated();
-        $email = mb_strtolower(trim((string) $data['email']));
-
-        if (User::withTrashed()->whereRaw('LOWER(email) = ?', [$email])->exists()) {
-            return response()->json(['message' => 'El email ya está registrado'], 422);
-        }
-
-        try {
-            $this->mfaService->sendToEmail(
-                email: $email,
-                purpose: 'register',
-                payload: [
-                    'name'             => (string) $data['name'],
-                    'phone'            => trim((string) ($data['phone'] ?? '')),
-                    'accept_terms'     => (bool) $data['accept_terms'],
-                    'accept_privacy'   => (bool) $data['accept_privacy'],
-                    'accept_marketing' => (bool) ($data['accept_marketing'] ?? false),
-                    'legal_version'    => (string) config('legal.version'),
-                ]
-            );
-        } catch (\RuntimeException $e) {
-            return response()->json(['message' => $e->getMessage()], 503);
-        }
-
-        return response()->json([
-            'message' => 'Enviamos un código a tu email para completar el registro.',
-            'verification_required' => true,
-            'channel' => 'email',
-            'email_hint' => $this->maskEmail($email),
-        ], 202);
+        return response()->json(['message' => 'El registro autónomo no está disponible. Solicita acceso desde el formulario de contacto.'], 404);
     }
 
     public function verifyRegister(Request $request)
     {
-        $data = $request->validate([
-            'email'    => 'required|string|email|max:255',
-            'code'     => 'required|string|max:12',
-            'password' => 'required|string|min:12|confirmed',
-        ]);
-
-        $email = mb_strtolower(trim((string) $data['email']));
-
-        try {
-            $user = DB::transaction(function () use ($data, $email, $request) {
-                if (User::withTrashed()->whereRaw('LOWER(email) = ?', [$email])->exists()) {
-                    throw new \Illuminate\Validation\ValidationException(
-                        validator([], []),
-                        response()->json(['message' => 'El email ya está registrado'], 422)
-                    );
-                }
-
-                $entry = $this->mfaService->verifyAndConsumeByEmail($email, 'register', (string) $data['code']);
-                if (!$entry) {
-                    throw new \Illuminate\Validation\ValidationException(
-                        validator([], []),
-                        response()->json(['message' => 'Código inválido o expirado'], 422)
-                    );
-                }
-
-                $payload = is_array($entry->payload) ? $entry->payload : [];
-                $name    = trim((string) ($payload['name'] ?? ''));
-
-                if ($name === '') {
-                    throw new \Illuminate\Validation\ValidationException(
-                        validator([], []),
-                        response()->json(['message' => 'No pudimos completar el registro. Solicita un nuevo código.'], 422)
-                    );
-                }
-
-                $assignedRole = Role::ensureDefault('admin');
-
-                return User::create([
-                    'name'    => $name,
-                    'email'   => $email,
-                    'phone'   => trim((string) ($payload['phone'] ?? '')) ?: null,
-                    'password' => $data['password'],
-                    'terms_accepted_at' => !empty($payload['accept_terms']) ? now() : null,
-                    'privacy_accepted_at' => !empty($payload['accept_privacy']) ? now() : null,
-                    'marketing_consent_at' => !empty($payload['accept_marketing']) ? now() : null,
-                    'legal_version' => (string) ($payload['legal_version'] ?? config('legal.version')),
-                    'legal_acceptance_ip' => $request->ip(),
-                    'legal_acceptance_user_agent' => substr((string) $request->userAgent(), 0, 1000),
-                    'role_id' => $assignedRole->id,
-                    'status'  => 'active',
-                ]);
-            });
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $e->getResponse();
-        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
-            return response()->json(['message' => 'El email ya está registrado'], 422);
-        }
-
-        $user->load('role');
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        Mail::to($user->email)->queue(new WelcomeMail($user));
-
-        $this->auditAction(
-            actor: $user,
-            action: 'auth.register_verified',
-            resourceType: 'user',
-            resourceId: $user->id,
-            targetUser: $user,
-            metadata: ['channel' => 'email'],
-            ipAddress: $request->ip(),
-            userAgent: (string) $request->userAgent()
-        );
-
-        return response()->json([
-            'message' => 'Registro completado correctamente.',
-            'user' => new AuthUserResource($user),
-            'token' => $token,
-        ], 201);
+        return response()->json(['message' => 'El registro autónomo no está disponible. Solicita acceso desde el formulario de contacto.'], 404);
     }
 
     public function login(LoginRequest $request)

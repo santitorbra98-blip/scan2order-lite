@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LegalController;
@@ -61,10 +62,11 @@ Route::post('/setup/create-superadmin', [SetupController::class, 'createSuperAdm
 // Legal information (public)
 Route::get('/legal/meta', [LegalController::class, 'meta']);
 
+// Contact / request access (public)
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:contact-request');
+
 // Auth routes (public)
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth-login');
-Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth-register-request');
-Route::post('/register/verify', [AuthController::class, 'verifyRegister'])->middleware('throttle:auth-register-verify');
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:auth-forgot-password');
 Route::post('/verify-reset-code', [AuthController::class, 'verifyPasswordResetCode'])->middleware('throttle:auth-reset-password');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:auth-reset-password');

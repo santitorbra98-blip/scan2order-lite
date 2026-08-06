@@ -7,7 +7,7 @@
       <div v-else class="legal-content">
         <section>
           <h2>1. Aceptación</h2>
-          <p>Al registrarse y utilizar {{ meta.brand_name }}, usted acepta estos términos y condiciones en su totalidad.</p>
+          <p>Al solicitar acceso y utilizar {{ meta.brand_name }}, usted acepta estos términos y condiciones en su totalidad.</p>
         </section>
         <section>
           <h2>2. Descripción del servicio</h2>

@@ -8,7 +8,7 @@
         </router-link>
         <div class="home-nav-actions">
           <router-link to="/login" class="btn-nav-login">Acceder</router-link>
-          <router-link to="/register" class="btn-nav-register">Registrarse</router-link>
+          <router-link to="/contacto" class="btn-nav-register">Solicitar acceso</router-link>
         </div>
         <button class="nav-burger" @click="mobileOpen = !mobileOpen" aria-label="Menú">
           <span></span><span></span><span></span>
@@ -16,7 +16,7 @@
       </div>
       <div class="home-nav-mobile" :class="{ open: mobileOpen }">
         <router-link to="/login" @click="mobileOpen = false">Acceder</router-link>
-        <router-link to="/register" @click="mobileOpen = false">Registrarse</router-link>
+        <router-link to="/contacto" @click="mobileOpen = false">Solicitar acceso</router-link>
       </div>
     </nav>
 
@@ -36,10 +36,10 @@
           <div v-if="!auth.isAuthenticated" class="auth-hero-card">
             <div class="auth-icon">🔐</div>
             <h2>¿Tienes un restaurante?</h2>
-            <p>Inicia sesión para gestionar tu carta digital</p>
+            <p>Inicia sesión si ya tienes una cuenta o solicita acceso desde el formulario</p>
             <div class="auth-buttons">
               <router-link to="/login" class="btn-auth btn-login">Iniciar sesión</router-link>
-              <router-link to="/register" class="btn-auth btn-register">Crear cuenta</router-link>
+              <router-link to="/contacto" class="btn-auth btn-register">Solicitar acceso</router-link>
             </div>
           </div>
           <div v-else class="welcome-hero-card">
