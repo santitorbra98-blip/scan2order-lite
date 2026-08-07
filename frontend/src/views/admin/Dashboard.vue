@@ -5,6 +5,25 @@
       <p>Gestión de tu restaurante</p>
     </div>
 
+    <div class="actions-section">
+      <h2>Acciones rápidas</h2>
+      <div class="action-buttons">
+        <router-link to="/admin/restaurants" class="action-btn">
+          <span class="btn-icon">🍽️</span>
+          Gestionar locales
+        </router-link>
+        <router-link to="/admin/products" class="action-btn">
+          <span class="btn-icon">📦</span>
+          Gestionar productos
+        </router-link>
+        <router-link v-if="isSuperadmin" to="/admin/users" class="action-btn">
+          <span class="btn-icon">👥</span>
+          Gestionar usuarios
+          <span class="users-counter">{{ stats.users }} usuarios</span>
+        </router-link>
+      </div>
+    </div>
+
     <div class="dashboard-grid">
       <StatsCard icon="🍽️">
         <p class="stat-label">Restaurantes</p>
@@ -24,43 +43,6 @@
         <p class="stat-value">{{ stats.allTimeVisits }}</p>
         <p class="stat-sub">histórico</p>
       </StatsCard>
-      <StatsCard v-if="isSuperadmin" icon="👥">
-        <p class="stat-label">Usuarios</p>
-        <p class="stat-value">{{ stats.users }}</p>
-      </StatsCard>
-      <StatsCard v-if="isSuperadmin" icon="🖼️">
-        <p class="stat-label">Con imágenes</p>
-        <p class="stat-value">{{ stats.withImages }}</p>
-        <p class="stat-sub">cuentas activas</p>
-      </StatsCard>
-      <StatsCard v-if="isSuperadmin" icon="📄">
-        <p class="stat-label">Con PDF</p>
-        <p class="stat-value">{{ stats.withPdf }}</p>
-        <p class="stat-sub">cuentas activas</p>
-      </StatsCard>
-      <StatsCard v-if="isSuperadmin" icon="⭐">
-        <p class="stat-label">Con ambos</p>
-        <p class="stat-value">{{ stats.withBoth }}</p>
-        <p class="stat-sub">imágenes + PDF</p>
-      </StatsCard>
-    </div>
-
-    <div class="actions-section">
-      <h2>Acciones rápidas</h2>
-      <div class="action-buttons">
-        <router-link to="/admin/restaurants" class="action-btn">
-          <span class="btn-icon">🍽️</span>
-          Gestionar locales
-        </router-link>
-        <router-link to="/admin/products" class="action-btn">
-          <span class="btn-icon">📦</span>
-          Gestionar productos
-        </router-link>
-        <router-link v-if="isSuperadmin" to="/admin/users" class="action-btn">
-          <span class="btn-icon">👥</span>
-          Gestionar usuarios
-        </router-link>
-      </div>
     </div>
   </div>
 </template>
@@ -76,17 +58,16 @@ const auth = useAuthStore()
 const router = useRouter()
 const isSuperadmin = computed(() => auth.hasRole('superadmin'))
 
-const stats = reactive({ restaurants: 0, products: 0, catalogs: 0, users: 0, totalVisits: 0, allTimeVisits: 0, withImages: 0, withPdf: 0, withBoth: 0 })
+const stats = reactive({ restaurants: 0, products: 0, catalogs: 0, users: 0, totalVisits: 0, allTimeVisits: 0 })
 
 async function fetchStats() {
   try {
-    const [restaurantsRes, statsRes, usersRes, visitsRes, allVisitsRes, featureRes] = await Promise.allSettled([
+    const [restaurantsRes, statsRes, usersRes, visitsRes, allVisitsRes] = await Promise.allSettled([
       api.get('/restaurants'),
       api.get('/restaurants/stats'),
       isSuperadmin.value ? api.get('/users') : Promise.resolve(null),
       api.get('/analytics/my-stats?period=30d'),
       api.get('/analytics/my-stats?period=all'),
-      isSuperadmin.value ? api.get('/users/feature-stats') : Promise.resolve(null),
     ])
 
     const restaurantsResult = restaurantsRes.status === 'fulfilled' ? restaurantsRes.value : null
@@ -120,11 +101,6 @@ async function fetchStats() {
     if (allVisitsRes.status === 'fulfilled' && allVisitsRes.value) {
       stats.allTimeVisits = allVisitsRes.value.unique_visits ?? 0
     }
-    if (featureRes?.status === 'fulfilled' && featureRes.value) {
-      stats.withImages = featureRes.value.with_images ?? 0
-      stats.withPdf    = featureRes.value.with_pdf    ?? 0
-      stats.withBoth   = featureRes.value.with_both   ?? 0
-    }
   } catch (err) {
     console.error('Error cargando estadísticas:', err)
   }
@@ -142,7 +118,7 @@ onMounted(() => fetchStats())
 
 .dashboard-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
-  gap: 1.5rem; margin-bottom: 3rem;
+  gap: 1.5rem; margin-top: 2rem;
 }
 
 /* stat-card styles moved to StatsCard.vue */
@@ -164,6 +140,13 @@ onMounted(() => fetchStats())
 }
 .action-btn:hover { transform: translateY(-3px); opacity: 0.9; }
 .btn-icon { font-size: 2rem; }
+.users-counter {
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+}
 
 @media (max-width: 640px) {
   .admin-container { padding: 1rem; }
