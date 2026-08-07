@@ -28,7 +28,7 @@ class ContactController extends Controller
                 email: $senderEmail,
                 phone: trim((string) ($data['phone'] ?? '')) ?: null,
                 restaurantName: trim((string) ($data['restaurant_name'] ?? '')) ?: null,
-                message: trim((string) $data['message']),
+                requestMessage: trim((string) $data['message']),
                 ipAddress: $request->ip(),
                 userAgent: (string) $request->userAgent(),
             ));
@@ -51,8 +51,8 @@ class ContactController extends Controller
         $candidates = [
             (string) config('legal.contact_email', ''),
             (string) env('SUPERADMIN_EMAIL', ''),
-            (string) config('mail.from.address', ''),
             (string) $fallbackEmail,
+            (string) config('mail.from.address', ''),
         ];
 
         foreach ($candidates as $candidate) {

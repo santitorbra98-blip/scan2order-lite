@@ -55,7 +55,7 @@ class ContactRequestTest extends TestCase
         $response->assertAccepted();
 
         Mail::assertSent(ContactRequestMail::class, function (ContactRequestMail $mail) {
-            return $mail->hasTo('owner@example.com');
+            return $mail->hasTo('cliente@example.com');
         });
     }
 

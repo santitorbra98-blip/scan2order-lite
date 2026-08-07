@@ -17,7 +17,7 @@ class ContactRequestMail extends Mailable
         public string $email,
         public ?string $phone,
         public ?string $restaurantName,
-        public string $message,
+        public string $requestMessage,
         public ?string $ipAddress = null,
         public ?string $userAgent = null,
     ) {
@@ -43,7 +43,7 @@ class ContactRequestMail extends Mailable
                 'email' => $this->email,
                 'phone' => $this->phone,
                 'restaurantName' => $this->restaurantName,
-                'message' => $this->message,
+                'requestMessage' => $this->requestMessage,
                 'ipAddress' => $this->ipAddress,
                 'userAgent' => $this->userAgent,
             ],

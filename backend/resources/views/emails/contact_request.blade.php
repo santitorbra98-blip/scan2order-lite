@@ -41,7 +41,7 @@
             </table>
 
             <div style="margin-top:24px;padding:16px;border-left:4px solid #2563eb;background:#eff6ff;border-radius:12px;white-space:pre-wrap;line-height:1.6;">
-                {{ $message }}
+                {{ $requestMessage }}
             </div>
 
             @if($userAgent)
