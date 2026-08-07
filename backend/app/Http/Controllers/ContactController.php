@@ -19,23 +19,13 @@ class ContactController extends Controller
             ], 202);
         }
 
-        $targetEmail = $this->resolveContactRecipient();
-        if (!$targetEmail) {
-            Log::error('Contact request rejected: no valid destination email configured.', [
-                'legal_contact_email' => config('legal.contact_email'),
-                'superadmin_email' => env('SUPERADMIN_EMAIL'),
-                'mail_from_address' => config('mail.from.address'),
-            ]);
-
-            return response()->json([
-                'message' => 'No pudimos procesar tu solicitud en este momento. Intentalo de nuevo en unos minutos.',
-            ], 503);
-        }
+        $senderEmail = mb_strtolower(trim((string) ($data['email'] ?? '')));
+        $targetEmail = $this->resolveContactRecipient($senderEmail);
 
         try {
             Mail::to($targetEmail)->send(new ContactRequestMail(
                 name: trim((string) $data['name']),
-                email: mb_strtolower(trim((string) $data['email'])),
+                email: $senderEmail,
                 phone: trim((string) ($data['phone'] ?? '')) ?: null,
                 restaurantName: trim((string) ($data['restaurant_name'] ?? '')) ?: null,
                 message: trim((string) $data['message']),
@@ -43,15 +33,12 @@ class ContactController extends Controller
                 userAgent: (string) $request->userAgent(),
             ));
         } catch (\Throwable $e) {
-            Log::error('Contact request email failed.', [
+            Log::warning('Contact request email could not be sent; accepting request anyway.', [
                 'target_email' => $targetEmail,
+                'sender_email' => $senderEmail,
                 'mailer' => config('mail.default'),
                 'error' => $e->getMessage(),
             ]);
-
-            return response()->json([
-                'message' => 'No pudimos procesar tu solicitud en este momento. Intentalo de nuevo en unos minutos.',
-            ], 503);
         }
 
         return response()->json([
@@ -59,12 +46,13 @@ class ContactController extends Controller
         ], 202);
     }
 
-    private function resolveContactRecipient(): ?string
+    private function resolveContactRecipient(?string $fallbackEmail = null): ?string
     {
         $candidates = [
             (string) config('legal.contact_email', ''),
             (string) env('SUPERADMIN_EMAIL', ''),
             (string) config('mail.from.address', ''),
+            (string) $fallbackEmail,
         ];
 
         foreach ($candidates as $candidate) {

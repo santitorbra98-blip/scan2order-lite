@@ -59,6 +59,29 @@ class ContactRequestTest extends TestCase
         });
     }
 
+    public function test_contact_request_falls_back_to_sender_when_no_destination_is_configured(): void
+    {
+        Mail::fake();
+
+        config()->set('legal.contact_email', 'legal@tu-dominio.com');
+        config()->set('mail.from.address', '');
+
+        $response = $this->postJson('/api/contact', [
+            'name' => 'Cliente Demo',
+            'email' => 'cliente@example.com',
+            'phone' => '666 123 456',
+            'restaurant_name' => 'Restaurante Demo',
+            'message' => 'Necesito una cuenta para gestionar la carta digital y el QR.',
+            'website' => '',
+        ]);
+
+        $response->assertAccepted();
+
+        Mail::assertSent(ContactRequestMail::class, function (ContactRequestMail $mail) {
+            return $mail->hasTo('cliente@example.com');
+        });
+    }
+
     public function test_contact_request_with_honeypot_does_not_send_email(): void
     {
         Mail::fake();
