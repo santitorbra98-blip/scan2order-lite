@@ -11,9 +11,11 @@ class ContactRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_contact_request_queues_an_email_to_the_contact_address(): void
+    public function test_contact_request_sends_an_email_to_the_contact_address(): void
     {
         Mail::fake();
+
+        config()->set('legal.contact_email', 'legal@example.com');
 
         $response = $this->postJson('/api/contact', [
             'name' => 'Cliente Demo',
@@ -27,14 +29,37 @@ class ContactRequestTest extends TestCase
         $response->assertAccepted();
         $response->assertJsonPath('message', 'Gracias. Hemos recibido tu solicitud y te responderemos por email.');
 
-        Mail::assertQueued(ContactRequestMail::class, function (ContactRequestMail $mail) {
-            return $mail->hasTo(config('legal.contact_email'))
+        Mail::assertSent(ContactRequestMail::class, function (ContactRequestMail $mail) {
+            return $mail->hasTo('legal@example.com')
                 && $mail->name === 'Cliente Demo'
                 && $mail->email === 'cliente@example.com';
         });
     }
 
-    public function test_contact_request_with_honeypot_does_not_queue_email(): void
+    public function test_contact_request_falls_back_to_mail_from_when_contact_email_is_placeholder(): void
+    {
+        Mail::fake();
+
+        config()->set('legal.contact_email', 'legal@tu-dominio.com');
+        config()->set('mail.from.address', 'owner@example.com');
+
+        $response = $this->postJson('/api/contact', [
+            'name' => 'Cliente Demo',
+            'email' => 'cliente@example.com',
+            'phone' => '666 123 456',
+            'restaurant_name' => 'Restaurante Demo',
+            'message' => 'Necesito una cuenta para gestionar la carta digital y el QR.',
+            'website' => '',
+        ]);
+
+        $response->assertAccepted();
+
+        Mail::assertSent(ContactRequestMail::class, function (ContactRequestMail $mail) {
+            return $mail->hasTo('owner@example.com');
+        });
+    }
+
+    public function test_contact_request_with_honeypot_does_not_send_email(): void
     {
         Mail::fake();
 
