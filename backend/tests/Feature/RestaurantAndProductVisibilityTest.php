@@ -141,4 +141,44 @@ class RestaurantAndProductVisibilityTest extends TestCase
         $publicResponse->assertJsonPath('data.0.sections.0.products.0.show_image', true);
         $this->assertNotEmpty($publicResponse->json('data.0.sections.0.products.0.image'));
     }
+
+    public function test_catalog_and_section_descriptions_are_ignored_on_create(): void
+    {
+        $superadmin = $this->createUserWithRole('superadmin');
+        $restaurant = Restaurant::create([
+            'name' => 'Restaurante Sin Descripciones',
+            'address' => 'Calle Limpia 1',
+            'phone' => '555555555',
+            'active' => true,
+            'created_by' => $superadmin->id,
+        ]);
+
+        Sanctum::actingAs($superadmin);
+
+        $catalogResponse = $this->postJson('/api/restaurants/' . $restaurant->id . '/catalogs', [
+            'name' => 'Carta de prueba',
+            'description' => 'Esta descripción no debería guardarse',
+        ]);
+
+        $catalogResponse->assertCreated();
+        $catalogId = $catalogResponse->json('data.id');
+        $this->assertNotNull($catalogId);
+
+        $catalog = Catalog::findOrFail($catalogId);
+        $this->assertSame('Carta de prueba', $catalog->name);
+        $this->assertNull($catalog->description);
+
+        $sectionResponse = $this->postJson('/api/restaurants/' . $restaurant->id . '/catalogs/' . $catalog->id . '/sections', [
+            'name' => 'Sección de prueba',
+            'description' => 'Esta descripción tampoco debería guardarse',
+        ]);
+
+        $sectionResponse->assertCreated();
+        $sectionId = $sectionResponse->json('data.id');
+        $this->assertNotNull($sectionId);
+
+        $section = Section::findOrFail($sectionId);
+        $this->assertSame('Sección de prueba', $section->name);
+        $this->assertNull($section->description);
+    }
 }

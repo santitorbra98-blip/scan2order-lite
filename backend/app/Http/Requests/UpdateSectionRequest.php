@@ -15,7 +15,6 @@ class UpdateSectionRequest extends FormRequest
     {
         return [
             'name'        => 'string|max:255',
-            'description' => 'nullable|string|max:2000',
             'active'      => 'boolean',
             'order'       => 'integer|min:0',
         ];

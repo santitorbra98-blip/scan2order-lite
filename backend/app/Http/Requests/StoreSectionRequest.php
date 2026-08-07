@@ -15,7 +15,6 @@ class StoreSectionRequest extends FormRequest
     {
         return [
             'name'        => 'required|string|max:255',
-            'description' => 'nullable|string|max:2000',
             'active'      => 'boolean',
             'order'       => 'integer|min:0',
         ];

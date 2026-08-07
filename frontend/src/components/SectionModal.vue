@@ -10,10 +10,6 @@
           <label>Nombre:</label>
           <input v-model="form.name" type="text" required placeholder="Bebidas, Postres..." />
         </div>
-        <div class="form-group">
-          <label>Descripción:</label>
-          <textarea v-model="form.description" placeholder="Descripción opcional"></textarea>
-        </div>
         <div class="form-actions">
           <button type="button" @click="$emit('close')" class="btn-cancel">Cancelar</button>
           <button type="submit" class="btn-save">{{ editing ? 'Actualizar' : 'Crear' }}</button>
@@ -33,11 +29,10 @@ const props = defineProps({
 
 defineEmits(['close', 'save'])
 
-const form = reactive({ name: '', description: '' })
+const form = reactive({ name: '' })
 
 watch(() => props.editing, (val) => {
   form.name = val?.name ?? ''
-  form.description = val?.description ?? ''
 }, { immediate: true })
 </script>
 
