@@ -193,6 +193,11 @@ const apiClient = {
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
     try {
+      const hasXsrfToken = Boolean(getCsrfToken())
+      if (!hasXsrfToken) {
+        await this.getCsrfCookie()
+      }
+
       const headers = { 'Accept': 'application/json' }
       const bearerToken = getToken()
       if (bearerToken) headers['Authorization'] = `Bearer ${bearerToken}`
