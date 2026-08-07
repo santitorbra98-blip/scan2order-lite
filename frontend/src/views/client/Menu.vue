@@ -58,6 +58,8 @@
           <div v-if="selectedSection" class="section-title-row">
             <h2>{{ selectedSection.name }}</h2>
             <p v-if="selectedSection.catalog" class="catalog-subtitle">{{ selectedSection.catalog.name }}</p>
+            <p v-if="selectedSection.catalog?.description" class="catalog-description">{{ selectedSection.catalog.description }}</p>
+            <p v-if="selectedSection.description" class="section-description">{{ selectedSection.description }}</p>
           </div>
 
           <div v-if="filteredProducts.length > 0" class="products-grid">
@@ -151,7 +153,7 @@ const allSections = computed(() => {
   const sections = []
   catalogs.value.forEach(c => {
     (c.sections || []).forEach(s => {
-      sections.push({ ...s, catalog: { id: c.id, name: c.name } })
+      sections.push({ ...s, catalog: { id: c.id, name: c.name, description: c.description } })
     })
   })
   if (sections.length > 0 && !selectedSection.value) selectedSection.value = sections[0]
@@ -250,6 +252,8 @@ onMounted(() => {
 .section-title-row { margin-bottom: 1.5rem; }
 .section-title-row h2 { margin: 0; color: #1e293b; font-size: 1.5rem; }
 .catalog-subtitle { margin: 0.25rem 0 0; color: #94a3b8; font-size: 0.85rem; }
+.catalog-description, .section-description { margin: 0.35rem 0 0; color: #475569; font-size: 0.92rem; line-height: 1.45; }
+.section-description { color: #64748b; }
 
 .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
 

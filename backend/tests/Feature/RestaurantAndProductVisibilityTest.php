@@ -142,7 +142,7 @@ class RestaurantAndProductVisibilityTest extends TestCase
         $this->assertNotEmpty($publicResponse->json('data.0.sections.0.products.0.image'));
     }
 
-    public function test_catalog_and_section_descriptions_are_ignored_on_create(): void
+    public function test_catalog_and_section_descriptions_are_saved_and_exposed_publicly(): void
     {
         $superadmin = $this->createUserWithRole('superadmin');
         $restaurant = Restaurant::create([
@@ -157,7 +157,7 @@ class RestaurantAndProductVisibilityTest extends TestCase
 
         $catalogResponse = $this->postJson('/api/restaurants/' . $restaurant->id . '/catalogs', [
             'name' => 'Carta de prueba',
-            'description' => 'Esta descripción no debería guardarse',
+            'description' => 'Descripción de catálogo',
         ]);
 
         $catalogResponse->assertCreated();
@@ -166,11 +166,11 @@ class RestaurantAndProductVisibilityTest extends TestCase
 
         $catalog = Catalog::findOrFail($catalogId);
         $this->assertSame('Carta de prueba', $catalog->name);
-        $this->assertNull($catalog->description);
+        $this->assertSame('Descripción de catálogo', $catalog->description);
 
         $sectionResponse = $this->postJson('/api/restaurants/' . $restaurant->id . '/catalogs/' . $catalog->id . '/sections', [
             'name' => 'Sección de prueba',
-            'description' => 'Esta descripción tampoco debería guardarse',
+            'description' => 'Descripción de sección',
         ]);
 
         $sectionResponse->assertCreated();
@@ -179,6 +179,11 @@ class RestaurantAndProductVisibilityTest extends TestCase
 
         $section = Section::findOrFail($sectionId);
         $this->assertSame('Sección de prueba', $section->name);
-        $this->assertNull($section->description);
+
+        $sectionPublicResponse = $this->getJson('/api/restaurants/' . $restaurant->id . '/catalogs');
+
+        $sectionPublicResponse->assertOk();
+        $sectionPublicResponse->assertJsonPath('data.0.description', 'Descripción de catálogo');
+        $sectionPublicResponse->assertJsonPath('data.0.sections.0.description', 'Descripción de sección');
     }
 }
