@@ -1,18 +1,16 @@
 <template>
   <div class="menu-container">
-    <div class="header">
-      <div v-if="restaurant" class="restaurant-header">
-        <div class="restaurant-title-row">
-          <h1>{{ restaurant.name }}</h1>
-          <span v-if="isOpen !== null" :class="['open-badge', isOpen ? 'badge-open' : 'badge-closed']">
-            {{ isOpen ? '● Abierto' : '● Cerrado' }}
-          </span>
+    <div class="restaurant-hero" v-if="restaurant">
+      <div class="restaurant-hero-inner">
+        <h1 class="restaurant-hero-name">{{ restaurant.name }}</h1>
+        <div class="restaurant-hero-meta">
+          <span v-if="restaurant.address" class="hero-meta-item">📍 {{ restaurant.address }}</span>
+          <span v-if="restaurant.phone" class="hero-meta-item">📞 {{ restaurant.phone }}</span>
         </div>
-        <p v-if="todayHours" class="today-hours">🕐 {{ todayHours }}</p>
-        <p v-if="restaurant.address" class="restaurant-info">📍 {{ restaurant.address }}</p>
-        <p v-if="restaurant.phone" class="restaurant-info">📞 {{ restaurant.phone }}</p>
       </div>
-      <div v-else><h1>Menú</h1></div>
+    </div>
+    <div class="header" v-else>
+      <h1>Menú</h1>
     </div>
 
     <div class="menu-content">
@@ -26,10 +24,10 @@
         <div class="filter-toggles">
           <label class="toggle-label" :class="{ active: showAllergens }">
             <input v-model="showAllergens" type="checkbox" />
-            <span>Mostrar alérgenos</span>
+            <span>🌿 Alérgenos</span>
           </label>
           <button v-if="availableDietTypes.length > 0" class="diet-btn" :class="{ active: showDietFilter || activeDiet }" @click="showDietFilter = !showDietFilter">
-            🥗 Tipo de alimento
+            🥗 Tipo
           </button>
         </div>
         <div v-if="showDietFilter" class="diet-pills">
@@ -211,14 +209,27 @@ onMounted(() => {
 .menu-container { max-width: 1200px; margin: 0 auto; padding: 2rem; min-height: 100vh; background: #f8fafc; border-radius: 16px; box-sizing: border-box; }
 
 .header { margin-bottom: 2rem; }
-.restaurant-header { }
-.restaurant-title-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-.restaurant-title-row h1 { margin: 0; font-size: 2rem; color: #1e293b; }
-.open-badge { padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.85rem; font-weight: 600; }
-.badge-open { background: #dcfce7; color: #166534; }
-.badge-closed { background: #fef2f2; color: #dc2626; }
-.today-hours { margin: 0.5rem 0 0; color: #1e293b; font-size: 0.95rem; }
-.restaurant-info { margin: 0.25rem 0 0; color: #1e293b; font-size: 0.9rem; }
+
+/* ── Restaurant Hero ───────────────────────────────────── */
+.restaurant-hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 2rem 2rem 1.5rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 8px 32px rgba(102,126,234,0.25);
+}
+.restaurant-hero-inner { }
+.restaurant-hero-name {
+  margin: 0 0 0.75rem;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  line-height: 1.15;
+}
+.restaurant-hero-meta { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.hero-meta-item { color: rgba(255,255,255,0.85); font-size: 0.88rem; }
 
 .filters { margin-bottom: 2rem; }
 .search-wrap { display: flex; align-items: center; background: white; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 0 1rem; margin-bottom: 0.75rem; }
@@ -259,11 +270,16 @@ onMounted(() => {
 
 /* ── Mobile ────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .menu-container { padding: 1rem; border-radius: 0; overflow-x: hidden; }
+  .menu-container { padding: 0.75rem; border-radius: 0; overflow-x: hidden; }
   .menu-content { width: 100%; overflow-x: hidden; }
-  .header { margin-bottom: 1.25rem; }
-  .restaurant-title-row h1 { font-size: 1.4rem; }
+  .header { margin-bottom: 1rem; }
+  .restaurant-hero { padding: 1.25rem 1.25rem 1rem; border-radius: 14px; margin-bottom: 1.25rem; }
+  .restaurant-hero-name { font-size: 1.6rem; margin-bottom: 0.5rem; }
+  .hero-meta-item { font-size: 0.82rem; }
   .filters { margin-bottom: 1.25rem; }
+  .filter-toggles { flex-wrap: nowrap; gap: 0.6rem; }
+  .toggle-label { flex: 1; justify-content: center; font-size: 0.82rem; padding: 0.4rem 0.5rem; white-space: nowrap; }
+  .diet-btn { flex: 1; font-size: 0.82rem; padding: 0.4rem 0.5rem; white-space: nowrap; }
 
   .menu-layout { grid-template-columns: 1fr; gap: 0; width: 100%; }
 
