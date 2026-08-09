@@ -10,13 +10,15 @@
           <router-link to="/login" class="btn-nav-login">Acceder</router-link>
           <router-link to="/contacto" class="btn-nav-register">Solicitar acceso</router-link>
         </div>
-        <button class="nav-burger" @click="mobileOpen = !mobileOpen" aria-label="Menú">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
-      <div class="home-nav-mobile" :class="{ open: mobileOpen }">
-        <router-link to="/login" @click="mobileOpen = false">Acceder</router-link>
-        <router-link to="/contacto" @click="mobileOpen = false">Solicitar acceso</router-link>
+        <div class="nav-burger-wrap">
+          <button class="nav-burger" @click="mobileOpen = !mobileOpen" aria-label="Menú">
+            <span></span><span></span><span></span>
+          </button>
+          <div class="home-nav-mobile" :class="{ open: mobileOpen }">
+            <router-link to="/login" @click="mobileOpen = false">Acceder</router-link>
+            <router-link to="/contacto" @click="mobileOpen = false">Solicitar acceso</router-link>
+          </div>
+        </div>
       </div>
     </nav>
 
@@ -344,6 +346,8 @@ function setTopPeriod(period) {
 
 .home-nav-actions { display: flex; gap: 0.6rem; margin-left: auto; }
 
+.nav-burger-wrap { margin-left: auto; position: relative; display: none; }
+
 .btn-nav-login {
   padding: 0.5rem 1rem; border-radius: 50px;
   border: 1.5px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.9);
@@ -356,15 +360,15 @@ function setTopPeriod(period) {
   color: #667eea; font-weight: 700; font-size: 0.88rem; text-decoration: none;
 }
 
-.nav-burger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
+.nav-burger { display: flex; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 0.25rem; }
 .nav-burger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; }
 
 .home-nav-mobile {
-  display: none; flex-direction: column;
-  position: absolute; top: calc(100% + 0.4rem); right: 1rem;
+  display: flex; flex-direction: column;
+  position: absolute; top: calc(100% + 0.5rem); right: 0;
   background: rgba(15,23,42,0.97);
   border-radius: 12px; min-width: 180px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   overflow: hidden;
   opacity: 0; pointer-events: none;
   transform: translateY(-6px);
@@ -372,13 +376,12 @@ function setTopPeriod(period) {
   z-index: 200;
 }
 .home-nav-mobile.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
-.home-nav-mobile a { padding: 0.8rem 1.25rem; color: white; text-decoration: none; font-size: 0.9rem; display: block; }
+.home-nav-mobile a { padding: 0.85rem 1.25rem; color: white; text-decoration: none; font-size: 0.9rem; display: block; white-space: nowrap; }
 .home-nav-mobile a:not(:first-child) { border-top: 1px solid rgba(255,255,255,0.06); }
 
 @media (max-width: 768px) {
   .home-nav-actions { display: none; }
-  .nav-burger { display: flex; }
-  .home-nav-mobile { display: flex; }
+  .nav-burger-wrap { display: block; }
 }
 
 .hero-section { padding: 3rem 1.5rem 0; position: relative; }

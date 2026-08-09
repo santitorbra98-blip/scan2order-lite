@@ -212,11 +212,11 @@ onMounted(() => {
 
 /* ── Restaurant Hero ───────────────────────────────────── */
 .restaurant-hero {
-  background: #3b1f6e;
+  background: #667eea;
   border-radius: 20px;
   padding: 2rem 2rem 1.5rem;
   margin-bottom: 1.75rem;
-  box-shadow: 0 8px 32px rgba(30,10,60,0.3);
+  box-shadow: 0 8px 32px rgba(102,126,234,0.3);
 }
 .restaurant-hero-inner { }
 .restaurant-hero-name {
