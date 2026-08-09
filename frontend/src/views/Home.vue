@@ -359,9 +359,21 @@ function setTopPeriod(period) {
 .nav-burger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; }
 .nav-burger span { display: block; width: 22px; height: 2px; background: white; border-radius: 2px; }
 
-.home-nav-mobile { display: none; flex-direction: column; background: rgba(15,23,42,0.97); max-height: 0; overflow: hidden; transition: max-height 0.3s; }
-.home-nav-mobile.open { max-height: 200px; }
-.home-nav-mobile a { padding: 0.8rem 1.5rem; color: white; text-decoration: none; border-top: 1px solid rgba(255,255,255,0.06); }
+.home-nav-mobile {
+  display: none; flex-direction: column;
+  position: absolute; top: calc(100% + 0.4rem); right: 1rem;
+  background: rgba(15,23,42,0.97);
+  border-radius: 12px; min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  overflow: hidden;
+  opacity: 0; pointer-events: none;
+  transform: translateY(-6px);
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 200;
+}
+.home-nav-mobile.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.home-nav-mobile a { padding: 0.8rem 1.25rem; color: white; text-decoration: none; font-size: 0.9rem; display: block; }
+.home-nav-mobile a:not(:first-child) { border-top: 1px solid rgba(255,255,255,0.06); }
 
 @media (max-width: 768px) {
   .home-nav-actions { display: none; }
