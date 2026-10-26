@@ -59,6 +59,8 @@ class UserController extends Controller
             'max_restaurants' => 'nullable|integer|min:0|max:9999',
             'max_catalogs'    => 'nullable|integer|min:0|max:9999',
             'max_products'    => 'nullable|integer|min:0|max:9999',
+            'can_upload_images' => 'sometimes|boolean',
+            'can_export_pdf'    => 'sometimes|boolean',
         ]);
 
         $user = User::create([
@@ -72,8 +74,8 @@ class UserController extends Controller
             'max_restaurants' => $data['max_restaurants'] ?? null,
             'max_catalogs'    => $data['max_catalogs'] ?? null,
             'max_products'    => $data['max_products'] ?? null,
-            'can_upload_images' => true,
-            'can_export_pdf'    => true,
+            'can_upload_images' => $data['can_upload_images'] ?? false,
+            'can_export_pdf'    => $data['can_export_pdf'] ?? false,
         ]);
 
         $this->auditAction(
@@ -112,6 +114,8 @@ class UserController extends Controller
             'max_restaurants' => 'sometimes|nullable|integer|min:0|max:9999',
             'max_catalogs'    => 'sometimes|nullable|integer|min:0|max:9999',
             'max_products'    => 'sometimes|nullable|integer|min:0|max:9999',
+            'can_upload_images' => 'sometimes|boolean',
+            'can_export_pdf'    => 'sometimes|boolean',
         ]);
 
         $updateData = [];
@@ -124,6 +128,8 @@ class UserController extends Controller
         if (array_key_exists('max_restaurants', $data)) $updateData['max_restaurants'] = $data['max_restaurants'];
         if (array_key_exists('max_catalogs', $data))    $updateData['max_catalogs']    = $data['max_catalogs'];
         if (array_key_exists('max_products', $data))    $updateData['max_products']    = $data['max_products'];
+        if (array_key_exists('can_upload_images', $data)) $updateData['can_upload_images'] = (bool) $data['can_upload_images'];
+        if (array_key_exists('can_export_pdf', $data))    $updateData['can_export_pdf']    = (bool) $data['can_export_pdf'];
 
         $user->update($updateData);
         $user->load('role');

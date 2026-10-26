@@ -11,20 +11,26 @@ class ContactRequestTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function postContact(array $payload, string $ip)
+    {
+        return $this->withServerVariables(['REMOTE_ADDR' => $ip])
+            ->postJson('/api/contact', $payload);
+    }
+
     public function test_contact_request_sends_an_email_to_the_contact_address(): void
     {
         Mail::fake();
 
         config()->set('legal.contact_email', 'legal@example.com');
 
-        $response = $this->postJson('/api/contact', [
+        $response = $this->postContact([
             'name' => 'Cliente Demo',
             'email' => 'cliente@example.com',
             'phone' => '666 123 456',
             'restaurant_name' => 'Restaurante Demo',
             'message' => 'Necesito una cuenta para gestionar la carta digital y el QR.',
             'website' => '',
-        ]);
+        ], '10.0.0.11');
 
         $response->assertAccepted();
         $response->assertJsonPath('message', 'Gracias. Hemos recibido tu solicitud y te responderemos por email.');
@@ -43,14 +49,14 @@ class ContactRequestTest extends TestCase
         config()->set('legal.contact_email', 'legal@tu-dominio.com');
         config()->set('mail.from.address', 'owner@example.com');
 
-        $response = $this->postJson('/api/contact', [
+        $response = $this->postContact([
             'name' => 'Cliente Demo',
             'email' => 'cliente@example.com',
             'phone' => '666 123 456',
             'restaurant_name' => 'Restaurante Demo',
             'message' => 'Necesito una cuenta para gestionar la carta digital y el QR.',
             'website' => '',
-        ]);
+        ], '10.0.0.12');
 
         $response->assertAccepted();
 
@@ -66,14 +72,14 @@ class ContactRequestTest extends TestCase
         config()->set('legal.contact_email', 'legal@tu-dominio.com');
         config()->set('mail.from.address', '');
 
-        $response = $this->postJson('/api/contact', [
+        $response = $this->postContact([
             'name' => 'Cliente Demo',
             'email' => 'cliente@example.com',
             'phone' => '666 123 456',
             'restaurant_name' => 'Restaurante Demo',
             'message' => 'Necesito una cuenta para gestionar la carta digital y el QR.',
             'website' => '',
-        ]);
+        ], '10.0.0.13');
 
         $response->assertAccepted();
 
@@ -86,14 +92,14 @@ class ContactRequestTest extends TestCase
     {
         Mail::fake();
 
-        $response = $this->postJson('/api/contact', [
+        $response = $this->postContact([
             'name' => 'Bot',
             'email' => 'bot@example.com',
             'phone' => null,
             'restaurant_name' => null,
             'message' => 'Necesito una cuenta para gestionar la carta digital y el QR.',
             'website' => 'https://spam.example.com',
-        ]);
+        ], '10.0.0.14');
 
         $response->assertAccepted();
         Mail::assertNothingQueued();
