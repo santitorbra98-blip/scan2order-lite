@@ -186,4 +186,32 @@ class RestaurantAndProductVisibilityTest extends TestCase
         $sectionPublicResponse->assertJsonPath('data.0.description', 'Descripción de catálogo');
         $sectionPublicResponse->assertJsonPath('data.0.sections.0.description', 'Descripción de sección');
     }
+
+    public function test_admin_can_remove_schedule_from_existing_restaurant(): void
+    {
+        $admin = $this->createUserWithRole('admin');
+
+        $restaurant = Restaurant::create([
+            'name' => 'Restaurante Con Horario',
+            'address' => 'Calle Horario 1',
+            'phone' => '666666666',
+            'active' => true,
+            'created_by' => $admin->id,
+            'schedule' => [
+                'monday' => ['enabled' => true, 'open' => '09:00', 'close' => '22:00'],
+            ],
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->putJson('/api/restaurants/' . $restaurant->id, [
+            'remove_schedule' => true,
+        ]);
+
+        $response->assertOk();
+        $this->assertNull($response->json('data.schedule'));
+
+        $restaurant->refresh();
+        $this->assertNull($restaurant->schedule);
+    }
 }

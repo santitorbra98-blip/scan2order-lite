@@ -195,6 +195,7 @@ class RestaurantController extends Controller
             'phone'        => 'nullable|string|max:30',
             'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'remove_image' => 'boolean',
+            'remove_schedule' => 'boolean',
             'active'       => 'boolean',
             'schedule'              => 'nullable|array|max:7',
             'schedule.*'            => 'array|max:3',
@@ -204,6 +205,9 @@ class RestaurantController extends Controller
         ]);
 
         $data = $request->only(['name', 'address', 'phone', 'active', 'schedule']);
+        if ($request->boolean('remove_schedule')) {
+            $data['schedule'] = null;
+        }
 
         try {
             $restaurant = $this->restaurantService->updateRestaurant(

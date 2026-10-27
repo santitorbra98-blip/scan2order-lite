@@ -241,6 +241,8 @@ async function saveRestaurant({ form, imageFile, removeImage }) {
     formData.append('active', form.active ? '1' : '0')
     if (form.useSchedule) {
       formData.append('schedule', JSON.stringify(form.schedule))
+    } else if (isEditing.value) {
+      formData.append('remove_schedule', '1')
     }
 
     if (imageFile) {
