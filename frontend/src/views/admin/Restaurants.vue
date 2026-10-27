@@ -295,7 +295,19 @@ function formatDayLabel(day) {
 }
 
 function canAssignOwner(restaurant) {
-  return isSuperAdmin.value && restaurant?.creator?.role === 'superadmin'
+  if (!isSuperAdmin.value) return false
+
+  const creatorRole = restaurant?.creator?.role || null
+  const creatorId = restaurant?.creator?.id ?? restaurant?.created_by ?? null
+  const currentUserId = authStore?.user?.id ?? null
+
+  // Keep strict check when role info exists, but allow legacy records where
+  // creator metadata may be missing by falling back to creator id.
+  if (creatorRole) {
+    return creatorRole === 'superadmin'
+  }
+
+  return creatorId === null || Number(creatorId) === Number(currentUserId)
 }
 
 function csvCell(value) {
