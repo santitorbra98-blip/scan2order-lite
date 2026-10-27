@@ -277,4 +277,34 @@ class RestaurantController extends Controller
             'restaurant' => new RestaurantResource($this->loadRestaurantWithRelations($restaurant)),
         ]);
     }
+
+    public function assignOwner(Request $request, Restaurant $restaurant)
+    {
+        $user = $request->user();
+        if (!$user || !$user->hasRole('superadmin')) {
+            return response()->json(['message' => 'No autorizado'], 403);
+        }
+
+        $data = $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+        ]);
+
+        try {
+            $updated = $this->restaurantService->assignRestaurantOwner($restaurant, (int) $data['user_id'], $user);
+
+            $this->auditAction(
+                actor: $user,
+                action: 'restaurant.assigned',
+                resourceType: 'restaurant',
+                resourceId: $updated->id,
+                metadata: ['assigned_to_user_id' => (int) $data['user_id']],
+                ipAddress: $request->ip(),
+                userAgent: (string) $request->userAgent(),
+            );
+
+            return new RestaurantResource($this->loadRestaurantWithRelations($updated));
+        } catch (BusinessException $e) {
+            return response()->json($e->toResponseArray(), $e->getStatusCode());
+        }
+    }
 }

@@ -106,6 +106,7 @@ Route::middleware(['auth:sanctum', 'role:admin,superadmin'])->group(function () 
 
     // Analytics (own restaurants)
     Route::get('/analytics/my-stats', [AnalyticsController::class, 'myStats']);
+    Route::get('/analytics/restaurants/{restaurant}/insights', [AnalyticsController::class, 'restaurantInsights']);
 
     // Catalog, section and product management — requires manage_products permission
     Route::middleware('permission:manage_products')->group(function () {
@@ -127,6 +128,9 @@ Route::middleware(['auth:sanctum', 'role:admin,superadmin'])->group(function () 
 
 // Superadmin-only routes
 Route::middleware(['auth:sanctum', 'role:superadmin'])->group(function () {
+    // Transfer restaurant ownership from superadmin to an admin user.
+    Route::post('/restaurants/{restaurant}/assign-owner', [RestaurantController::class, 'assignOwner']);
+
     // User management
     Route::get('/users', [UserController::class, 'index']);
     Route::post('/users', [UserController::class, 'store']);

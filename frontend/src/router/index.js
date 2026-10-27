@@ -12,6 +12,7 @@ const ClientMenu = () => import('../views/client/Menu.vue')
 const AdminDashboard = () => import('../views/admin/Dashboard.vue')
 const AdminRestaurants = () => import('../views/admin/Restaurants.vue')
 const AdminProducts = () => import('../views/admin/Products.vue')
+const AdminGuide = () => import('../views/admin/Guide.vue')
 const AdminUsers = () => import('../views/admin/Users.vue')
 const AdminOnboarding = () => import('../views/admin/Onboarding.vue')
 const AdminSettings = () => import('../views/admin/Settings.vue')
@@ -38,6 +39,7 @@ const routes = [
   { path: '/admin/onboarding', name: 'AdminOnboarding', component: AdminOnboarding, meta: { requiresAuth: true, roles: ['admin'] } },
   { path: '/admin/restaurants', name: 'AdminRestaurants', component: AdminRestaurants, meta: { requiresAuth: true, roles: ['admin', 'superadmin'] } },
   { path: '/admin/products', name: 'AdminProducts', component: AdminProducts, meta: { requiresAuth: true, roles: ['admin', 'superadmin'] } },
+  { path: '/admin/guide', name: 'AdminGuide', component: AdminGuide, meta: { requiresAuth: true, roles: ['admin', 'superadmin'] } },
   { path: '/admin/users', name: 'AdminUsers', component: AdminUsers, meta: { requiresAuth: true, roles: ['superadmin'] } },
   { path: '/admin/settings', name: 'AdminSettings', component: AdminSettings, meta: { requiresAuth: true, roles: ['superadmin'] } },
   { path: '/admin/profile',  name: 'AdminProfile',  component: AdminProfile,  meta: { requiresAuth: true, roles: ['admin', 'superadmin'] } },

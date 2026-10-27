@@ -53,6 +53,7 @@
     <!-- Actions -->
     <div class="restaurant-actions">
       <button class="btn-action" @click="$emit('edit', restaurant)">✏️ Editar</button>
+      <button class="btn-action btn-data" @click="$emit('insights', restaurant)">📊 Datos</button>
       <button class="btn-action btn-qr" @click="$emit('qr', restaurant)">📷 QR</button>
       <button class="btn-action btn-danger" @click="$emit('delete', restaurant)">🗑️ Eliminar</button>
     </div>
@@ -67,7 +68,7 @@ defineProps({
   days:         { type: Array,    required: true },
 })
 
-defineEmits(['edit', 'edit-schedule', 'qr', 'delete'])
+defineEmits(['edit', 'edit-schedule', 'insights', 'qr', 'delete'])
 </script>
 
 <style scoped>
@@ -90,6 +91,7 @@ defineEmits(['edit', 'edit-schedule', 'qr', 'delete'])
   background: white; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;
 }
 .btn-action:hover { background: #f8fafc; border-color: #cbd5e1; }
+.btn-action.btn-data { border-color: #0ea5e9; color: #0369a1; }
 .btn-action.btn-qr { border-color: #667eea; color: #667eea; }
 .btn-action.btn-danger { border-color: #fca5a5; color: #dc2626; }
 .btn-action.btn-danger:hover { background: #fef2f2; }

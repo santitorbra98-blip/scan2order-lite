@@ -11,6 +11,7 @@
         <li v-if="canAccessAdmin"><router-link to="/admin">Panel</router-link></li>
         <li v-if="canAccessAdmin"><router-link to="/admin/restaurants">Restaurantes</router-link></li>
         <li v-if="canAccessAdmin"><router-link to="/admin/products">Productos</router-link></li>
+        <li v-if="canAccessAdmin"><router-link to="/admin/guide">Guía</router-link></li>
         <li v-if="isSuperadmin"><router-link to="/admin/users">Usuarios</router-link></li>
         <li class="user-menu">
           <button @click="showUserMenu = !showUserMenu" class="user-btn">

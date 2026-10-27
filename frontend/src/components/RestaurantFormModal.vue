@@ -103,8 +103,10 @@ watch(() => props.initial, (val) => {
     form.address = val.address ?? ''
     form.phone = val.phone ?? ''
     form.active = Boolean(val.active)
-    form.useSchedule = Boolean(val.schedule && Object.keys(val.schedule).length)
-    form.schedule = form.useSchedule ? val.schedule : props.defaultSchedule()
+    // In edit mode, start with schedule disabled by default.
+    // Keep existing schedule data so it can be restored if the user enables it again.
+    form.useSchedule = false
+    form.schedule = (val.schedule && Object.keys(val.schedule).length) ? val.schedule : props.defaultSchedule()
     setPreview(val._imagePreview ?? null)
   } else {
     form.id = null

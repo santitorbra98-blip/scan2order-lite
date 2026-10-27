@@ -6,6 +6,7 @@ use App\Exceptions\BusinessException;
 use App\Models\Restaurant;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -196,5 +197,69 @@ class RestaurantService
         }
 
         return $restaurant;
+    }
+
+    /**
+     * Assign a superadmin-created restaurant to an active admin user.
+     *
+     * This operation transfers created_by and enforces a single managing admin
+     * in the pivot table, while respecting admin plan limits.
+     */
+    public function assignRestaurantOwner(Restaurant $restaurant, int $targetUserId, User $actingUser): Restaurant
+    {
+        if (!$actingUser->hasRole('superadmin')) {
+            throw new BusinessException('No autorizado', 403);
+        }
+
+        $restaurant->loadMissing('creator.role');
+
+        // Requirement: only restaurants created by superadmin can be reassigned.
+        if ($restaurant->creator && $restaurant->creator->role?->name !== 'superadmin') {
+            throw new BusinessException('Solo se pueden asignar locales creados por superadmin', 403);
+        }
+
+        $targetUser = User::with('role')->find($targetUserId);
+        if (!$targetUser || !$targetUser->hasRole('admin')) {
+            throw new BusinessException('El usuario destino debe ser admin', 422);
+        }
+        if ($targetUser->status !== 'active') {
+            throw new BusinessException('El usuario destino debe estar activo', 422);
+        }
+
+        // Enforce max_restaurants limit for target admin (excluding this restaurant).
+        $limit = $targetUser->max_restaurants;
+        if ($limit !== null) {
+            $managedCount = Restaurant::query()
+                ->where('id', '!=', $restaurant->id)
+                ->where(function (\Illuminate\Database\Eloquent\Builder $q) use ($targetUser) {
+                    $q->whereHas('admins', fn ($q2) => $q2->where('users.id', $targetUser->id))
+                        ->orWhere('created_by', $targetUser->id);
+                })
+                ->count();
+
+            if ($managedCount >= $limit) {
+                throw new BusinessException(
+                    "El admin destino ha alcanzado su límite de {$limit} local(es).",
+                    403
+                );
+            }
+        }
+
+        $adminRoleId = Role::where('name', 'admin')->value('id');
+        if (!$adminRoleId) {
+            throw new BusinessException('Admin role not found', 500);
+        }
+
+        DB::transaction(function () use ($restaurant, $targetUser, $adminRoleId) {
+            $restaurant->created_by = $targetUser->id;
+            $restaurant->save();
+
+            // Keep a single admin manager attached to the restaurant.
+            $restaurant->users()->sync([
+                $targetUser->id => ['role_id' => $adminRoleId],
+            ]);
+        });
+
+        return $restaurant->refresh();
     }
 }
