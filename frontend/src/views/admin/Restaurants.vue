@@ -17,56 +17,12 @@
       </div>
 
       <template v-else>
-        <!-- Superadmin view: own restaurants -->
-        <template v-if="isSuperAdmin">
-          <div class="section-header">
-            <h2 class="section-title">🏠 Mis restaurantes</h2>
-            <span class="section-count">{{ ownRestaurants.length }}</span>
-          </div>
-          <div v-if="ownRestaurants.length === 0" class="section-empty">Sin restaurantes propios.</div>
-          <div v-else class="restaurants-grid">
-            <div v-for="restaurant in ownRestaurants" :key="restaurant.id" class="restaurant-card">
-              <RestaurantCardContent
-                :restaurant="restaurant"
-                :get-image-url="getImageUrl"
-                :format-date="formatDate"
-                :days="DAYS"
-                @edit="openEditModal(restaurant)"
-                @edit-schedule="openEditModal(restaurant, true)"
-                @qr="qrRestaurant = restaurant"
-                @delete="openDeleteModal(restaurant)"
-              />
-            </div>
-          </div>
-
-          <div class="section-header" style="margin-top: 2.5rem;">
-            <h2 class="section-title">👥 Restaurantes de admins</h2>
-            <span class="section-count">{{ adminRestaurants.length }}</span>
-          </div>
-          <div v-if="adminRestaurants.length === 0" class="section-empty">Ningún admin ha creado restaurantes aún.</div>
-          <div v-else class="restaurants-grid">
-            <div v-for="restaurant in adminRestaurants" :key="restaurant.id" class="restaurant-card">
-              <div class="owner-badge">
-                <span class="owner-label">👤 {{ restaurant.creator?.name }}</span>
-                <span class="owner-email">{{ restaurant.creator?.email }}</span>
-              </div>
-              <RestaurantCardContent
-                :restaurant="restaurant"
-                :get-image-url="getImageUrl"
-                :format-date="formatDate"
-                :days="DAYS"
-                @edit="openEditModal(restaurant)"
-                @edit-schedule="openEditModal(restaurant, true)"
-                @qr="qrRestaurant = restaurant"
-                @delete="openDeleteModal(restaurant)"
-              />
-            </div>
-          </div>
-        </template>
-
-        <!-- Regular admin view -->
-        <div v-else class="restaurants-grid">
+        <div class="restaurants-grid">
           <div v-for="restaurant in restaurants" :key="restaurant.id" class="restaurant-card">
+            <div v-if="isSuperAdmin && restaurant.creator" class="owner-badge">
+              <span class="owner-label">👤 {{ restaurant.creator.name }}</span>
+              <span class="owner-email">{{ restaurant.creator.email }}</span>
+            </div>
             <RestaurantCardContent
               :restaurant="restaurant"
               :get-image-url="getImageUrl"
@@ -153,14 +109,6 @@ const isSuperAdmin = computed(() => authStore.hasRole('superadmin'))
 
 const restaurants = ref([])
 const pagination = ref(null)
-
-// Superadmin: split into own vs admin-owned
-const ownRestaurants = computed(() =>
-  restaurants.value.filter(r => r.creator?.role === 'superadmin' || !r.creator)
-)
-const adminRestaurants = computed(() =>
-  restaurants.value.filter(r => r.creator?.role === 'admin')
-)
 
 const isLoading = ref(false)
 const error = ref(null)
@@ -403,20 +351,6 @@ onMounted(() => fetchRestaurants())
 .btn-delete-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .error { background: #fef2f2; color: #dc2626; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1rem; }
-
-/* Section separators (superadmin view) */
-.section-header {
-  display: flex; align-items: center; gap: 0.75rem;
-  margin-bottom: 1.25rem; padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e2e8f0;
-}
-.section-title { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0; }
-.section-count {
-  background: #e0e7ff; color: #4338ca;
-  font-size: 0.8rem; font-weight: 700; padding: 0.2rem 0.6rem;
-  border-radius: 999px; line-height: 1.5;
-}
-.section-empty { color: #94a3b8; font-style: italic; padding: 1rem 0 1.5rem; }
 
 /* Owner badge on admin-created cards */
 .owner-badge {
