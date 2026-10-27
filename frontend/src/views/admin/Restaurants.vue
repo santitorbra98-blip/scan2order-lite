@@ -169,10 +169,6 @@
                 <strong>🕐 Hora punta:</strong>
                 <span>{{ insightsData.peak_hour || 'Sin datos' }}</span>
               </div>
-              <div class="insight-summary-box">
-                <strong>📞 Ratio de contacto:</strong>
-                <span>{{ formatPercent(insightsData.contact_rate_percent) }}</span>
-              </div>
             </div>
 
             <div class="trend-section">
@@ -330,7 +326,6 @@ function exportInsightsCsv() {
     csvLine(['Dia con mas visitas', data.best_weekday?.day || '']),
     csvLine(['Visitas en mejor dia', data.best_weekday?.visits || 0]),
     csvLine(['Hora punta', data.peak_hour || '']),
-    csvLine(['Ratio de contacto (%)', data.contact_rate_percent]),
     csvLine([]),
     csvLine(['Tendencia 7d', 'Visitas']),
     ...(Array.isArray(data.trend_7d)

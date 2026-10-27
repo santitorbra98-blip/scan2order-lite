@@ -350,19 +350,6 @@ class AnalyticsController extends Controller
                 $peakHour = str_pad((string) $topHour, 2, '0', STR_PAD_LEFT) . ':00';
             }
 
-            $contactClicks = DB::table('analytics_events')
-                ->where('restaurant_id', $restaurant)
-                ->where('event_type', 'contact_click')
-                ->whereBetween('created_at', [$from, $to])
-                ->count();
-
-            $menuViews = DB::table('analytics_events')
-                ->where('restaurant_id', $restaurant)
-                ->where('event_type', 'menu_view')
-                ->whereBetween('created_at', [$from, $to])
-                ->count();
-
-            $contactRatePercent = $menuViews > 0 ? round(($contactClicks / $menuViews) * 100, 2) : 0.0;
             $returningUniqueVisits = max($uniqueVisits - $newUniqueVisits, 0);
 
             [$trendFrom, $trendTo] = [now()->subDays(7), now()];
@@ -388,7 +375,6 @@ class AnalyticsController extends Controller
                     'visits' => $bestDayVisits,
                 ],
                 'peak_hour' => $peakHour,
-                'contact_rate_percent' => $contactRatePercent,
                 'trend_7d' => $this->trendByDay($restaurant, $trendFrom, $trendTo),
             ];
         });
