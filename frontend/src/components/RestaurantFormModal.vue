@@ -38,20 +38,27 @@
 
         <section class="form-section" ref="scheduleSection">
           <h3>Horario de apertura</h3>
+          <div class="form-group checkbox-group schedule-mode-toggle">
+            <label>
+              <input v-model="form.useSchedule" type="checkbox" />
+              Configurar horarios para este local
+            </label>
+          </div>
           <div class="schedule-grid">
-            <div v-for="day in days" :key="day.key" class="schedule-row">
+            <div v-for="day in days" :key="day.key" class="schedule-row" :class="{ 'row-disabled': !form.useSchedule }">
               <label class="schedule-day-toggle">
-                <input type="checkbox" v-model="form.schedule[day.key].enabled" />
+                <input type="checkbox" v-model="form.schedule[day.key].enabled" :disabled="!form.useSchedule" />
                 <span>{{ day.label }}</span>
               </label>
               <template v-if="form.schedule[day.key].enabled">
-                <input class="time-input" type="time" v-model="form.schedule[day.key].open" />
+                <input class="time-input" type="time" v-model="form.schedule[day.key].open" :disabled="!form.useSchedule" />
                 <span>—</span>
-                <input class="time-input" type="time" v-model="form.schedule[day.key].close" />
+                <input class="time-input" type="time" v-model="form.schedule[day.key].close" :disabled="!form.useSchedule" />
               </template>
               <span v-else class="schedule-closed">Cerrado</span>
             </div>
           </div>
+          <small v-if="!form.useSchedule">Se creará el local sin horarios configurados.</small>
         </section>
 
         <div v-if="error" class="error">{{ error }}</div>
@@ -86,7 +93,7 @@ const emit = defineEmits(['close', 'save'])
 const { inputRef: fileInput, file: imageFile, preview: imagePreview, remove: removeFlag, reset: resetImage, setPreview, handleChange, removeSelection } = useImageField()
 
 const form = reactive({
-  id: null, name: '', address: '', phone: '', active: true, schedule: props.defaultSchedule(),
+  id: null, name: '', address: '', phone: '', active: true, useSchedule: true, schedule: props.defaultSchedule(),
 })
 
 watch(() => props.initial, (val) => {
@@ -96,7 +103,8 @@ watch(() => props.initial, (val) => {
     form.address = val.address ?? ''
     form.phone = val.phone ?? ''
     form.active = Boolean(val.active)
-    form.schedule = (val.schedule && Object.keys(val.schedule).length) ? val.schedule : props.defaultSchedule()
+    form.useSchedule = Boolean(val.schedule && Object.keys(val.schedule).length)
+    form.schedule = form.useSchedule ? val.schedule : props.defaultSchedule()
     setPreview(val._imagePreview ?? null)
   } else {
     form.id = null
@@ -104,6 +112,7 @@ watch(() => props.initial, (val) => {
     form.address = ''
     form.phone = ''
     form.active = true
+    form.useSchedule = true
     form.schedule = props.defaultSchedule()
     resetImage()
   }
@@ -165,9 +174,11 @@ function handleSubmit() {
 }
 
 .checkbox-group label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 500; }
+.schedule-mode-toggle { margin-bottom: 0.9rem; }
 
 .schedule-grid { display: flex; flex-direction: column; gap: 0.5rem; }
 .schedule-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.schedule-row.row-disabled { opacity: 0.55; }
 .schedule-day-toggle {
   display: flex; align-items: center; gap: 0.4rem;
   min-width: 130px; font-size: 0.9rem; cursor: pointer; font-weight: 500;

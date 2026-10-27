@@ -22,7 +22,7 @@
           <button v-if="searchText" type="button" class="btn-clear" @click="searchText = ''">✕</button>
         </div>
         <div class="filter-toggles">
-          <label class="toggle-label" :class="{ active: showAllergens }">
+          <label v-if="hasAnyAllergens" class="toggle-label" :class="{ active: showAllergens }">
             <input v-model="showAllergens" type="checkbox" />
             <span>🌿 Alérgenos</span>
           </label>
@@ -147,6 +147,14 @@ const availableDietTypes = computed(() => {
   return DIET_TYPE_OPTIONS.filter(d => codes.has(d.code))
 })
 
+const hasAnyAllergens = computed(() => {
+  return catalogs.value.some(c =>
+    (c.sections || []).some(s =>
+      (s.products || []).some(p => Array.isArray(p.allergens) && p.allergens.length > 0)
+    )
+  )
+})
+
 const allSections = computed(() => {
   const sections = []
   catalogs.value.forEach(c => {
@@ -193,6 +201,9 @@ async function fetchMenu() {
     restaurant.value = rJson?.data ?? rJson
     const cJson = cRes.ok ? await cRes.json() : []
     catalogs.value = Array.isArray(cJson) ? cJson : (cJson?.data ?? [])
+    if (!hasAnyAllergens.value) {
+      showAllergens.value = false
+    }
   } catch (err) {
     error.value = err.message
   } finally {
